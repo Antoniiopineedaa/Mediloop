@@ -91,6 +91,14 @@ function seedIfEmpty(table, sql, rows) {
 // Seed demo users (password: 123456)
 const DEMO_HASH = bcrypt.hashSync("123456", 10);
 const ADMIN_HASH = bcrypt.hashSync("Mediloop2026!", 10);
+
+// Garantiza que el admin siempre existe (upsert)
+const adminExists = db.prepare("SELECT id FROM users WHERE id = 'adm-1'").get();
+if (!adminExists) {
+  db.prepare("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?)").run(
+    "adm-1", "admin@uji.es", "Admin Mediloop", "admin", ADMIN_HASH, new Date().toISOString()
+  );
+}
 const now = new Date().toISOString();
 
 seedIfEmpty("users",
