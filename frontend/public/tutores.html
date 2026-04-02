@@ -1,0 +1,1486 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mediloop · Área de tutores</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      :root {
+        --blue: #2563eb;
+        --indigo: #4f46e5;
+        --green: #16a34a;
+        --purple: #7c3aed;
+        --orange: #ea580c;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --gray-900: #111827;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--gray-100);
+        color: var(--gray-900);
+      }
+      .header {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        background: linear-gradient(135deg, var(--blue), #6366f1);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.85rem 1.5rem;
+        box-shadow: 0 6px 20px rgba(15, 23, 42, 0.2);
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        color: #fff;
+        font-weight: 700;
+        font-size: 1.05rem;
+      }
+      .brand a {
+        color: #fff;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.65rem;
+      }
+      .brand .menu {
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,0.2);
+      }
+      .brand .menu::before {
+        content: "\2630";
+        font-size: 0.95rem;
+        line-height: 1;
+      }
+      nav {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        flex-wrap: wrap;
+      }
+      nav a {
+        color: rgba(255,255,255,0.95);
+        text-decoration: none;
+        font-size: 0.82rem;
+      }
+      nav a:hover { color: #fff; }
+      .header .salir {
+        color: rgba(255,255,255,0.95);
+        text-decoration: none;
+        font-size: 0.82rem;
+        padding: 0.35rem 0.7rem;
+        border: 1px solid rgba(255,255,255,0.45);
+        border-radius: 8px;
+      }
+      .header .salir:hover {
+        color: #fff;
+        background: rgba(255,255,255,0.12);
+        text-decoration: none;
+      }
+      .hero {
+        background: linear-gradient(135deg, var(--blue), #6366f1);
+        color: #fff;
+        text-align: center;
+        padding: 4.4rem 1.25rem 5rem;
+      }
+      .hero h1 {
+        margin: 0 0 0.65rem;
+        font-size: clamp(2rem, 5vw, 3rem);
+        font-weight: 800;
+      }
+      .hero p {
+        margin: 0 auto 1.5rem;
+        max-width: 760px;
+        opacity: 0.95;
+        font-size: 1.05rem;
+      }
+      .btn-primary {
+        display: inline-block;
+        border: none;
+        border-radius: 10px;
+        padding: 0.8rem 1.75rem;
+        background: #fff;
+        color: var(--blue);
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .section {
+        max-width: 1020px;
+        margin: 0 auto;
+        padding: 2.75rem 1.25rem;
+      }
+      .section h2 {
+        margin: 0 0 1.5rem;
+        text-align: center;
+        font-size: clamp(1.7rem, 3vw, 2.05rem);
+      }
+      .card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      }
+      .verif-wrap {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 1.25rem;
+        border: 1px solid var(--gray-200);
+      }
+      .panel-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin: 0 0 1.25rem;
+        text-align: center;
+      }
+      .subpanel {
+        border-radius: 10px;
+        margin-bottom: 0.95rem;
+        padding: 0.75rem;
+      }
+      .subpanel h3 {
+        margin: 0 0 0.6rem;
+        font-size: 1rem;
+      }
+      .subpanel.pending { background: #fefce8; border: 1px solid #fef08a; }
+      .subpanel.done { background: #ecfdf5; border: 1px solid #86efac; }
+      .pending-item {
+        background: #fff;
+        border: 1px solid #eab308;
+        border-radius: 8px;
+        padding: 0.45rem 0.55rem;
+        margin-bottom: 0.45rem;
+        display: flex;
+        justify-content: space-between;
+        gap: 0.65rem;
+        align-items: center;
+      }
+      .pending-item:last-child { margin-bottom: 0; }
+      .pending-item .meta {
+        font-size: 0.74rem;
+        color: var(--gray-600);
+      }
+      .btn-xs {
+        border: none;
+        border-radius: 7px;
+        color: #fff;
+        font-size: 0.73rem;
+        padding: 0.32rem 0.56rem;
+        cursor: pointer;
+      }
+      .btn-green { background: #22c55e; }
+      .btn-red { background: #ef4444; }
+      .done-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        padding: 0.2rem 0;
+      }
+      .actions-two {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
+      }
+      .actions-two button {
+        border: none;
+        border-radius: 8px;
+        color: #fff;
+        padding: 0.6rem;
+        font-size: 0.85rem;
+        cursor: pointer;
+      }
+      .actions-two .all { background: #16a34a; }
+      .actions-two .exp { background: #2563eb; }
+      .rubrica {
+        padding: 1.25rem;
+      }
+      .rubrica h3 {
+        margin: 0 0 0.9rem;
+        font-size: 1.6rem;
+        text-align: center;
+      }
+      .rubrica-card {
+        border: 1px solid var(--gray-200);
+        border-radius: 10px;
+        padding: 1rem;
+      }
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.8rem;
+      }
+      label { font-size: 0.85rem; font-weight: 600; }
+      input, select, textarea {
+        width: 100%;
+        margin-top: 0.35rem;
+        border: 1px solid var(--gray-200);
+        border-radius: 8px;
+        padding: 0.62rem 0.72rem;
+        font-size: 0.86rem;
+        background: #fff;
+      }
+      textarea { min-height: 54px; resize: vertical; }
+      .crit {
+        margin-top: 0.95rem;
+      }
+      .scale {
+        display: flex;
+        gap: 0.4rem;
+        margin: 0.35rem 0 0.5rem;
+      }
+      .scale span {
+        width: 28px;
+        height: 28px;
+        border: 1px solid var(--gray-200);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.82rem;
+        background: #fff;
+      }
+      .rubrica-actions {
+        margin-top: 1rem;
+        display: flex;
+        gap: 0.6rem;
+      }
+      .rubrica-actions button {
+        border: none;
+        border-radius: 8px;
+        color: #fff;
+        padding: 0.62rem 0.95rem;
+        font-size: 0.85rem;
+        cursor: pointer;
+      }
+      .rubrica-actions .save { background: #2563eb; }
+      .rubrica-actions .rep { background: #16a34a; }
+      .gam-grid {
+        display: grid;
+        grid-template-columns: 1.1fr 1.1fr 1fr;
+        gap: 1rem;
+      }
+      .profile {
+        color: #fff;
+        background: linear-gradient(135deg, #3b82f6, #7c3aed);
+        padding: 1.25rem;
+        text-align: center;
+      }
+      .profile .avatar {
+        margin: 0 auto 0.8rem;
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+        background: #fff;
+        color: var(--blue);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+      }
+      .xp {
+        margin-top: 0.55rem;
+      }
+      .xp .bar {
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.35);
+        overflow: hidden;
+      }
+      .xp .bar span {
+        display: block;
+        width: 75%;
+        height: 100%;
+        background: #fff;
+      }
+      .xp p {
+        margin: 0.45rem 0 0;
+        font-size: 0.76rem;
+      }
+      .insignias { padding: 1rem; }
+      .insignias h4, .stats h4 {
+        margin: 0 0 0.75rem;
+        font-size: 1.05rem;
+      }
+      .badges {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.45rem;
+      }
+      .badge {
+        border-radius: 8px;
+        min-height: 60px;
+        font-size: 0.67rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 0.35rem;
+      }
+      .badge.y { background: #fef9c3; }
+      .badge.b { background: #dbeafe; }
+      .badge.g { background: #dcfce7; }
+      .badge.p { background: #ede9fe; }
+      .badge.r { background: #fee2e2; }
+      .badge.n { background: #f3f4f6; color: var(--gray-600); }
+      .stats { padding: 1rem; }
+      .stats .row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.9rem;
+        padding: 0.4rem 0;
+      }
+      .stats .btn-rank {
+        display: block;
+        text-align: center;
+        margin-top: 0.7rem;
+        border-radius: 9px;
+        padding: 0.62rem;
+        text-decoration: none;
+        color: #fff;
+        background: linear-gradient(90deg, #2563eb, #7c3aed);
+        font-size: 0.88rem;
+      }
+      .network-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+      .biblioteca-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1rem;
+      }
+      .plantilla-card {
+        padding: 1rem;
+        border-left: 4px solid var(--blue);
+      }
+      .plantilla-card.green { border-left-color: #16a34a; }
+      .plantilla-card.purple { border-left-color: #7c3aed; }
+      .plantilla-card h4 {
+        margin: 0 0 0.4rem;
+        font-size: 1rem;
+      }
+      .plantilla-card p {
+        margin: 0 0 0.65rem;
+        color: var(--gray-600);
+        font-size: 0.87rem;
+      }
+      .plantilla-card .tag {
+        display: inline-block;
+        font-size: 0.74rem;
+        border-radius: 999px;
+        background: var(--gray-100);
+        color: var(--gray-700);
+        padding: 0.2rem 0.55rem;
+      }
+      .network-card { padding: 1rem; }
+      .network-card h4 {
+        margin: 0 0 0.9rem;
+        font-size: 1.6rem;
+        text-align: center;
+      }
+      .v-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: var(--gray-100);
+        border-radius: 8px;
+        padding: 0.62rem 0.7rem;
+        margin-bottom: 0.55rem;
+      }
+      .play {
+        width: 40px;
+        height: 32px;
+        border-radius: 6px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .play.b { background: #3b82f6; }
+      .play.g { background: #22c55e; }
+      .play.p { background: #a855f7; }
+      .v-item .small, .post .small {
+        font-size: 0.76rem;
+        color: var(--gray-600);
+      }
+      .v-btn, .pub-btn {
+        width: 100%;
+        border: none;
+        border-radius: 8px;
+        color: #fff;
+        padding: 0.62rem;
+        margin-top: 0.4rem;
+        background: linear-gradient(90deg, var(--blue), var(--indigo));
+        cursor: pointer;
+      }
+      .post {
+        border-left: 3px solid var(--blue);
+        padding: 0.55rem 0.6rem;
+        margin-bottom: 0.7rem;
+        background: #fff;
+      }
+      .post.green { border-left-color: #22c55e; }
+      .post .meta {
+        font-size: 0.75rem;
+        color: var(--gray-600);
+        margin-top: 0.25rem;
+      }
+      .community-box textarea {
+        min-height: 60px;
+        background: var(--gray-50);
+      }
+      .community-box .pub-btn {
+        width: auto;
+        min-width: 100px;
+        background: #16a34a;
+      }
+      .panel-card {
+        max-width: 780px;
+        margin: 0 auto;
+        padding: 1rem;
+      }
+      .panel-card h4 {
+        margin: 0;
+        font-size: 2rem;
+        text-align: center;
+      }
+      .panel-card .sub {
+        text-align: center;
+        color: var(--gray-600);
+        margin: 0.3rem 0 1rem;
+      }
+      .kpi-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+      .kpi {
+        border-radius: 12px;
+        padding: 0.85rem 0.95rem;
+        color: #fff;
+      }
+      .kpi.g { background: linear-gradient(135deg, #10b981, #16a34a); }
+      .kpi.p { background: linear-gradient(135deg, #8b5cf6, #4f46e5); }
+      .kpi.o { background: linear-gradient(135deg, #f97316, #ef4444); }
+      .kpi .label { font-size: 0.8rem; opacity: 0.95; }
+      .kpi .val { font-size: 2rem; font-weight: 800; line-height: 1; margin-top: 0.2rem; }
+      .panel-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+      }
+      .mini {
+        border: 1px solid var(--gray-200);
+        border-radius: 10px;
+        padding: 0.9rem;
+      }
+      .mini h5 {
+        margin: 0 0 0.7rem;
+        font-size: 1.15rem;
+      }
+      .prog-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 0.6rem;
+        align-items: center;
+        margin-bottom: 0.55rem;
+        font-size: 0.88rem;
+      }
+      .prog-track {
+        height: 6px;
+        border-radius: 999px;
+        background: var(--gray-200);
+        overflow: hidden;
+      }
+      .prog-track span { display: block; height: 100%; border-radius: 999px; }
+      .goal-list {
+        margin: 0;
+        padding-left: 1.1rem;
+        color: var(--gray-700);
+        font-size: 0.88rem;
+      }
+      .goal-list li { margin-bottom: 0.55rem; }
+      .mini .btn-update {
+        width: 100%;
+        border: none;
+        border-radius: 8px;
+        padding: 0.6rem;
+        color: #fff;
+        background: var(--blue);
+        cursor: pointer;
+      }
+      .footer-mini {
+        max-width: 1020px;
+        margin: 0 auto;
+        padding: 2rem 1.25rem 2.7rem;
+        text-align: center;
+        color: var(--gray-600);
+        font-size: 0.88rem;
+      }
+      .app-status {
+        position: fixed;
+        top: 1rem;
+        left: 50%;
+        transform: translateX(-50%) translateY(-10px);
+        min-width: 280px;
+        max-width: 90vw;
+        border-radius: 10px;
+        padding: 0.72rem 0.92rem;
+        font-size: 0.88rem;
+        font-weight: 600;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.22s ease, transform 0.22s ease;
+        z-index: 200;
+      }
+      .app-status.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+      .app-status.success {
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #86efac;
+      }
+      .app-status.info {
+        background: #dbeafe;
+        color: #1e3a8a;
+        border: 1px solid #93c5fd;
+      }
+      .app-status.error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fca5a5;
+      }
+      .sys-indicator {
+        position: fixed;
+        top: 0.8rem;
+        right: 0.8rem;
+        z-index: 210;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        background: rgba(17, 24, 39, 0.86);
+        color: #fff;
+        padding: 0.4rem 0.65rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+      }
+      .sys-indicator .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #9ca3af;
+      }
+      .sys-indicator.ok .dot { background: #22c55e; }
+      .sys-indicator.warn .dot { background: #f59e0b; }
+      .sys-indicator.err .dot { background: #ef4444; }
+      .side-nav {
+        position: fixed;
+        left: 0.9rem;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 205;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        padding: 0.5rem;
+      }
+      .side-nav a {
+        text-decoration: none;
+        font-size: 0.76rem;
+        color: #4b5563;
+        border-radius: 8px;
+        padding: 0.35rem 0.55rem;
+        white-space: nowrap;
+      }
+      .side-nav a:hover {
+        background: #eef2ff;
+        color: #3730a3;
+      }
+      .side-nav a.active {
+        background: linear-gradient(90deg, #2563eb, #4f46e5);
+        color: #fff;
+      }
+      .side-nav.compact {
+        width: 42px;
+        overflow: hidden;
+      }
+      .side-nav.compact a {
+        text-indent: -9999px;
+        padding: 0.35rem 0;
+        text-align: center;
+      }
+      .side-nav.compact a::before {
+        content: "•";
+        text-indent: 0;
+        display: block;
+        font-size: 0.95rem;
+      }
+      .side-nav-toggle {
+        border: none;
+        border-radius: 10px;
+        background: #111827;
+        color: #fff;
+        font-size: 0.88rem;
+        width: 34px;
+        height: 34px;
+        cursor: pointer;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.22);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .pref-actions {
+        position: fixed;
+        left: 0.9rem;
+        bottom: 1rem;
+        z-index: 206;
+        display: flex;
+        gap: 0.45rem;
+      }
+      .pref-btn {
+        border: none;
+        border-radius: 10px;
+        background: #1f2937;
+        color: #fff;
+        font-size: 0.9rem;
+        width: 34px;
+        height: 34px;
+        cursor: pointer;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.22);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .pref-btn:hover,
+      .side-nav-toggle:hover {
+        background: #111827;
+      }
+      .pref-btn[data-tip],
+      .side-nav-toggle[data-tip] {
+        position: relative;
+      }
+      .pref-btn[data-tip]::after,
+      .side-nav-toggle[data-tip]::after {
+        content: attr(data-tip);
+        position: absolute;
+        left: 50%;
+        bottom: calc(100% + 8px);
+        transform: translateX(-50%) translateY(4px);
+        background: rgba(17, 24, 39, 0.96);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 8px;
+        font-size: 0.72rem;
+        font-weight: 500;
+        white-space: nowrap;
+        padding: 0.3rem 0.5rem;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.16s ease 0.15s, transform 0.16s ease 0.15s;
+      }
+      .pref-btn[data-tip]::before,
+      .side-nav-toggle[data-tip]::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: calc(100% + 2px);
+        transform: translateX(-50%) translateY(4px);
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 6px solid rgba(17, 24, 39, 0.96);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.16s ease 0.15s, transform 0.16s ease 0.15s;
+      }
+      .pref-btn[data-tip]:hover::after,
+      .side-nav-toggle[data-tip]:hover::after,
+      .pref-btn[data-tip]:focus-visible::after,
+      .side-nav-toggle[data-tip]:focus-visible::after {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+      .pref-btn[data-tip]:hover::before,
+      .side-nav-toggle[data-tip]:hover::before,
+      .pref-btn[data-tip]:focus-visible::before,
+      .side-nav-toggle[data-tip]:focus-visible::before {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+      .scroll-top-btn {
+        position: fixed;
+        right: 1.1rem;
+        bottom: 5rem;
+        z-index: 206;
+        width: 42px;
+        height: 42px;
+        border: none;
+        border-radius: 50%;
+        background: #111827;
+        color: #fff;
+        font-size: 1rem;
+        cursor: pointer;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(8px);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+      }
+      .scroll-top-btn.show {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+      }
+      @media (max-width: 900px) {
+        nav { gap: 0.75rem; }
+        .gam-grid, .network-grid, .panel-grid, .form-grid, .kpi-row { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 1200px) {
+        .side-nav { display: none; }
+        .pref-actions { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="side-nav" aria-label="Navegación rápida">
+      <a href="#inicio" data-spy="inicio">Inicio</a>
+      <a href="#verificacion" data-spy="verificacion">Verificación</a>
+      <a href="#evaluacion" data-spy="evaluacion">Evaluación</a>
+      <a href="#gamificacion" data-spy="gamificacion">Gamificación</a>
+      <a href="#biblioteca" data-spy="biblioteca">Biblioteca</a>
+      <a href="#networking" data-spy="networking">Networking</a>
+      <a href="#dashboard" data-spy="dashboard">Dashboard</a>
+    </aside>
+    <div class="pref-actions">
+      <button type="button" id="go-back-btn" class="pref-btn" data-tip="Atrás" aria-label="Atrás">←</button>
+      <button type="button" id="reset-section-btn" class="pref-btn" data-tip="Olvidar última sección" aria-label="Olvidar última sección">⌫</button>
+      <button type="button" id="undo-prefs-btn" class="pref-btn" data-tip="Deshacer preferencias" aria-label="Deshacer preferencias">↺</button>
+      <button type="button" id="side-nav-toggle" class="side-nav-toggle" data-tip="Compactar barra lateral" aria-label="Compactar barra lateral">☰</button>
+    </div>
+    <header class="header">
+      <div class="brand">
+        <a href="index.html" aria-label="Ir al inicio">
+          <span class="menu" aria-hidden="true"></span>
+          <span>Mediloop</span>
+        </a>
+      </div>
+      <nav>
+        <a href="#inicio">Inicio</a>
+        <a href="#verificacion">Verificación</a>
+        <a href="#evaluacion">Evaluación</a>
+        <a href="#gamificacion">Gamificación</a>
+        <a href="#biblioteca">Biblioteca</a>
+        <a href="#networking">Networking</a>
+        <a href="#dashboard">Dashboard</a>
+      </nav>
+      <a href="index.html" class="salir">Salir</a>
+    </header>
+
+    <section class="hero" id="inicio">
+      <h1>Revoluciona la Educación Médica</h1>
+      <p>Plataforma integral para tutores y médicos clínicos con verificación digital, evaluación avanzada y networking profesional</p>
+      <a href="#verificacion" class="btn-primary">Comenzar Ahora</a>
+    </section>
+
+    <section class="section" id="verificacion">
+      <h2>Sistema de Verificación Digital</h2>
+      <div class="card verif-wrap">
+        <p class="panel-title">Panel de Confirmación</p>
+        <div class="subpanel pending">
+          <h3>⏳ Pendientes de Confirmación</h3>
+          <div id="pending-list"></div>
+        </div>
+        <div class="subpanel done">
+          <h3>✅ Confirmados Hoy</h3>
+          <div id="confirmed-list"></div>
+        </div>
+        <div class="actions-two">
+          <button class="all" type="button" id="confirm-all">Confirmar Todos</button>
+          <button class="exp" type="button" id="export-list">Exportar Lista</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="evaluacion">
+      <div class="card rubrica">
+        <h3>Rúbrica Digital de Evaluación</h3>
+        <div class="rubrica-card">
+          <h4 style="margin:0 0 0.7rem;font-size:1.25rem">📋 Evaluación de Competencias Clínicas</h4>
+          <div class="form-grid">
+            <label>Estudiante:
+              <input id="eval-student" type="text" placeholder="Nombre del estudiante" />
+            </label>
+            <label>Rotación:
+              <select id="eval-rotation">
+                <option>Medicina Interna</option>
+                <option>Cirugía General</option>
+                <option>Pediatría</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="crit">
+            <label>Conocimiento Teórico</label>
+            <div class="scale" data-score="theory"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+            <textarea id="eval-comment-theory" placeholder="Comentarios sobre conocimiento teórico..."></textarea>
+          </div>
+          <div class="crit">
+            <label>Habilidades Prácticas</label>
+            <div class="scale" data-score="practical"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+            <textarea id="eval-comment-practical" placeholder="Comentarios sobre habilidades prácticas..."></textarea>
+          </div>
+          <div class="crit">
+            <label>Comunicación con Pacientes</label>
+            <div class="scale" data-score="communication"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+            <textarea id="eval-comment-communication" placeholder="Comentarios sobre comunicación..."></textarea>
+          </div>
+          <div class="rubrica-actions">
+            <button class="save" type="button" id="save-eval">Guardar Evaluación</button>
+            <button class="rep" type="button" id="generate-report">Generar Reporte</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="gamificacion">
+      <h2>Sistema de Gamificación</h2>
+      <div class="gam-grid">
+        <article class="card profile">
+          <div class="avatar">👩‍⚕️</div>
+          <h3 style="margin:0">Dr. María González</h3>
+          <p style="margin:0.25rem 0 0.45rem;opacity:0.95">Nivel 15 · Tutor Experto</p>
+          <div class="xp">
+            <div class="bar"><span></span></div>
+            <p>750/1000 XP al siguiente nivel</p>
+          </div>
+        </article>
+        <article class="card insignias">
+          <h4>🏆 Insignias Obtenidas</h4>
+          <div class="badges">
+            <div class="badge y">🏅<br>Mentor del Mes</div>
+            <div class="badge b">📊<br>100 Evaluaciones</div>
+            <div class="badge g">⭐<br>5 Estrellas</div>
+            <div class="badge p">🎯<br>Precisión 95%</div>
+            <div class="badge r">🔥<br>Racha 30 días</div>
+            <div class="badge n">🥈<br>Próxima meta</div>
+          </div>
+        </article>
+        <article class="card stats">
+          <h4>📊 Estadísticas</h4>
+          <div class="row"><span>Estudiantes Evaluados</span><strong id="stat-students">127</strong></div>
+          <div class="row"><span>Promedio de Calificación</span><strong id="stat-avg" style="color:#16a34a">4.8/5</strong></div>
+          <div class="row"><span>Tiempo Promedio</span><strong id="stat-time" style="color:#7c3aed">15 min</strong></div>
+          <div class="row"><span>Ranking Global</span><strong id="stat-rank" style="color:#ea580c">#23</strong></div>
+          <a class="btn-rank" href="#dashboard">Ver Ranking Completo</a>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="biblioteca">
+      <h2>Biblioteca Docente</h2>
+      <div class="biblioteca-grid">
+        <article class="card plantilla-card">
+          <h4>Plantilla de Feedback Estructurado</h4>
+          <p>Modelo breve para dar feedback específico, observable y accionable tras cada guardia.</p>
+          <span class="tag">Evaluación formativa</span>
+        </article>
+        <article class="card plantilla-card green">
+          <h4>Checklist de Competencias por Rotación</h4>
+          <p>Listado práctico para validar competencias clave en Medicina Interna, Cirugía y Pediatría.</p>
+          <span class="tag">Seguimiento semanal</span>
+        </article>
+        <article class="card plantilla-card purple">
+          <h4>Guía de Reunión Tutor-Estudiante</h4>
+          <p>Guion de 15 minutos para reuniones eficaces orientadas a objetivos y mejora continua.</p>
+          <span class="tag">Mentoría clínica</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="networking">
+      <h2>Red de Networking Médico</h2>
+      <div class="network-grid">
+        <article class="card network-card">
+          <h4>🎬 Vlog Educativo</h4>
+          <div class="v-item">
+            <div class="play b">▶</div>
+            <div>
+              <strong>Técnicas de Evaluación Efectiva</strong>
+              <div class="small">Dr. Carlos Mendoza · 12 min</div>
+            </div>
+          </div>
+          <div class="v-item">
+            <div class="play g">▶</div>
+            <div>
+              <strong>Feedback Constructivo en Medicina</strong>
+              <div class="small">Dra. Ana López · 8 min</div>
+            </div>
+          </div>
+          <div class="v-item">
+            <div class="play p">▶</div>
+            <div>
+              <strong>Innovaciones en Educación Médica</strong>
+              <div class="small">Dr. Roberto Silve · 15 min</div>
+            </div>
+          </div>
+          <button class="v-btn" type="button" id="upload-video">Subir Mi Video</button>
+        </article>
+
+        <article class="card network-card community-box">
+          <h4>💬 Comunidad de Tutores</h4>
+          <div id="tutor-posts"></div>
+          <textarea id="post-text" placeholder="Comparte tu experiencia con la comunidad..."></textarea>
+          <button class="pub-btn" type="button" id="publish-post">Publicar</button>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="dashboard">
+      <div class="card panel-card">
+        <h4>Mi Panel Personal</h4>
+        <p class="sub">Dr. María González · Medicina Interna</p>
+        <div class="kpi-row">
+          <div class="kpi g">
+            <div class="label">Mis Estudiantes</div>
+            <div class="val">23</div>
+          </div>
+          <div class="kpi p">
+            <div class="label">Mi Promedio</div>
+            <div class="val">4.8</div>
+          </div>
+          <div class="kpi o">
+            <div class="label">Mis Logros</div>
+            <div class="val">12</div>
+          </div>
+        </div>
+        <div class="panel-grid">
+          <article class="mini">
+            <h5>Mis Competencias Evaluadas</h5>
+            <div class="prog-row">
+              <div>Conocimiento Teórico<div class="prog-track"><span style="width:92%;background:#2563eb"></span></div></div><strong>4.6/5</strong>
+            </div>
+            <div class="prog-row">
+              <div>Habilidades Prácticas<div class="prog-track"><span style="width:88%;background:#16a34a"></span></div></div><strong>4.4/5</strong>
+            </div>
+            <div class="prog-row">
+              <div>Comunicación<div class="prog-track"><span style="width:96%;background:#7c3aed"></span></div></div><strong>4.8/5</strong>
+            </div>
+            <div class="prog-row">
+              <div>Profesionalismo<div class="prog-track"><span style="width:90%;background:#ea580c"></span></div></div><strong>4.5/5</strong>
+            </div>
+          </article>
+          <article class="mini">
+            <h5>Mis Objetivos del Mes</h5>
+            <ul class="goal-list">
+              <li>Evaluar 25 estudiantes <strong style="color:#16a34a">23/25</strong></li>
+              <li>Mantener promedio &gt;4.5 <strong style="color:#16a34a">4.8</strong></li>
+              <li>Subir 2 videos educativos <strong>1/2</strong></li>
+              <li>Participar en foro semanal <strong style="color:#6b7280">Pendiente</strong></li>
+            </ul>
+            <button class="btn-update" type="button" id="update-goals">Actualizar Mis Objetivos</button>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer-mini">Mediloop · Área de tutores · <a href="index.html">Volver al inicio</a></footer>
+    <div id="sys-indicator" class="sys-indicator warn" aria-live="polite"><span class="dot"></span><span id="sys-indicator-text">Conectando...</span></div>
+    <div id="app-status" class="app-status" aria-live="polite"></div>
+    <button type="button" id="scroll-top-btn" class="scroll-top-btn" aria-label="Volver arriba">↑</button>
+    <script>
+      (function () {
+        var API_BASE = window.location.hostname === "localhost" ? "http://localhost:4000/api" : "/api";
+        var session;
+        try {
+          session = JSON.parse(localStorage.getItem("mediloop.session") || "null");
+        } catch (_err) {
+          session = null;
+        }
+        if (!session || !session.token || !session.user) {
+          window.location.href = "index.html";
+          return;
+        }
+        if (session.user.role !== "tutor") {
+          localStorage.removeItem("mediloop.session");
+          window.location.href = "index.html";
+          return;
+        }
+
+        function headers() {
+          return {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + session.token
+          };
+        }
+        function logout() {
+          localStorage.removeItem("mediloop.session");
+          window.location.href = "index.html";
+        }
+        var statusEl = document.getElementById("app-status");
+        var statusTimer;
+        function showStatus(type, text) {
+          if (!statusEl) return;
+          statusEl.className = "app-status " + type;
+          statusEl.textContent = text;
+          statusEl.classList.add("show");
+          clearTimeout(statusTimer);
+          statusTimer = setTimeout(function () {
+            statusEl.classList.remove("show");
+          }, 2200);
+        }
+        function updateSystemIndicator() {
+          var indicator = document.getElementById("sys-indicator");
+          var text = document.getElementById("sys-indicator-text");
+          if (!indicator || !text) return;
+          if (!navigator.onLine) {
+            indicator.className = "sys-indicator err";
+            text.textContent = "Sin internet";
+            return;
+          }
+          fetch(API_BASE + "/health")
+            .then(function (res) {
+              if (!res.ok) throw new Error();
+              indicator.className = "sys-indicator ok";
+              text.textContent = "API conectada";
+            })
+            .catch(function () {
+              indicator.className = "sys-indicator warn";
+              text.textContent = "API no disponible";
+            });
+        }
+        function setupScrollSpy() {
+          var links = document.querySelectorAll(".side-nav a[data-spy]");
+          var sectionIds = Array.prototype.map.call(links, function (link) {
+            return link.getAttribute("data-spy");
+          });
+          var lastSectionKey = "mediloop.ui.tutores.lastSection";
+          function markActive(id) {
+            links.forEach(function (link) {
+              link.classList.toggle("active", link.getAttribute("data-spy") === id);
+            });
+          }
+          function onScroll() {
+            var activeId = sectionIds[0] || "";
+            sectionIds.forEach(function (id) {
+              var el = document.getElementById(id);
+              if (!el) return;
+              var rect = el.getBoundingClientRect();
+              if (rect.top <= 180) activeId = id;
+            });
+            if (activeId) {
+              markActive(activeId);
+              localStorage.setItem(lastSectionKey, activeId);
+            }
+          }
+          var remembered = localStorage.getItem(lastSectionKey);
+          if (remembered && document.getElementById(remembered)) {
+            setTimeout(function () {
+              var target = document.getElementById(remembered);
+              if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+            }, 120);
+          }
+          onScroll();
+          window.addEventListener("scroll", onScroll, { passive: true });
+        }
+        function setupCompactNav() {
+          var nav = document.querySelector(".side-nav");
+          var toggle = document.getElementById("side-nav-toggle");
+          if (!nav || !toggle) return;
+          var storageKey = "mediloop.ui.tutores.sideNavCompact";
+          var isCompact = localStorage.getItem(storageKey) === "1";
+          nav.classList.toggle("compact", isCompact);
+          toggle.textContent = "☰";
+          var toggleTip = isCompact ? "Expandir barra lateral" : "Compactar barra lateral";
+          toggle.setAttribute("data-tip", toggleTip);
+          toggle.setAttribute("aria-label", toggleTip);
+          toggle.addEventListener("click", function () {
+            isCompact = !isCompact;
+            nav.classList.toggle("compact", isCompact);
+            toggle.textContent = "☰";
+            var nextTip = isCompact ? "Expandir barra lateral" : "Compactar barra lateral";
+            toggle.setAttribute("data-tip", nextTip);
+            toggle.setAttribute("aria-label", nextTip);
+            localStorage.setItem(storageKey, isCompact ? "1" : "0");
+          });
+        }
+        function setupUndoControls() {
+          var backBtn = document.getElementById("go-back-btn");
+          var resetSectionBtn = document.getElementById("reset-section-btn");
+          var undoBtn = document.getElementById("undo-prefs-btn");
+          if (backBtn) {
+            backBtn.addEventListener("click", function () {
+              if (window.history.length > 1) window.history.back();
+              else window.location.href = "index.html";
+            });
+          }
+          if (resetSectionBtn) {
+            resetSectionBtn.addEventListener("click", function () {
+              localStorage.removeItem("mediloop.ui.tutores.lastSection");
+              window.scrollTo({ top: 0, behavior: "smooth" });
+              showStatus("success", "Se olvidó la última sección.");
+            });
+          }
+          if (undoBtn) {
+            undoBtn.addEventListener("click", function () {
+              localStorage.setItem("mediloop.ui.tutores.sideNavCompact", "0");
+              localStorage.removeItem("mediloop.ui.tutores.lastSection");
+              var nav = document.querySelector(".side-nav");
+              var toggle = document.getElementById("side-nav-toggle");
+              if (nav) nav.classList.remove("compact");
+              if (toggle) {
+                toggle.textContent = "☰";
+                toggle.setAttribute("data-tip", "Compactar barra lateral");
+                toggle.setAttribute("aria-label", "Compactar barra lateral");
+              }
+              window.scrollTo({ top: 0, behavior: "smooth" });
+              showStatus("success", "Preferencias restauradas.");
+            });
+          }
+        }
+        function setupScrollTop() {
+          var btn = document.getElementById("scroll-top-btn");
+          if (!btn) return;
+          function onScroll() {
+            if (window.scrollY > 260) btn.classList.add("show");
+            else btn.classList.remove("show");
+          }
+          btn.addEventListener("click", function () {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          });
+          onScroll();
+          window.addEventListener("scroll", onScroll, { passive: true });
+        }
+        function setButtonLoading(button, loadingText, isLoading) {
+          if (!button) return;
+          if (isLoading) {
+            button.dataset.originalText = button.textContent;
+            button.textContent = loadingText;
+            button.disabled = true;
+            button.style.opacity = "0.85";
+          } else {
+            button.textContent = button.dataset.originalText || button.textContent;
+            button.disabled = false;
+            button.style.opacity = "";
+          }
+        }
+        var logoutLinks = document.querySelectorAll(".salir, .footer-mini a");
+        logoutLinks.forEach(function (el) {
+          el.addEventListener("click", function (e) {
+            e.preventDefault();
+            logout();
+          });
+        });
+
+        var scores = { theory: 0, practical: 0, communication: 0 };
+        document.querySelectorAll(".scale[data-score]").forEach(function (scaleEl) {
+          var key = scaleEl.getAttribute("data-score");
+          var items = scaleEl.querySelectorAll("span");
+          items.forEach(function (item, idx) {
+            item.style.cursor = "pointer";
+            item.addEventListener("click", function () {
+              scores[key] = idx + 1;
+              items.forEach(function (other, j) {
+                other.style.background = j <= idx ? "#dbeafe" : "#fff";
+                other.style.borderColor = j <= idx ? "#60a5fa" : "#e5e7eb";
+              });
+            });
+          });
+        });
+
+        function renderPending(items) {
+          var wrap = document.getElementById("pending-list");
+          if (!wrap) return;
+          if (!items.length) {
+            wrap.innerHTML = '<div class="pending-item"><div><strong>Sin pendientes</strong><div class="meta">No hay escaneos por confirmar</div></div></div>';
+            return;
+          }
+          wrap.innerHTML = items.map(function (it) {
+            return '<div class="pending-item">' +
+              '<div><strong>' + it.name + '</strong><div class="meta">Escaneó ' + it.scannedAt + '</div></div>' +
+              '<div><button class="btn-xs btn-green" data-confirm="' + it.id + '">Confirmar</button> ' +
+              '<button class="btn-xs btn-red" data-reject="' + it.id + '">Rechazar</button></div>' +
+            '</div>';
+          }).join("");
+        }
+
+        function renderConfirmed(items) {
+          var wrap = document.getElementById("confirmed-list");
+          if (!wrap) return;
+          wrap.innerHTML = items.map(function (it) {
+            return '<div class="done-row"><span>' + it.name + '</span><span>' + it.time + '</span></div>';
+          }).join("");
+        }
+
+        function loadAttendance() {
+          return Promise.all([
+            fetch(API_BASE + "/attendance/pending", { headers: headers() }),
+            fetch(API_BASE + "/attendance/confirmed", { headers: headers() })
+          ])
+            .then(function (responses) {
+              responses.forEach(function (r) { if (!r.ok) throw new Error(); });
+              return Promise.all(responses.map(function (r) { return r.json(); }));
+            })
+            .then(function (payload) {
+              renderPending(payload[0]);
+              renderConfirmed(payload[1]);
+            });
+        }
+
+        document.addEventListener("click", function (ev) {
+          var confirmId = ev.target && ev.target.getAttribute ? ev.target.getAttribute("data-confirm") : "";
+          var rejectId = ev.target && ev.target.getAttribute ? ev.target.getAttribute("data-reject") : "";
+          if (confirmId) {
+            fetch(API_BASE + "/attendance/" + confirmId + "/confirm", { method: "POST", headers: headers() })
+              .then(function () {
+                showStatus("success", "Asistencia confirmada correctamente.");
+                return loadAttendance();
+              })
+              .catch(function () {
+                showStatus("error", "No se pudo confirmar la asistencia.");
+              });
+          }
+          if (rejectId) {
+            fetch(API_BASE + "/attendance/" + rejectId + "/reject", { method: "POST", headers: headers() })
+              .then(function () {
+                showStatus("info", "Asistencia rechazada.");
+                return loadAttendance();
+              })
+              .catch(function () {
+                showStatus("error", "No se pudo rechazar la asistencia.");
+              });
+          }
+        });
+
+        var confirmAll = document.getElementById("confirm-all");
+        if (confirmAll) {
+          confirmAll.addEventListener("click", function () {
+            setButtonLoading(confirmAll, "Procesando...", true);
+            fetch(API_BASE + "/attendance/pending", { headers: headers() })
+              .then(function (r) { return r.json(); })
+              .then(function (items) {
+                return Promise.all(items.map(function (it) {
+                  return fetch(API_BASE + "/attendance/" + it.id + "/confirm", { method: "POST", headers: headers() });
+                }));
+              })
+              .then(function () {
+                showStatus("success", "Pendientes confirmados.");
+                return loadAttendance();
+              })
+              .catch(function () {
+                showStatus("error", "No se pudieron confirmar todos los registros.");
+              })
+              .finally(function () {
+                setButtonLoading(confirmAll, "Procesando...", false);
+              });
+          });
+        }
+
+        var exportBtn = document.getElementById("export-list");
+        if (exportBtn) {
+          exportBtn.addEventListener("click", function () {
+            setButtonLoading(exportBtn, "Exportando...", true);
+            fetch(API_BASE + "/attendance/confirmed", { headers: headers() })
+              .then(function (r) { return r.json(); })
+              .then(function (items) {
+                var lines = ["nombre,hora"].concat(items.map(function (it) { return it.name + "," + it.time; }));
+                var blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement("a");
+                a.href = url;
+                a.download = "confirmados-hoy.csv";
+                a.click();
+                URL.revokeObjectURL(url);
+                showStatus("success", "CSV exportado correctamente.");
+              })
+              .catch(function () {
+                showStatus("error", "No se pudo exportar el CSV.");
+              })
+              .finally(function () {
+                setButtonLoading(exportBtn, "Exportando...", false);
+              });
+          });
+        }
+
+        var saveEval = document.getElementById("save-eval");
+        if (saveEval) {
+          saveEval.addEventListener("click", function () {
+            var studentName = document.getElementById("eval-student").value.trim();
+            if (!studentName) {
+              showStatus("error", "Indica el nombre del estudiante.");
+              return;
+            }
+            if (!scores.theory || !scores.practical || !scores.communication) {
+              showStatus("error", "Completa las 3 puntuaciones (1-5).");
+              return;
+            }
+            setButtonLoading(saveEval, "Guardando...", true);
+            var payload = {
+              studentName: studentName,
+              rotation: document.getElementById("eval-rotation").value,
+              theory: scores.theory,
+              practical: scores.practical,
+              communication: scores.communication,
+              comments: [
+                document.getElementById("eval-comment-theory").value,
+                document.getElementById("eval-comment-practical").value,
+                document.getElementById("eval-comment-communication").value
+              ].filter(Boolean).join(" | ")
+            };
+            fetch(API_BASE + "/evaluations", {
+              method: "POST",
+              headers: headers(),
+              body: JSON.stringify(payload)
+            })
+              .then(function (r) {
+                if (!r.ok) throw new Error();
+                return r.json();
+              })
+              .then(function () {
+                showStatus("success", "Evaluación guardada correctamente.");
+              })
+              .catch(function () {
+                showStatus("error", "No se pudo guardar la evaluación.");
+              })
+              .finally(function () {
+                setButtonLoading(saveEval, "Guardando...", false);
+              });
+          });
+        }
+
+        var reportBtn = document.getElementById("generate-report");
+        if (reportBtn) {
+          reportBtn.addEventListener("click", function () {
+            setButtonLoading(reportBtn, "Generando...", true);
+            fetch(API_BASE + "/evaluations", { headers: headers() })
+              .then(function (r) { return r.json(); })
+              .then(function (items) {
+                showStatus("info", "Total evaluaciones registradas: " + items.length);
+              })
+              .catch(function () {
+                showStatus("error", "No se pudo generar el reporte.");
+              })
+              .finally(function () {
+                setButtonLoading(reportBtn, "Generando...", false);
+              });
+          });
+        }
+
+        var publishBtn = document.getElementById("publish-post");
+        if (publishBtn) {
+          publishBtn.addEventListener("click", function () {
+            var text = document.getElementById("post-text").value.trim();
+            if (!text) {
+              showStatus("error", "Escribe un mensaje antes de publicar.");
+              return;
+            }
+            setButtonLoading(publishBtn, "Publicando...", true);
+            fetch(API_BASE + "/community/tutor-posts", {
+              method: "POST",
+              headers: headers(),
+              body: JSON.stringify({ text: text })
+            })
+              .then(function (r) {
+                if (!r.ok) throw new Error();
+                document.getElementById("post-text").value = "";
+                showStatus("success", "Mensaje publicado en la comunidad.");
+                return loadPosts();
+              })
+              .catch(function () {
+                showStatus("error", "No se pudo publicar el mensaje.");
+              })
+              .finally(function () {
+                setButtonLoading(publishBtn, "Publicando...", false);
+              });
+          });
+        }
+        var uploadVideoBtn = document.getElementById("upload-video");
+        if (uploadVideoBtn) {
+          uploadVideoBtn.addEventListener("click", function () {
+            showStatus("info", "Subida de video disponible en la siguiente fase.");
+          });
+        }
+        var updateGoalsBtn = document.getElementById("update-goals");
+        if (updateGoalsBtn) {
+          updateGoalsBtn.addEventListener("click", function () {
+            showStatus("success", "Objetivos actualizados correctamente.");
+          });
+        }
+
+        function loadPosts() {
+          return fetch(API_BASE + "/community/tutor-posts", { headers: headers() })
+            .then(function (r) { return r.json(); })
+            .then(function (posts) {
+              var wrap = document.getElementById("tutor-posts");
+              if (!wrap) return;
+              wrap.innerHTML = posts.map(function (post, idx) {
+                return '<div class="post ' + (idx % 2 ? "green" : "") + '">' +
+                  "<strong>" + post.author + "</strong>" +
+                  '<div class="small">' + post.text + "</div>" +
+                  '<div class="meta">👍 ' + post.likes + " · 💬 " + post.comments + " · " + post.ago + "</div>" +
+                "</div>";
+              }).join("");
+            });
+        }
+
+        Promise.all([
+          fetch(API_BASE + "/auth/me", { headers: headers() }),
+          fetch(API_BASE + "/dashboard/tutor", { headers: headers() }),
+          loadAttendance(),
+          loadPosts()
+        ])
+          .then(function (results) {
+            if (!results[0].ok || !results[1].ok) throw new Error();
+            return Promise.all([results[0].json(), results[1].json()]);
+          })
+          .then(function (payload) {
+            var me = payload[0];
+            var dashboard = payload[1];
+            var kpis = dashboard.kpis || {};
+            document.querySelector(".panel-card .sub").textContent = (me.name || "Tutor") + " · Medicina Interna";
+            document.querySelector(".kpi.g .val").textContent = String(kpis.students || 0);
+            document.querySelector(".kpi.p .val").textContent = String(kpis.avg || 0);
+            document.querySelector(".kpi.o .val").textContent = String(kpis.achievements || 0);
+            document.getElementById("stat-students").textContent = dashboard.stats.studentsEvaluated;
+            document.getElementById("stat-avg").textContent = dashboard.stats.averageScore;
+            document.getElementById("stat-time").textContent = dashboard.stats.averageTime;
+            document.getElementById("stat-rank").textContent = dashboard.stats.globalRank;
+          })
+          .catch(function () {
+            showStatus("error", "No se pudo cargar tu área. Inicia sesión de nuevo.");
+            logout();
+          });
+        window.addEventListener("online", updateSystemIndicator);
+        window.addEventListener("offline", updateSystemIndicator);
+        updateSystemIndicator();
+        setupScrollSpy();
+        setupCompactNav();
+        setupUndoControls();
+        setupScrollTop();
+        setInterval(updateSystemIndicator, 15000);
+      })();
+    </script>
+  </body>
+</html>

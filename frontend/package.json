@@ -1,0 +1,11 @@
+{
+  "name": "mediloop-frontend",
+  "version": "0.1.0",
+  "description": "Frontend React para Mediloop",
+  "private": true,
+  "scripts": {
+    "start": "serve public"
+  },
+  "dependencies": {}
+}
+

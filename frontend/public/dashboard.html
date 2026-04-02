@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mediloop · Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: #f3f4f6;
+        color: #111827;
+        display: flex;
+        min-height: 100vh;
+      }
+      aside {
+        width: 260px;
+        background: #111827;
+        color: white;
+        padding: 1.5rem 1rem;
+      }
+      main {
+        flex: 1;
+        padding: 2rem;
+      }
+      .logo {
+        font-weight: 700;
+        margin-bottom: 2rem;
+      }
+      .nav-section {
+        margin-bottom: 1.5rem;
+      }
+      .nav-title {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        opacity: 0.6;
+        margin-bottom: 0.5rem;
+      }
+      .nav-item {
+        display: block;
+        padding: 0.4rem 0.6rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        color: inherit;
+        font-size: 0.9rem;
+      }
+      .nav-item.active {
+        background: #2563eb;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+      .card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      }
+      .card h2 {
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+      }
+      .badge {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        background: #dbeafe;
+        color: #1d4ed8;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+      }
+      th, td {
+        padding: 0.5rem 0.75rem;
+        text-align: left;
+      }
+      th {
+        background: #f9fafb;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      tr:nth-child(even) td {
+        background: #f9fafb;
+      }
+    </style>
+  </head>
+  <body>
+    <aside>
+      <div class="logo">Mediloop</div>
+      <div class="nav-section">
+        <div class="nav-title">Estudiante</div>
+        <a class="nav-item active" href="#">Dashboard</a>
+        <a class="nav-item" href="#">Rotaciones</a>
+        <a class="nav-item" href="#">Evaluaciones</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-title">Cuenta</div>
+        <a class="nav-item" href="#">Perfil</a>
+      </div>
+    </aside>
+    <main>
+      <h1>Resumen de prácticas</h1>
+      <div class="cards">
+        <article class="card">
+          <h2>Progreso</h2>
+          <p id="progress-text">Rotaciones completadas: <strong>0 / 0</strong></p>
+          <span id="progress-badge" class="badge">Sin datos aún</span>
+        </article>
+        <article class="card">
+          <h2>Próxima rotación</h2>
+          <p id="next-rotation-text">No hay rotaciones asignadas.</p>
+        </article>
+        <article class="card">
+          <h2>Tareas pendientes</h2>
+          <p id="pending-evals-text">Evaluaciones por rellenar: <strong>0</strong></p>
+          <p id="pending-signatures-text">Firmas pendientes: <strong>0</strong></p>
+        </article>
+      </div>
+
+      <section class="card">
+        <h2>Rotaciones</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Hospital</th>
+              <th>Servicio</th>
+              <th>Fechas</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="rotations-body">
+            <tr>
+              <td colspan="4">Cargando datos…</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+    <script>
+      async function loadStudentDashboard() {
+        const apiBase = "http://localhost:4000/api";
+        const progressText = document.getElementById("progress-text");
+        const progressBadge = document.getElementById("progress-badge");
+        const nextRotationText = document.getElementById("next-rotation-text");
+        const pendingEvalsText = document.getElementById("pending-evals-text");
+        const pendingSignaturesText = document.getElementById("pending-signatures-text");
+        const rotationsBody = document.getElementById("rotations-body");
+
+        try {
+          const [dashboardRes, rotationsRes] = await Promise.all([
+            fetch(apiBase + "/dashboard/student"),
+            fetch(apiBase + "/rotations")
+          ]);
+
+          if (!dashboardRes.ok || !rotationsRes.ok) {
+            throw new Error("Error al obtener datos del servidor");
+          }
+
+          const dashboard = await dashboardRes.json();
+          const rotations = await rotationsRes.json();
+
+          const completed = dashboard.progress?.completed ?? 0;
+          const total = dashboard.progress?.total ?? 0;
+          progressText.innerHTML = "Rotaciones completadas: <strong>" + completed + " / " + total + "</strong>";
+          progressBadge.textContent = total > 0 ? "En curso" : "Sin datos aún";
+
+          if (dashboard.nextRotation) {
+            const r = dashboard.nextRotation;
+            nextRotationText.textContent =
+              r.hospital + " · " + r.service + " (" + r.startDate + " - " + r.endDate + ")";
+          }
+
+          const pendingEvals = (dashboard.pendingEvaluations || []).length;
+          const pendingSigns = (dashboard.pendingSignatures || []).length;
+          pendingEvalsText.innerHTML = "Evaluaciones por rellenar: <strong>" + pendingEvals + "</strong>";
+          pendingSignaturesText.innerHTML = "Firmas pendientes: <strong>" + pendingSigns + "</strong>";
+
+          if (Array.isArray(rotations) && rotations.length > 0) {
+            rotationsBody.innerHTML = "";
+            rotations.forEach((rot) => {
+              const tr = document.createElement("tr");
+              tr.innerHTML =
+                "<td>" + (rot.hospital || "-") + "</td>" +
+                "<td>" + (rot.service || "-") + "</td>" +
+                "<td>" + (rot.startDate || "-") + " - " + (rot.endDate || "-") + "</td>" +
+                "<td>" + (rot.status || "-") + "</td>";
+              rotationsBody.appendChild(tr);
+            });
+          } else {
+            rotationsBody.innerHTML = '<tr><td colspan="4">Aún no se han configurado rotaciones.</td></tr>';
+          }
+        } catch (err) {
+          console.error(err);
+          rotationsBody.innerHTML = '<tr><td colspan="4">No se pudo conectar con el servidor.</td></tr>';
+          progressBadge.textContent = "Error de conexión";
+        }
+      }
+
+      window.addEventListener("DOMContentLoaded", loadStudentDashboard);
+    </script>
+  </body>
+  </html>
+

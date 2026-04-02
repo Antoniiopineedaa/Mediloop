@@ -1,0 +1,14 @@
+{
+  "name": "mediloop-backend",
+  "version": "0.1.0",
+  "description": "API backend para Mediloop (gestion de practicas clinicas UJI)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.0",
+    "cors": "^2.8.5"
+  }
+}
+

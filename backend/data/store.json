@@ -1,0 +1,50 @@
+{
+  "attendancePending": [
+    {
+      "id": "att-1",
+      "name": "Ana García Rodríguez",
+      "scannedAt": "hace 2 min"
+    },
+    {
+      "id": "att-2",
+      "name": "Carlos Mendoza López",
+      "scannedAt": "hace 5 min"
+    }
+  ],
+  "attendanceConfirmed": [
+    {
+      "id": "att-3",
+      "name": "María Fernández",
+      "time": "08:30"
+    },
+    {
+      "id": "att-4",
+      "name": "José Martínez",
+      "time": "08:45"
+    },
+    {
+      "id": "att-5",
+      "name": "Laura Sánchez",
+      "time": "09:15"
+    }
+  ],
+  "evaluations": [],
+  "tutorPosts": [
+    {
+      "id": "post-1",
+      "author": "Dr. Patricia Ruiz",
+      "text": "¿Alguien tiene experiencia evaluando estudiantes de intercambio internacional?",
+      "likes": 12,
+      "comments": 5,
+      "ago": "Hace 2h"
+    },
+    {
+      "id": "post-2",
+      "author": "Dr. Miguel Torres",
+      "text": "Excelente webinar sobre evaluación por competencias. ¡Muy recomendado!",
+      "likes": 8,
+      "comments": 3,
+      "ago": "Hace 4h"
+    }
+  ]
+}

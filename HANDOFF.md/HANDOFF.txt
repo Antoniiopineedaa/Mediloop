@@ -1,0 +1,136 @@
+# HANDOFF Mediloop
+
+## Estado actual del proyecto
+
+Proyecto web Mediloop con:
+- Landing/login (`index.html`)
+- Área alumno (`alumnos.html`)
+- Área tutor (`tutores.html`)
+- Backend Node/Express en `localhost:4000`
+- Sesión por rol (`student` / `tutor`)
+- Persistencia básica en archivo JSON (`backend/data/store.json`)
+
+## Estructura principal
+
+- `frontend/public/index.html` → Landing + login
+- `frontend/public/alumnos.html` → Vista alumno
+- `frontend/public/tutores.html` → Vista tutor
+- `backend/src/server.js` → servidor Express
+- `backend/src/routes.js` → auth + endpoints
+- `backend/data/store.json` → datos persistentes demo
+
+## Cómo ejecutar
+
+1. Terminal:
+   - `cd C:\Users\ANTONIO\mediloop\backend`
+   - `npm install` (si hace falta)
+   - `npm start`
+
+2. Navegador:
+   - `http://localhost:4000/index.html`
+
+## Credenciales demo
+
+- Alumno: `alumno@mediloop.app` / `123456`
+- Tutor: `tutor@mediloop.app` / `123456`
+
+## Flujo funcional implementado
+
+### Login
+- Login por rol desde landing.
+- Redirección:
+  - student -> `alumnos.html`
+  - tutor -> `tutores.html`
+- Protección de rol en frontend.
+- Logout funcional (limpia sesión local).
+
+### Tutor
+- Carga de dashboard tutor desde backend.
+- Pendientes/confirmados de asistencia:
+  - confirmar
+  - rechazar
+  - confirmar todos
+  - exportar CSV
+- Rúbrica:
+  - validación de campos y puntuaciones
+  - guardar evaluación
+  - reporte con total de evaluaciones
+- Comunidad:
+  - publicar post
+  - cargar posts
+- Estados visuales de éxito/error/cargando en acciones.
+
+### Alumno
+- Carga de datos base desde backend.
+- Secciones completas visuales (hospitales, progreso, apoyo, recursos, mapa, novedades, comunidad).
+- CTAs conectados a secciones internas.
+- Estados visuales para acciones demo (sin alertas bruscas).
+
+## UX/UI añadida recientemente
+
+En alumno y tutor:
+- Barra lateral fija por secciones (scrollspy).
+- Botón flotante “volver arriba”.
+- Modo compacto/expandido de barra lateral.
+- Persistencia de preferencias (`localStorage`):
+  - compactado de barra
+  - última sección visitada
+- Controles de preferencias:
+  - Atrás
+  - Olvidar sección
+  - Deshacer preferencias
+- Botonera compacta con iconos y tooltips custom:
+  - flecha/tooltip estilo Mediloop
+  - delay suave en aparición
+
+## Keys de localStorage usadas
+
+### Alumno
+- `mediloop.session`
+- `mediloop.ui.alumnos.sideNavCompact`
+- `mediloop.ui.alumnos.lastSection`
+
+### Tutor
+- `mediloop.session`
+- `mediloop.ui.tutores.sideNavCompact`
+- `mediloop.ui.tutores.lastSection`
+
+## API base esperada en frontend
+
+- `http://localhost:4000/api`
+
+## Endpoints usados (resumen)
+
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+- `GET /api/dashboard/student`
+- `GET /api/dashboard/tutor`
+- `GET /api/rotations`
+- `GET /api/attendance/pending`
+- `GET /api/attendance/confirmed`
+- `POST /api/attendance/:id/confirm`
+- `POST /api/attendance/:id/reject`
+- `GET /api/evaluations`
+- `POST /api/evaluations`
+- `GET /api/community/tutor-posts`
+- `POST /api/community/tutor-posts`
+- `GET /api/health`
+
+## Pendientes recomendados (siguiente fase)
+
+1. Mover persistencia JSON -> SQLite/PostgreSQL.
+2. Seguridad real:
+   - hash de contraseñas
+   - JWT robusto/expiración
+   - validación backend más estricta
+3. Unificar a una sola app (SPA) si se quiere “1 solo link” sin cambio de `.html`.
+4. Responsive móvil fino (navegación móvil dedicada y UX táctil).
+5. PWA (manifest + service worker) para futura experiencia móvil/offline.
+6. Sustituir placeholders demo por módulos reales (firmas, incidencias, etc.).
+
+## Instrucción para Claude Code
+
+- Mantener la estética y estructura visual actual.
+- No rehacer desde cero.
+- Empezar validando arranque local en `localhost:4000`.
+- Continuar desde este estado.

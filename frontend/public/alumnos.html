@@ -1,0 +1,1472 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mediloop · Área de alumnos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      :root {
+        --blue: #2563eb;
+        --indigo: #4f46e5;
+        --green: #059669;
+        --purple: #7c3aed;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --gray-900: #111827;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--gray-50);
+        color: var(--gray-900);
+      }
+      .header {
+        background: linear-gradient(135deg, var(--blue), var(--indigo));
+        padding: 1rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .header .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .header .logo-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+      }
+      .header .logo-mark { width: 36px; height: 36px; flex-shrink: 0; }
+      .header .logo-mark svg { width: 100%; height: 100%; display: block; }
+      .header .logo-text { color: #fff; font-weight: 700; font-size: 1.1rem; }
+      .header nav { display: flex; gap: 1.5rem; align-items: center; }
+      .header nav a { color: rgba(255,255,255,0.95); text-decoration: none; font-size: 0.9rem; }
+      .header nav a:hover { color: #fff; }
+      .header .user-block {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .header .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.25);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+      }
+      .header .user-name { color: rgba(255,255,255,0.95); font-size: 0.9rem; font-weight: 500; }
+      .header .user-block .salir {
+        color: rgba(255,255,255,0.9);
+        text-decoration: none;
+        font-size: 0.85rem;
+        padding: 0.4rem 0.75rem;
+        border: 1px solid rgba(255,255,255,0.5);
+        border-radius: 8px;
+      }
+      .header .user-block .salir:hover { background: rgba(255,255,255,0.15); color: #fff; }
+      .header .user-block .landing-link {
+        color: rgba(255,255,255,0.95);
+        text-decoration: none;
+        font-size: 0.85rem;
+        padding: 0.4rem 0.75rem;
+        border: 1px solid rgba(255,255,255,0.35);
+        border-radius: 8px;
+      }
+      .header .user-block .landing-link:hover { background: rgba(255,255,255,0.12); color: #fff; }
+      .hero {
+        background: linear-gradient(to bottom right, #2563eb 0%, #4f46e5 50%, #6366f1 100%);
+        padding: 4rem 2rem;
+        text-align: center;
+      }
+      .hero h1 {
+        margin: 0 0 0.5rem;
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: #fff;
+      }
+      .hero p {
+        margin: 0 0 1.75rem;
+        color: rgba(255,255,255,0.95);
+        font-size: 1.05rem;
+        max-width: 560px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .hero .btn {
+        display: inline-block;
+        padding: 0.9rem 2rem;
+        border-radius: 12px;
+        background: #fff;
+        color: var(--blue);
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-decoration: none;
+      }
+      .resumen-wrap {
+        max-width: 1000px;
+        margin: -2rem auto 0;
+        padding: 0 1.5rem 2rem;
+      }
+      .resumen-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        padding: 1.25rem 1.5rem;
+      }
+      .resumen-card h3 {
+        margin: 0 0 1rem;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--gray-900);
+      }
+      .resumen-list { display: flex; flex-direction: column; gap: 0.75rem; }
+      .resumen-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid var(--gray-100);
+      }
+      .resumen-item:last-child { border-bottom: none; }
+      .resumen-item .icono {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.1rem;
+      }
+      .resumen-item .icono.rotacion { background: #dbeafe; color: var(--blue); }
+      .resumen-item .icono.tarea { background: #fef3c7; color: #b45309; }
+      .resumen-item .icono.evento { background: #d1fae5; color: var(--green); }
+      .resumen-item .titulo { font-weight: 600; font-size: 0.9rem; color: var(--gray-900); }
+      .resumen-item .detalle { font-size: 0.85rem; color: var(--gray-600); margin-top: 0.15rem; }
+      .resumen-item a.titulo { text-decoration: none; color: var(--gray-900); }
+      .resumen-item a.titulo:hover { color: var(--blue); }
+      .section {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 3rem 1.5rem;
+      }
+      .section-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-align: center;
+        color: var(--gray-900);
+      }
+      .section-desc {
+        text-align: center;
+        color: var(--gray-600);
+        font-size: 0.95rem;
+        margin-bottom: 2rem;
+        max-width: 560px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        padding: 1.4rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+      }
+      .centros-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+      }
+      .centro-card .icon-wrap {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.75rem;
+        background: var(--blue);
+        color: #fff;
+      }
+      .centro-card .icon-wrap svg { width: 26px; height: 26px; }
+      .centro-card h3 { margin: 0 0 0.35rem; font-size: 1.05rem; font-weight: 700; }
+      .centro-card .stars { color: #eab308; font-size: 0.9rem; margin-bottom: 0.5rem; letter-spacing: 0.05em; }
+      .centro-card p { margin: 0 0 0.75rem; font-size: 0.9rem; color: var(--gray-600); }
+      .centro-card .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; }
+      .centro-card .tag {
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+      }
+      .centro-card .tag.blue { background: #dbeafe; color: var(--blue); }
+      .centro-card .tag.green { background: #d1fae5; color: var(--green); }
+      .centro-card .tag.purple { background: #ede9fe; color: var(--purple); }
+      .centro-card .btn-card {
+        display: block;
+        text-align: center;
+        padding: 0.6rem 1rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+      }
+      .centro-card .btn-card.blue { background: var(--blue); }
+      .centro-card .btn-card.green { background: var(--green); }
+      .centro-card .btn-card.purple { background: var(--purple); }
+      .rotaciones-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.25rem;
+      }
+      .rotacion-card {
+        position: relative;
+        border-left: 4px solid var(--gray-200);
+      }
+      .rotacion-card.borde-green { border-left-color: #10b981; }
+      .rotacion-card.borde-blue { border-left-color: var(--blue); }
+      .rotacion-card.borde-gray { border-left-color: var(--gray-200); }
+      .rotacion-card .badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+      .rotacion-card .badge.completada { background: #d1fae5; color: var(--green); }
+      .rotacion-card .badge.en-curso { background: #dbeafe; color: var(--blue); }
+      .rotacion-card .badge.proxima { background: var(--gray-200); color: var(--gray-600); }
+      .rotacion-card .icon-wrap {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.6rem;
+      }
+      .rotacion-card .icon-wrap.green { background: #d1fae5; color: var(--green); }
+      .rotacion-card .icon-wrap.blue { background: #dbeafe; color: var(--blue); }
+      .rotacion-card .icon-wrap.gray { background: var(--gray-200); color: var(--gray-600); }
+      .rotacion-card h3 { margin: 0 0 0.2rem; font-size: 1rem; }
+      .rotacion-card .sub { font-size: 0.85rem; color: var(--gray-600); margin-bottom: 0.6rem; }
+      .rotacion-card .meta { font-size: 0.85rem; color: var(--gray-700); }
+      .rotacion-card .meta .ok { color: var(--green); }
+      .rotacion-card .progress-bar {
+        height: 6px;
+        border-radius: 999px;
+        background: var(--gray-200);
+        margin-top: 0.4rem;
+        overflow: hidden;
+      }
+      .rotacion-card .progress-bar span { display: block; height: 100%; border-radius: 999px; background: var(--blue); }
+      .dos-columnas {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+      }
+      .competencia-item { margin-bottom: 0.9rem; }
+      .competencia-item .row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem; }
+      .competencia-item .dot { width: 8px; height: 8px; border-radius: 50%; }
+      .competencia-item .bar { height: 8px; border-radius: 999px; background: var(--gray-200); overflow: hidden; }
+      .competencia-item .bar span { display: block; height: 100%; border-radius: 999px; }
+      .competencia-item .nivel { font-size: 0.8rem; color: var(--gray-600); }
+      .calendario-item {
+        display: flex;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--gray-100);
+      }
+      .calendario-item:last-child { border-bottom: none; }
+      .calendario-item .line { width: 4px; border-radius: 2px; flex-shrink: 0; }
+      .calendario-item .time { font-size: 0.8rem; padding: 0.2rem 0.5rem; border-radius: 6px; }
+      .btn-gradient { background: linear-gradient(90deg, var(--blue), var(--indigo)); color: #fff; padding: 0.6rem 1rem; border-radius: 10px; font-weight: 600; font-size: 0.9rem; border: none; cursor: pointer; }
+      .btn-outline { background: #fff; color: var(--blue); border: 1px solid var(--blue); padding: 0.6rem 1rem; border-radius: 10px; font-weight: 600; font-size: 0.9rem; cursor: pointer; }
+      .recursos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.25rem;
+      }
+      .recurso-card { position: relative; }
+      .recurso-card .icon-wrap {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.75rem;
+      }
+      .recurso-card { background: #f0f9ff; }
+      .recurso-card:nth-child(2) { background: #f0fdf4; }
+      .recurso-card:nth-child(3) { background: #faf5ff; }
+      .recurso-card .icon-wrap.blue { background: var(--blue); color: #fff; }
+      .recurso-card .icon-wrap.green { background: var(--green); color: #fff; }
+      .recurso-card .icon-wrap.purple { background: var(--purple); color: #fff; }
+      .recurso-card h3 { margin: 0 0 0.35rem; font-size: 1rem; font-weight: 700; }
+      .recurso-card p { margin: 0 0 0.5rem; font-size: 0.88rem; color: var(--gray-600); }
+      .recurso-card a { font-size: 0.9rem; font-weight: 500; text-decoration: none; }
+      .recurso-card a.blue { color: var(--blue); }
+      .recurso-card a.green { color: var(--green); }
+      .recurso-card a.purple { color: var(--purple); }
+      .tabs {
+        display: inline-flex;
+        background: var(--gray-200);
+        border-radius: 999px;
+        padding: 0.25rem;
+        margin-bottom: 1.5rem;
+      }
+      .tabs button {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 999px;
+        font-size: 0.9rem;
+        background: transparent;
+        color: var(--gray-600);
+        cursor: pointer;
+      }
+      .tabs button.active { background: var(--blue); color: #fff; }
+      .mapa-wrap {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+      }
+      .mapa-schema {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr 1fr;
+        grid-template-rows: auto 1fr 1fr;
+        gap: 0.75rem;
+        border: 1px solid var(--gray-200);
+        border-radius: 12px;
+        padding: 1rem;
+        max-width: 560px;
+        margin: 0 auto;
+      }
+      .mapa-block {
+        padding: 0.75rem;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        position: relative;
+      }
+      .mapa-block .qr { position: absolute; top: 0.25rem; right: 0.25rem; font-size: 0.65rem; color: var(--gray-600); }
+      .mapa-block.red { background: #fee2e2; color: #991b1b; }
+      .mapa-block.blue { background: #dbeafe; color: #1e40af; }
+      .mapa-block.green { background: #d1fae5; color: #065f46; }
+      .mapa-block.orange { background: #ffedd5; color: #9a3412; }
+      .mapa-block.purple { background: #ede9fe; color: #5b21b6; }
+      .mapa-block .name { font-weight: 700; }
+      .mapa-block .desc { font-size: 0.75rem; opacity: 0.9; }
+      .leyenda { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin-top: 1rem; font-size: 0.8rem; color: var(--gray-600); }
+      .leyenda span { display: flex; align-items: center; gap: 0.35rem; }
+      .leyenda .cuadro { width: 12px; height: 12px; border-radius: 3px; }
+      .qr-instructions {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--blue);
+      }
+      .qr-instructions h4 { margin: 0 0 0.5rem; color: var(--blue); font-size: 0.95rem; }
+      .qr-instructions ul { margin: 0; padding-left: 1.25rem; font-size: 0.9rem; color: var(--gray-600); line-height: 1.6; }
+      .apoyo-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.25rem;
+      }
+      .apoyo-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        padding: 1.25rem;
+      }
+      .apoyo-card h4 {
+        margin: 0 0 0.75rem;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .apoyo-card h4 .emoji { font-size: 1.2rem; }
+      .apoyo-card .tutor-info { font-size: 0.9rem; color: var(--gray-700); }
+      .apoyo-card .tutor-info .nombre { font-weight: 600; color: var(--gray-900); }
+      .apoyo-card .tutor-info a { color: var(--blue); text-decoration: none; }
+      .apoyo-card .tutor-info a:hover { text-decoration: underline; }
+      .apoyo-checklist { list-style: none; margin: 0; padding: 0; }
+      .apoyo-checklist li {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.35rem 0;
+        font-size: 0.9rem;
+        color: var(--gray-700);
+      }
+      .apoyo-checklist li::before {
+        content: "☐";
+        font-size: 1.1rem;
+        color: var(--gray-600);
+      }
+      .apoyo-contactos { font-size: 0.9rem; color: var(--gray-700); }
+      .apoyo-contactos p { margin: 0 0 0.5rem; }
+      .apoyo-contactos a { color: var(--blue); text-decoration: none; }
+      .apoyo-contactos a:hover { text-decoration: underline; }
+      .apoyo-normativa { font-size: 0.88rem; color: var(--gray-600); line-height: 1.55; }
+      .apoyo-normativa ul { margin: 0.5rem 0 0; padding-left: 1.1rem; }
+      .comunidad-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.5rem;
+      }
+      .noti-wrap {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 3px 14px rgba(0,0,0,0.07);
+        overflow: hidden;
+      }
+      .noti-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 1rem 1.2rem;
+        border-bottom: 1px solid var(--gray-100);
+      }
+      .noti-head .unread {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #1e40af;
+        background: #dbeafe;
+        border-radius: 999px;
+        padding: 0.22rem 0.65rem;
+      }
+      .noti-list { display: flex; flex-direction: column; }
+      .noti-item {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 0.8rem;
+        align-items: start;
+        padding: 0.95rem 1.2rem;
+        border-bottom: 1px solid var(--gray-100);
+      }
+      .noti-item:last-child { border-bottom: none; }
+      .noti-item.nueva { background: #f8fbff; }
+      .noti-item .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-top: 0.35rem;
+      }
+      .noti-item .dot.blue { background: var(--blue); }
+      .noti-item .dot.green { background: var(--green); }
+      .noti-item .dot.purple { background: var(--purple); }
+      .noti-item .dot.orange { background: #f59e0b; }
+      .noti-item h4 {
+        margin: 0 0 0.25rem;
+        font-size: 0.95rem;
+      }
+      .noti-item p {
+        margin: 0;
+        color: var(--gray-600);
+        font-size: 0.86rem;
+      }
+      .noti-item .time {
+        font-size: 0.76rem;
+        color: var(--gray-600);
+        white-space: nowrap;
+      }
+      .post-card, .grupo-card {
+        display: flex;
+        gap: 0.75rem;
+        padding: 1rem;
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+      }
+      .post-card { border-left: 4px solid var(--blue); }
+      .post-card.verde { border-left-color: var(--green); }
+      .avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 1rem; flex-shrink: 0; }
+      .avatar.blue { background: var(--blue); }
+      .avatar.green { background: var(--green); }
+      .post-card .content { flex: 1; }
+      .post-card .author { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.25rem; }
+      .post-card .text { font-size: 0.88rem; color: var(--gray-600); margin-bottom: 0.5rem; }
+      .post-card .meta { font-size: 0.8rem; color: var(--gray-600); }
+      .grupo-card { border-left: 4px solid var(--blue); }
+      .grupo-card.verde { border-left-color: var(--green); }
+      .grupo-card.purple { border-left-color: var(--purple); }
+      .grupo-card h4 { margin: 0 0 0.25rem; font-size: 0.95rem; }
+      .grupo-card p { margin: 0 0 0.5rem; font-size: 0.85rem; color: var(--gray-600); }
+      .grupo-card .foot { display: flex; justify-content: space-between; align-items: center; }
+      .grupo-card .miembros { font-size: 0.8rem; color: var(--gray-600); }
+      .grupo-card .btn-join { padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; border: none; cursor: pointer; color: #fff; }
+      .grupo-card .btn-join.blue { background: var(--blue); }
+      .grupo-card .btn-join.green { background: var(--green); }
+      .grupo-card .btn-join.purple { background: var(--purple); }
+      .footer-mini {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 3rem;
+        text-align: center;
+        border-top: 1px solid var(--gray-200);
+        background: var(--gray-50);
+      }
+      .footer-mini .brand { font-size: 0.9rem; color: var(--gray-600); margin-bottom: 0.5rem; }
+      .footer-mini .brand strong { color: var(--gray-900); }
+      .footer-mini a {
+        font-size: 0.85rem;
+        color: var(--blue);
+        text-decoration: none;
+      }
+      .footer-mini a:hover { text-decoration: underline; }
+      .footer-mini .acciones {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+      }
+      .app-status {
+        position: fixed;
+        top: 1rem;
+        left: 50%;
+        transform: translateX(-50%) translateY(-10px);
+        min-width: 280px;
+        max-width: 90vw;
+        border-radius: 10px;
+        padding: 0.7rem 0.9rem;
+        font-size: 0.88rem;
+        font-weight: 600;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.22s ease, transform 0.22s ease;
+        z-index: 200;
+      }
+      .app-status.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+      .app-status.success {
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #86efac;
+      }
+      .app-status.info {
+        background: #dbeafe;
+        color: #1e3a8a;
+        border: 1px solid #93c5fd;
+      }
+      .app-status.error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fca5a5;
+      }
+      .sys-indicator {
+        position: fixed;
+        top: 0.8rem;
+        right: 0.8rem;
+        z-index: 210;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        background: rgba(17, 24, 39, 0.86);
+        color: #fff;
+        padding: 0.4rem 0.65rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+      }
+      .sys-indicator .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #9ca3af;
+      }
+      .sys-indicator.ok .dot { background: #22c55e; }
+      .sys-indicator.warn .dot { background: #f59e0b; }
+      .sys-indicator.err .dot { background: #ef4444; }
+      .side-nav {
+        position: fixed;
+        left: 0.9rem;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 205;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        padding: 0.5rem;
+      }
+      .side-nav a {
+        text-decoration: none;
+        font-size: 0.76rem;
+        color: #4b5563;
+        border-radius: 8px;
+        padding: 0.35rem 0.55rem;
+        white-space: nowrap;
+      }
+      .side-nav a:hover {
+        background: #eef2ff;
+        color: #3730a3;
+      }
+      .side-nav a.active {
+        background: linear-gradient(90deg, #2563eb, #4f46e5);
+        color: #fff;
+      }
+      .side-nav.compact {
+        width: 42px;
+        overflow: hidden;
+      }
+      .side-nav.compact a {
+        text-indent: -9999px;
+        padding: 0.35rem 0;
+        text-align: center;
+      }
+      .side-nav.compact a::before {
+        content: "•";
+        text-indent: 0;
+        display: block;
+        font-size: 0.95rem;
+      }
+      .side-nav-toggle {
+        border: none;
+        border-radius: 10px;
+        background: #111827;
+        color: #fff;
+        font-size: 0.88rem;
+        width: 34px;
+        height: 34px;
+        cursor: pointer;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.22);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .pref-actions {
+        position: fixed;
+        left: 0.9rem;
+        bottom: 1rem;
+        z-index: 206;
+        display: flex;
+        gap: 0.45rem;
+      }
+      .pref-btn {
+        border: none;
+        border-radius: 10px;
+        background: #1f2937;
+        color: #fff;
+        font-size: 0.9rem;
+        width: 34px;
+        height: 34px;
+        cursor: pointer;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.22);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .pref-btn:hover,
+      .side-nav-toggle:hover {
+        background: #111827;
+      }
+      .pref-btn[data-tip],
+      .side-nav-toggle[data-tip] {
+        position: relative;
+      }
+      .pref-btn[data-tip]::after,
+      .side-nav-toggle[data-tip]::after {
+        content: attr(data-tip);
+        position: absolute;
+        left: 50%;
+        bottom: calc(100% + 8px);
+        transform: translateX(-50%) translateY(4px);
+        background: rgba(17, 24, 39, 0.96);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 8px;
+        font-size: 0.72rem;
+        font-weight: 500;
+        white-space: nowrap;
+        padding: 0.3rem 0.5rem;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.16s ease 0.15s, transform 0.16s ease 0.15s;
+      }
+      .pref-btn[data-tip]::before,
+      .side-nav-toggle[data-tip]::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: calc(100% + 2px);
+        transform: translateX(-50%) translateY(4px);
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 6px solid rgba(17, 24, 39, 0.96);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.16s ease 0.15s, transform 0.16s ease 0.15s;
+      }
+      .pref-btn[data-tip]:hover::after,
+      .side-nav-toggle[data-tip]:hover::after,
+      .pref-btn[data-tip]:focus-visible::after,
+      .side-nav-toggle[data-tip]:focus-visible::after {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+      .pref-btn[data-tip]:hover::before,
+      .side-nav-toggle[data-tip]:hover::before,
+      .pref-btn[data-tip]:focus-visible::before,
+      .side-nav-toggle[data-tip]:focus-visible::before {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+      .scroll-top-btn {
+        position: fixed;
+        right: 1.1rem;
+        bottom: 5rem;
+        z-index: 206;
+        width: 42px;
+        height: 42px;
+        border: none;
+        border-radius: 50%;
+        background: #111827;
+        color: #fff;
+        font-size: 1rem;
+        cursor: pointer;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(8px);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+      }
+      .scroll-top-btn.show {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+      }
+      @media (max-width: 1200px) {
+        .side-nav { display: none; }
+        .pref-actions { display: none; }
+      }
+      .help-fab {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: var(--blue);
+        color: #fff;
+        border: none;
+        font-size: 1.25rem;
+        cursor: pointer;
+        box-shadow: 0 4px 14px rgba(37,99,235,0.4);
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="side-nav" aria-label="Navegación rápida">
+      <a href="#hospitales" data-spy="hospitales">Hospitales</a>
+      <a href="#progreso" data-spy="progreso">Progreso</a>
+      <a href="#apoyo" data-spy="apoyo">Apoyo</a>
+      <a href="#recursos" data-spy="recursos">Recursos</a>
+      <a href="#mapa-hospital" data-spy="mapa-hospital">Mapa</a>
+      <a href="#novedades" data-spy="novedades">Novedades</a>
+      <a href="#comunidad" data-spy="comunidad">Comunidad</a>
+    </aside>
+    <div class="pref-actions">
+      <button type="button" id="go-back-btn" class="pref-btn" data-tip="Atrás" aria-label="Atrás">←</button>
+      <button type="button" id="reset-section-btn" class="pref-btn" data-tip="Olvidar última sección" aria-label="Olvidar última sección">⌫</button>
+      <button type="button" id="undo-prefs-btn" class="pref-btn" data-tip="Deshacer preferencias" aria-label="Deshacer preferencias">↺</button>
+      <button type="button" id="side-nav-toggle" class="side-nav-toggle" data-tip="Compactar barra lateral" aria-label="Compactar barra lateral">☰</button>
+    </div>
+    <header class="header">
+      <div class="logo">
+        <a href="index.html" class="logo-link" aria-label="Ir al inicio">
+        <div class="logo-mark">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="logo-blur-header" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="0.4" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <rect x="18" y="6" width="16" height="16" rx="4" fill="#c2cfff" opacity="0.95"/>
+            <rect x="12" y="12" width="16" height="16" rx="4" fill="#8a9eff" opacity="0.95"/>
+            <rect x="6" y="18" width="16" height="16" rx="4" fill="#4f46e5" filter="url(#logo-blur-header)"/>
+          </svg>
+        </div>
+        <span class="logo-text">Mediloop</span>
+        </a>
+      </div>
+      <nav>
+        <a href="#hospitales">Hospitales</a>
+        <a href="#progreso">Progreso</a>
+        <a href="#apoyo">Apoyo</a>
+        <a href="#recursos">Recursos</a>
+        <a href="#novedades">Novedades</a>
+        <a href="#comunidad">Comunidad</a>
+      </nav>
+      <div class="user-block">
+        <span class="user-avatar" aria-hidden="true">AM</span>
+        <span class="user-name">Ana M.</span>
+        <a href="index.html" class="landing-link">Landing</a>
+        <a href="index.html" class="salir">Salir</a>
+      </div>
+    </header>
+
+    <section class="hero">
+      <h1>Tu Futuro Médico Comienza Aquí</h1>
+      <p>Conecta con los mejores hospitales, desarrolla tus habilidades y únete a una comunidad de futuros profesionales de la salud.</p>
+      <a href="#hospitales" class="btn">Explorar Oportunidades</a>
+    </section>
+
+    <div class="resumen-wrap">
+      <div class="resumen-card">
+        <h3>Tu resumen</h3>
+        <div class="resumen-list">
+          <div class="resumen-item">
+            <span class="icono rotacion">🛏</span>
+            <div>
+              <span class="titulo">Rotación en curso: Cirugía General</span>
+              <p class="detalle">Hospital General · Semana 3 de 6</p>
+            </div>
+          </div>
+          <div class="resumen-item">
+            <span class="icono tarea">📄</span>
+            <div>
+              <a href="#progreso" class="titulo">Pendiente: informe Medicina Interna</a>
+              <p class="detalle">Entrega hasta el viernes</p>
+            </div>
+          </div>
+          <div class="resumen-item">
+            <span class="icono evento">📅</span>
+            <div>
+              <span class="titulo">Sesión de competencias</span>
+              <p class="detalle">Viernes 10:00 · Aula 3</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="section" id="hospitales">
+      <h2 class="section-title">Centros Sanitarios de Castellón</h2>
+      <p class="section-desc">Colaboramos con los principales centros de salud de la provincia para ofrecerte las mejores oportunidades de formación práctica.</p>
+      <div class="centros-grid">
+        <article class="card centro-card">
+          <div class="icon-wrap blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+          <h3>Hospital General Universitario de Castellón</h3>
+          <div class="stars">★★★★★ (4.8)</div>
+          <p>Hospital de referencia con todas las especialidades médicas y quirúrgicas. Centro docente universitario.</p>
+          <div class="tags">
+            <span class="tag blue">Urgencias 24h</span>
+            <span class="tag blue">UCI</span>
+            <span class="tag blue">Quirófanos</span>
+          </div>
+          <button type="button" class="btn-card blue js-go" data-target="mapa-hospital" data-message="Mostrando ubicación y áreas del Hospital General...">Ver Detalles</button>
+        </article>
+        <article class="card centro-card">
+          <div class="icon-wrap blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <h3>Centro de Salud 9 de Octubre</h3>
+          <div class="stars">★★★★★ (4.6)</div>
+          <p>Atención primaria integral en el centro de Castellón. Medicina familiar y comunitaria.</p>
+          <div class="tags">
+            <span class="tag green">Medicina Familiar</span>
+            <span class="tag green">Pediatría</span>
+            <span class="tag green">Enfermería</span>
+          </div>
+          <button type="button" class="btn-card green js-go" data-target="mapa-hospital" data-message="Mostrando ubicación y áreas del Centro 9 de Octubre...">Ver Detalles</button>
+        </article>
+        <article class="card centro-card">
+          <div class="icon-wrap blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
+          <h3>Centro de Salud de Vall d'Alba</h3>
+          <div class="stars">★★★★★ (4.7)</div>
+          <p>Atención sanitaria rural y comunitaria. Medicina preventiva y promoción de la salud.</p>
+          <div class="tags">
+            <span class="tag purple">Medicina Rural</span>
+            <span class="tag purple">Prevención</span>
+            <span class="tag purple">Comunitaria</span>
+          </div>
+          <button type="button" class="btn-card purple js-go" data-target="mapa-hospital" data-message="Mostrando ubicación y áreas de Vall d'Alba...">Ver Detalles</button>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="progreso">
+      <h2 class="section-title">Rotaciones Clínicas y Competencias</h2>
+      <p class="section-desc">Sigue tu progreso en las rotaciones hospitalarias y desarrolla competencias médicas esenciales.</p>
+      <div class="rotaciones-grid">
+        <article class="card rotacion-card borde-green">
+          <span class="badge completada">Completada</span>
+          <div class="icon-wrap green">✓</div>
+          <h3>Medicina Interna</h3>
+          <p class="sub">Hospital General - 8 semanas</p>
+          <p class="meta">Historias clínicas: <span class="ok">24/20</span></p>
+          <p class="meta">Procedimientos: <span class="ok">15/12</span></p>
+          <p class="meta">Evaluación final: <span class="ok">8.5/10</span></p>
+        </article>
+        <article class="card rotacion-card borde-blue">
+          <span class="badge en-curso">En curso</span>
+          <div class="icon-wrap blue">🛏</div>
+          <h3>Cirugía General</h3>
+          <p class="sub">Hospital General - Semana 3/6</p>
+          <p class="meta">Cirugías observadas: 8/15</p>
+          <p class="meta">Suturas practicadas: 12/20</p>
+          <div class="progress-bar"><span style="width:60%"></span></div>
+        </article>
+        <article class="card rotacion-card borde-gray">
+          <span class="badge proxima">Próxima</span>
+          <div class="icon-wrap gray">★</div>
+          <h3>Pediatría</h3>
+          <p class="sub">Centro de Salud - Inicia en 2 semanas</p>
+          <p class="meta">• Consultas pediátricas</p>
+          <p class="meta">• Vacunación infantil</p>
+          <p class="meta">• Desarrollo psicomotor</p>
+        </article>
+      </div>
+      <div class="dos-columnas">
+        <div class="card">
+          <h3>Competencias Desarrolladas</h3>
+          <div class="competencia-item">
+            <div class="row" style="justify-content:space-between"><span style="display:flex;align-items:center;gap:0.5rem"><span class="dot" style="background:var(--green)"></span><span>Anamnesis y Exploración</span></span><span class="nivel" style="color:var(--green);font-weight:600">Avanzado</span></div>
+            <div class="bar" style="margin-top:0.25rem"><span style="width:85%;background:var(--green)"></span></div>
+          </div>
+          <div class="competencia-item">
+            <div class="row" style="justify-content:space-between"><span style="display:flex;align-items:center;gap:0.5rem"><span class="dot" style="background:var(--blue)"></span><span>Técnicas Básicas</span></span><span class="nivel" style="color:var(--blue);font-weight:600">Intermedio</span></div>
+            <div class="bar" style="margin-top:0.25rem"><span style="width:62%;background:var(--blue)"></span></div>
+          </div>
+          <div class="competencia-item">
+            <div class="row" style="justify-content:space-between"><span style="display:flex;align-items:center;gap:0.5rem"><span class="dot" style="background:#f59e0b"></span><span>Comunicación Clínica</span></span><span class="nivel" style="color:#f59e0b;font-weight:600">Intermedio</span></div>
+            <div class="bar" style="margin-top:0.25rem"><span style="width:42%;background:#f59e0b"></span></div>
+          </div>
+          <div class="competencia-item">
+            <div class="row" style="justify-content:space-between"><span style="display:flex;align-items:center;gap:0.5rem"><span class="dot" style="background:var(--purple)"></span><span>Trabajo en Equipo</span></span><span class="nivel" style="color:var(--purple);font-weight:600">Avanzado</span></div>
+            <div class="bar" style="margin-top:0.25rem"><span style="width:72%;background:var(--purple)"></span></div>
+          </div>
+          <button type="button" class="btn-gradient js-go" data-target="novedades" style="margin-top:0.75rem;width:100%">Ver Evaluaciones Detalladas</button>
+        </div>
+        <div class="card">
+          <h3>Calendario de Prácticas</h3>
+          <div class="calendario-item">
+            <span class="line" style="background:var(--blue)"></span>
+            <div><strong>Guardia de Urgencias</strong><br><span style="font-size:0.85rem;color:var(--gray-600)">Hospital General</span></div>
+            <span class="time" style="background:#dbeafe;color:var(--blue)">Hoy 22:00</span>
+          </div>
+          <div class="calendario-item">
+            <span class="line" style="background:var(--green)"></span>
+            <div><strong>Consulta Externa</strong><br><span style="font-size:0.85rem;color:var(--gray-600)">Dr. Martínez Cirugía</span></div>
+            <span class="time" style="background:#d1fae5;color:var(--green)">Mañana 9:00</span>
+          </div>
+          <div class="calendario-item">
+            <span class="line" style="background:var(--purple)"></span>
+            <div><strong>Sesión Clínica</strong><br><span style="font-size:0.85rem;color:var(--gray-600)">Casos Complejos</span></div>
+            <span class="time" style="background:#ede9fe;color:var(--purple)">Vie 12:00</span>
+          </div>
+          <div class="calendario-item">
+            <span class="line" style="background:#f59e0b"></span>
+            <div><strong>Evaluación Práctica</strong><br><span style="font-size:0.85rem;color:var(--gray-600)">Competencias Quirúrgicas</span></div>
+            <span class="time" style="background:#ffedd5;color:#d97706">Lun 15:00</span>
+          </div>
+          <button type="button" class="btn-outline js-go" data-target="novedades" style="margin-top:0.75rem;width:100%">Ver Calendario Completo</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="apoyo">
+      <h2 class="section-title">Apoyo en prácticas</h2>
+      <p class="section-desc">Todo lo que necesitas para estar preparado y saber a quién acudir durante tus rotaciones.</p>
+      <div class="apoyo-grid">
+        <div class="apoyo-card">
+          <h4><span class="emoji">👤</span> Tu tutor asignado</h4>
+          <div class="tutor-info">
+            <p><span class="nombre">Dr. Carlos Ruiz</span><br>Cirugía General · Hospital General</p>
+            <p><a href="mailto:tutor.cirugia@hospital.es">tutor.cirugia@hospital.es</a><br>Ext. 2341</p>
+          </div>
+        </div>
+        <div class="apoyo-card">
+          <h4><span class="emoji">✓</span> Antes de ir al hospital</h4>
+          <ul class="apoyo-checklist">
+            <li>Bata y identificación visible</li>
+            <li>Lista de procedimientos a observar hoy</li>
+            <li>Confirmar horario y planta con tu tutor</li>
+            <li>Revisar protocolos del servicio</li>
+          </ul>
+        </div>
+        <div class="apoyo-card">
+          <h4><span class="emoji">📞</span> Contactos útiles</h4>
+          <div class="apoyo-contactos">
+            <p><strong>Coordinación prácticas UJI</strong><br><a href="mailto:practicas@uji.es">practicas@uji.es</a> · 964 72 80 00</p>
+            <p><strong>Secretaría Medicina</strong><br><a href="mailto:medicina@uji.es">medicina@uji.es</a></p>
+          </div>
+        </div>
+        <div class="apoyo-card">
+          <h4><span class="emoji">📋</span> Normativa y deberes</h4>
+          <div class="apoyo-normativa">
+            <strong>Recuerda:</strong>
+            <ul>
+              <li>Confidencialidad de datos y historias clínicas</li>
+              <li>Asistencia obligatoria según normativa del centro</li>
+              <li>Las faltas se justifican en Secretaría y al tutor</li>
+              <li>En caso de incidencia (lesión, exposición), avisar al tutor y a Coordinación</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="recursos">
+      <h2 class="section-title">Recursos Digitales</h2>
+      <div class="recursos-grid">
+        <article class="card recurso-card">
+          <div class="icon-wrap blue">📖</div>
+          <h3>Recursos Prácticos</h3>
+          <p>Información rápida, concisa y útil para no perderte en las prácticas hospitalarias.</p>
+          <a href="#recursos" class="blue js-demo-link" data-message="Cargando recursos prácticos...">Explorar →</a>
+        </article>
+        <article class="card recurso-card">
+          <div class="icon-wrap green">👁</div>
+          <h3>Simuladores 3D</h3>
+          <p>Modelos anatómicos interactivos para práctica virtual.</p>
+          <a href="#recursos" class="green js-demo-link" data-message="Iniciando simulador 3D...">Practicar →</a>
+        </article>
+        <article class="card recurso-card">
+          <div class="icon-wrap purple">📋</div>
+          <h3>Casos Clínicos</h3>
+          <p>Estudios de casos reales para desarrollar diagnóstico.</p>
+          <a href="#recursos" class="purple js-demo-link" data-message="Abriendo casos clínicos...">Estudiar →</a>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="mapa-hospital">
+      <h2 class="section-title">Mapa del Hospital General</h2>
+      <p class="section-desc">Escanea los códigos QR en cada área para registrar tu asistencia a prácticas.</p>
+      <div style="text-align:center">
+        <div class="tabs">
+          <button type="button" class="active">Planta Baja</button>
+          <button type="button">1ª Planta</button>
+          <button type="button">2ª Planta</button>
+        </div>
+      </div>
+      <div class="mapa-wrap">
+        <div class="mapa-schema" style="position:relative">
+          <div style="grid-column:1/-1;text-align:center;font-weight:700;font-size:0.8rem;color:#166534;background:#dcfce7;padding:0.4rem;border-radius:8px;margin-bottom:0.5rem">ENTRADA</div>
+          <div class="mapa-block red" style="grid-column:1;grid-row:2"><span class="qr">QR</span><div class="name">URGENCIAS</div><div class="desc">24 Horas</div></div>
+          <div class="mapa-block blue" style="grid-column:2;grid-row:2"><span class="qr">QR</span><div class="name">RECEPCIÓN</div><div class="desc">Información General</div></div>
+          <div class="mapa-block green" style="grid-column:3;grid-row:2"><span class="qr">QR</span><div class="name">LABORATORIO</div><div class="desc">Análisis Clínicos</div></div>
+          <div class="mapa-block orange" style="grid-column:1;grid-row:3"><span class="qr">QR</span><div class="name">RADIOLOGÍA</div><div class="desc">Rayos X - TAC</div></div>
+          <div class="mapa-block purple" style="grid-column:3;grid-row:3"><span class="qr">QR</span><div class="name">FARMACIA</div><div class="desc">Medicamentos</div></div>
+        </div>
+        <div class="leyenda">
+          <span><span class="cuadro" style="background:#fecaca"></span> Urgencias/Quirófanos</span>
+          <span><span class="cuadro" style="background:#93c5fd"></span> Consultas/Recepción</span>
+          <span><span class="cuadro" style="background:#6ee7b7"></span> Laboratorio/Neurología</span>
+          <span><span class="cuadro" style="background:#c4b5fd"></span> UCI/Farmacia</span>
+        </div>
+      </div>
+      <div class="qr-instructions">
+        <h4>Cómo usar los códigos QR:</h4>
+        <ul>
+          <li>Haz clic en cualquier código QR del mapa para simular el escaneo.</li>
+          <li>En la práctica real, usa la cámara de tu móvil para escanear.</li>
+          <li>Tu asistencia se registrará automáticamente en el sistema.</li>
+          <li>Cada área tiene su propio código para un seguimiento preciso.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" id="novedades">
+      <h2 class="section-title">Novedades y Notificaciones</h2>
+      <p class="section-desc">Avisos importantes de prácticas, recursos y cambios de agenda para tu seguimiento diario.</p>
+      <div class="noti-wrap">
+        <div class="noti-head">
+          <strong>Centro de notificaciones</strong>
+          <span class="unread">3 nuevas</span>
+        </div>
+        <div class="noti-list">
+          <article class="noti-item nueva">
+            <span class="dot blue"></span>
+            <div>
+              <h4>Cambio de aula en sesión clínica</h4>
+              <p>La sesión del viernes pasa del Aula 3 al Aula 5 por disponibilidad del servicio.</p>
+            </div>
+            <span class="time">Hace 25 min</span>
+          </article>
+          <article class="noti-item nueva">
+            <span class="dot green"></span>
+            <div>
+              <h4>Nuevo recurso disponible: ECG básico</h4>
+              <p>Ya puedes revisar la guía interactiva de interpretación de ECG en Recursos Digitales.</p>
+            </div>
+            <span class="time">Hace 2 h</span>
+          </article>
+          <article class="noti-item nueva">
+            <span class="dot purple"></span>
+            <div>
+              <h4>Confirmación pendiente de informe</h4>
+              <p>Recuerda subir el informe de Medicina Interna antes de las 23:59 de hoy.</p>
+            </div>
+            <span class="time">Hoy</span>
+          </article>
+          <article class="noti-item">
+            <span class="dot orange"></span>
+            <div>
+              <h4>Taller práctico de suturas</h4>
+              <p>Inscripciones abiertas. Quedan 6 plazas para la sesión del miércoles.</p>
+            </div>
+            <span class="time">Ayer</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="comunidad">
+      <h2 class="section-title">Comunidad de Estudiantes</h2>
+      <div class="comunidad-grid">
+        <div>
+          <h3 style="margin-bottom:1rem">Discusiones Recientes</h3>
+          <article class="post-card">
+            <div class="avatar blue">M</div>
+            <div class="content">
+              <div class="author">María Rodríguez</div>
+              <div class="text">¿Alguien puede explicar la diferencia entre taquicardia sinusal y fibrilación auricular?</div>
+              <div class="meta">hace 2 horas · 👍 12 · 💬 5</div>
+            </div>
+          </article>
+          <article class="post-card verde">
+            <div class="avatar green">J</div>
+            <div class="content">
+              <div class="author">Juan Pérez</div>
+              <div class="text">Compartiendo mis apuntes de neuroanatomía. ¡Espero que os sirvan!</div>
+              <div class="meta">hace 4 horas · 👍 28 · 💬 15</div>
+            </div>
+          </article>
+        </div>
+        <div>
+          <h3 style="margin-bottom:1rem">Grupos de Estudio</h3>
+          <article class="grupo-card">
+            <div style="flex:1">
+              <h4>Anatomía Cardiovascular</h4>
+              <p>Grupo de estudio para el examen de anatomía del sistema cardiovascular.</p>
+              <div class="foot"><span class="miembros">15 miembros</span><button type="button" class="btn-join blue js-join-group">Unirse</button></div>
+            </div>
+          </article>
+          <article class="grupo-card verde">
+            <div style="flex:1">
+              <h4>Farmacología Básica</h4>
+              <p>Repaso de conceptos fundamentales de farmacología.</p>
+              <div class="foot"><span class="miembros">23 miembros</span><button type="button" class="btn-join green js-join-group">Unirse</button></div>
+            </div>
+          </article>
+          <article class="grupo-card purple">
+            <div style="flex:1">
+              <h4>Casos Clínicos</h4>
+              <p>Análisis y discusión de casos clínicos complejos.</p>
+              <div class="foot"><span class="miembros">8 miembros</span><button type="button" class="btn-join purple js-join-group">Unirse</button></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer-mini">
+      <p class="brand"><strong>Mediloop</strong> · Prácticas clínicas UJI</p>
+      <div class="acciones">
+        <a href="index.html">Ver landing</a>
+        <a href="index.html" id="cerrar-sesion-footer">Cerrar sesión</a>
+      </div>
+    </footer>
+    <div id="sys-indicator" class="sys-indicator warn" aria-live="polite"><span class="dot"></span><span id="sys-indicator-text">Conectando...</span></div>
+    <div id="app-status" class="app-status" aria-live="polite"></div>
+    <button type="button" id="scroll-top-btn" class="scroll-top-btn" aria-label="Volver arriba">↑</button>
+    <button type="button" class="help-fab" aria-label="Ayuda">?</button>
+    <script>
+      (function () {
+        var API_BASE = window.location.hostname === "localhost" ? "http://localhost:4000/api" : "/api";
+        var session;
+        try {
+          session = JSON.parse(localStorage.getItem("mediloop.session") || "null");
+        } catch (_err) {
+          session = null;
+        }
+
+        if (!session || !session.token || !session.user) {
+          window.location.href = "index.html";
+          return;
+        }
+        if (session.user.role !== "student") {
+          localStorage.removeItem("mediloop.session");
+          window.location.href = "index.html";
+          return;
+        }
+
+        function authHeaders() {
+          return {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + session.token
+          };
+        }
+
+        function logoutAndGo() {
+          localStorage.removeItem("mediloop.session");
+          window.location.href = "index.html";
+        }
+        var statusEl = document.getElementById("app-status");
+        var statusTimer;
+        function showStatus(type, text) {
+          if (!statusEl) return;
+          statusEl.className = "app-status " + type;
+          statusEl.textContent = text;
+          statusEl.classList.add("show");
+          clearTimeout(statusTimer);
+          statusTimer = setTimeout(function () {
+            statusEl.classList.remove("show");
+          }, 2200);
+        }
+        function goToSection(id) {
+          var target = document.getElementById(id);
+          if (!target) return;
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        function setupScrollSpy() {
+          var links = document.querySelectorAll(".side-nav a[data-spy]");
+          var sectionIds = Array.prototype.map.call(links, function (link) {
+            return link.getAttribute("data-spy");
+          });
+          var lastSectionKey = "mediloop.ui.alumnos.lastSection";
+          function markActive(id) {
+            links.forEach(function (link) {
+              link.classList.toggle("active", link.getAttribute("data-spy") === id);
+            });
+          }
+          function onScroll() {
+            var activeId = sectionIds[0] || "";
+            sectionIds.forEach(function (id) {
+              var el = document.getElementById(id);
+              if (!el) return;
+              var rect = el.getBoundingClientRect();
+              if (rect.top <= 180) activeId = id;
+            });
+            if (activeId) {
+              markActive(activeId);
+              localStorage.setItem(lastSectionKey, activeId);
+            }
+          }
+          var remembered = localStorage.getItem(lastSectionKey);
+          if (remembered && document.getElementById(remembered)) {
+            setTimeout(function () {
+              goToSection(remembered);
+            }, 120);
+          }
+          onScroll();
+          window.addEventListener("scroll", onScroll, { passive: true });
+        }
+        function setupCompactNav() {
+          var nav = document.querySelector(".side-nav");
+          var toggle = document.getElementById("side-nav-toggle");
+          if (!nav || !toggle) return;
+          var storageKey = "mediloop.ui.alumnos.sideNavCompact";
+          var isCompact = localStorage.getItem(storageKey) === "1";
+          nav.classList.toggle("compact", isCompact);
+          toggle.textContent = "☰";
+          var toggleTip = isCompact ? "Expandir barra lateral" : "Compactar barra lateral";
+          toggle.setAttribute("data-tip", toggleTip);
+          toggle.setAttribute("aria-label", toggleTip);
+          toggle.addEventListener("click", function () {
+            isCompact = !isCompact;
+            nav.classList.toggle("compact", isCompact);
+            toggle.textContent = "☰";
+            var nextTip = isCompact ? "Expandir barra lateral" : "Compactar barra lateral";
+            toggle.setAttribute("data-tip", nextTip);
+            toggle.setAttribute("aria-label", nextTip);
+            localStorage.setItem(storageKey, isCompact ? "1" : "0");
+          });
+        }
+        function setupUndoControls() {
+          var backBtn = document.getElementById("go-back-btn");
+          var resetSectionBtn = document.getElementById("reset-section-btn");
+          var undoBtn = document.getElementById("undo-prefs-btn");
+          if (backBtn) {
+            backBtn.addEventListener("click", function () {
+              if (window.history.length > 1) window.history.back();
+              else window.location.href = "index.html";
+            });
+          }
+          if (resetSectionBtn) {
+            resetSectionBtn.addEventListener("click", function () {
+              localStorage.removeItem("mediloop.ui.alumnos.lastSection");
+              window.scrollTo({ top: 0, behavior: "smooth" });
+              showStatus("success", "Se olvidó la última sección.");
+            });
+          }
+          if (undoBtn) {
+            undoBtn.addEventListener("click", function () {
+              localStorage.setItem("mediloop.ui.alumnos.sideNavCompact", "0");
+              localStorage.removeItem("mediloop.ui.alumnos.lastSection");
+              var nav = document.querySelector(".side-nav");
+              var toggle = document.getElementById("side-nav-toggle");
+              if (nav) nav.classList.remove("compact");
+              if (toggle) {
+                toggle.textContent = "☰";
+                toggle.setAttribute("data-tip", "Compactar barra lateral");
+                toggle.setAttribute("aria-label", "Compactar barra lateral");
+              }
+              window.scrollTo({ top: 0, behavior: "smooth" });
+              showStatus("success", "Preferencias restauradas.");
+            });
+          }
+        }
+        function setupScrollTop() {
+          var btn = document.getElementById("scroll-top-btn");
+          if (!btn) return;
+          function onScroll() {
+            if (window.scrollY > 260) btn.classList.add("show");
+            else btn.classList.remove("show");
+          }
+          btn.addEventListener("click", function () {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          });
+          onScroll();
+          window.addEventListener("scroll", onScroll, { passive: true });
+        }
+        function updateSystemIndicator() {
+          var indicator = document.getElementById("sys-indicator");
+          var text = document.getElementById("sys-indicator-text");
+          if (!indicator || !text) return;
+          if (!navigator.onLine) {
+            indicator.className = "sys-indicator err";
+            text.textContent = "Sin internet";
+            return;
+          }
+          fetch(API_BASE + "/health")
+            .then(function (res) {
+              if (!res.ok) throw new Error();
+              indicator.className = "sys-indicator ok";
+              text.textContent = "API conectada";
+            })
+            .catch(function () {
+              indicator.className = "sys-indicator warn";
+              text.textContent = "API no disponible";
+            });
+        }
+
+        var userNameEl = document.querySelector(".user-name");
+        if (userNameEl) userNameEl.textContent = session.user.name || "Alumno";
+
+        var logoutEls = document.querySelectorAll(".salir, #cerrar-sesion-footer");
+        logoutEls.forEach(function (el) {
+          el.addEventListener("click", function (event) {
+            event.preventDefault();
+            logoutAndGo();
+          });
+        });
+
+        Promise.all([
+          fetch(API_BASE + "/auth/me", { headers: authHeaders() }),
+          fetch(API_BASE + "/dashboard/student", { headers: authHeaders() }),
+          fetch(API_BASE + "/rotations", { headers: authHeaders() })
+        ])
+          .then(function (responses) {
+            responses.forEach(function (r) {
+              if (!r.ok) throw new Error("Sesión inválida o backend no disponible");
+            });
+            return Promise.all(responses.map(function (r) { return r.json(); }));
+          })
+          .then(function (data) {
+            var me = data[0];
+            var dashboard = data[1];
+            var rots = data[2];
+
+            if (userNameEl) userNameEl.textContent = me.name || session.user.name || "Alumno";
+
+            var summaryTitle = document.querySelector(".resumen-item .titulo");
+            var summaryDetail = document.querySelector(".resumen-item .detalle");
+            if (summaryTitle && dashboard.nextRotation) {
+              summaryTitle.textContent = "Rotación en curso: " + dashboard.nextRotation.service;
+            }
+            if (summaryDetail && dashboard.nextRotation) {
+              summaryDetail.textContent = dashboard.nextRotation.hospital + " · " + dashboard.nextRotation.startDate + " a " + dashboard.nextRotation.endDate;
+            }
+
+            var cardTitles = document.querySelectorAll(".rotacion-card h3");
+            var cardSubs = document.querySelectorAll(".rotacion-card .sub");
+            if (rots && rots.length > 0 && cardTitles[0] && cardSubs[0]) {
+              cardTitles[0].textContent = rots[0].service;
+              cardSubs[0].textContent = rots[0].hospital + " - " + rots[0].startDate + " / " + rots[0].endDate;
+            }
+            if (rots && rots.length > 1 && cardTitles[1] && cardSubs[1]) {
+              cardTitles[1].textContent = rots[1].service;
+              cardSubs[1].textContent = rots[1].hospital + " - " + rots[1].startDate + " / " + rots[1].endDate;
+            }
+          })
+          .catch(function () {
+            showStatus("error", "No se pudo cargar tu área. Inicia sesión de nuevo.");
+            logoutAndGo();
+          });
+
+        document.querySelectorAll(".js-demo-action, .js-demo-link").forEach(function (el) {
+          el.addEventListener("click", function (event) {
+            event.preventDefault();
+            showStatus("info", el.getAttribute("data-message") || "Funcionalidad disponible en la siguiente fase.");
+          });
+        });
+        document.querySelectorAll(".js-go").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var targetId = btn.getAttribute("data-target");
+            if (targetId) goToSection(targetId);
+            var msg = btn.getAttribute("data-message");
+            if (msg) showStatus("info", msg);
+          });
+        });
+
+        document.querySelectorAll(".js-join-group").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            btn.disabled = true;
+            btn.textContent = "Uniendo...";
+            btn.disabled = true;
+            setTimeout(function () {
+              btn.textContent = "Unido";
+              btn.style.opacity = "0.85";
+              showStatus("success", "Te has unido al grupo correctamente.");
+            }, 450);
+          });
+        });
+        window.addEventListener("online", updateSystemIndicator);
+        window.addEventListener("offline", updateSystemIndicator);
+        updateSystemIndicator();
+        setupScrollSpy();
+        setupCompactNav();
+        setupUndoControls();
+        setupScrollTop();
+        setInterval(updateSystemIndicator, 15000);
+      })();
+    </script>
+  </body>
+</html>
