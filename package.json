@@ -5,7 +5,7 @@
     "node": ">=22.5.0"
   },
   "scripts": {
-    "start": "node backend/src/server.js",
+    "start": "node --experimental-sqlite backend/src/server.js",
     "install": "cd backend && npm install"
   },
   "dependencies": {

@@ -8,6 +8,17 @@ const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "mediloop-secret-dev-2026";
 const JWT_EXPIRES = "7d";
 
+// ── Debug (temporal) ──────────────────────────────────────────────────────────
+router.get("/debug/db", (req, res) => {
+  try {
+    const users = db.prepare("SELECT COUNT(*) as n FROM users").get();
+    const sample = db.prepare("SELECT id, email, role FROM users LIMIT 4").all();
+    res.json({ userCount: users.n, users: sample, nodeVersion: process.version });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ── Utilidades ────────────────────────────────────────────────────────────────
 function newId(prefix) {
   return prefix + "-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
