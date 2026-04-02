@@ -539,8 +539,10 @@
             })
           })
             .then(function (res) {
-              if (!res.ok) throw new Error("Credenciales inválidas");
-              return res.json();
+              return res.json().then(function(d) {
+                if (!res.ok) throw new Error(d.message || "Credenciales inválidas");
+                return d;
+              });
             })
             .then(function (data) {
               localStorage.setItem("mediloop.session", JSON.stringify(data));
