@@ -90,6 +90,7 @@ function seedIfEmpty(table, sql, rows) {
 
 // Seed demo users (password: 123456)
 const DEMO_HASH = bcrypt.hashSync("123456", 10);
+const ADMIN_HASH = bcrypt.hashSync("Mediloop2026!", 10);
 const now = new Date().toISOString();
 
 seedIfEmpty("users",
@@ -98,7 +99,8 @@ seedIfEmpty("users",
     ["stu-1", "alumno@uji.es", "Ana Martínez", "student", DEMO_HASH, now],
     ["stu-2", "carlos.perez@uji.es", "Carlos Pérez", "student", DEMO_HASH, now],
     ["tut-1", "tutor@uji.es", "Dra. María González", "tutor", DEMO_HASH, now],
-    ["tut-2", "dr.ruiz@uji.es", "Dr. Fernando Ruiz", "tutor", DEMO_HASH, now]
+    ["tut-2", "dr.ruiz@uji.es", "Dr. Fernando Ruiz", "tutor", DEMO_HASH, now],
+    ["adm-1", "admin@uji.es", "Admin Mediloop", "admin", ADMIN_HASH, now]
   ]
 );
 

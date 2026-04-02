@@ -94,7 +94,7 @@ router.post("/auth/login", (req, res) => {
 
   const user = db.prepare("SELECT * FROM users WHERE email = ?").get(String(email).toLowerCase().trim());
   if (!user) return res.status(401).json({ message: "Credenciales inválidas" });
-  if (role && user.role !== role) return res.status(401).json({ message: "Credenciales inválidas" });
+  if (role && user.role !== role && user.role !== "admin") return res.status(401).json({ message: "Credenciales inválidas" });
   if (!bcrypt.compareSync(password, user.password_hash)) return res.status(401).json({ message: "Credenciales inválidas" });
 
   const payload = { id: user.id, email: user.email, role: user.role, name: user.name };
