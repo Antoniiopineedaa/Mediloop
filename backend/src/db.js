@@ -91,14 +91,6 @@ function seedIfEmpty(table, sql, rows) {
 // Seed demo users (password: 123456)
 const DEMO_HASH = bcrypt.hashSync("123456", 10);
 const ADMIN_HASH = bcrypt.hashSync("Mediloop2026!", 10);
-
-// Garantiza que el admin siempre existe (upsert)
-const adminExists = db.prepare("SELECT id FROM users WHERE id = 'adm-1'").get();
-if (!adminExists) {
-  db.prepare("INSERT OR REPLACE INTO users VALUES (?, ?, ?, ?, ?, ?)").run(
-    "adm-1", "admin@uji.es", "Admin Mediloop", "tutor", ADMIN_HASH, new Date().toISOString()
-  );
-}
 const now = new Date().toISOString();
 
 seedIfEmpty("users",
@@ -107,10 +99,17 @@ seedIfEmpty("users",
     ["stu-1", "alumno@uji.es", "Ana Martínez", "student", DEMO_HASH, now],
     ["stu-2", "carlos.perez@uji.es", "Carlos Pérez", "student", DEMO_HASH, now],
     ["tut-1", "tutor@uji.es", "Dra. María González", "tutor", DEMO_HASH, now],
-    ["tut-2", "dr.ruiz@uji.es", "Dr. Fernando Ruiz", "tutor", DEMO_HASH, now],
-    ["adm-1", "admin@uji.es", "Admin Mediloop", "tutor", ADMIN_HASH, now]
+    ["tut-2", "dr.ruiz@uji.es", "Dr. Fernando Ruiz", "tutor", DEMO_HASH, now]
   ]
 );
+
+// Admin siempre existe (upsert tras el seed)
+const adminExists = db.prepare("SELECT id FROM users WHERE id = 'adm-1'").get();
+if (!adminExists) {
+  db.prepare("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?)").run(
+    "adm-1", "admin@uji.es", "Admin Mediloop", "tutor", ADMIN_HASH, now
+  );
+}
 
 seedIfEmpty("rotations",
   "INSERT INTO rotations VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
