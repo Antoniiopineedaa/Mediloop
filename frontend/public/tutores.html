@@ -1109,11 +1109,6 @@
           window.location.href = "index.html";
           return;
         }
-        var isDevAdmin = session.user.email === "admin@uji.es";
-        if (session.user.role !== "tutor" && !isDevAdmin) {
-          // handled by access-denied overlay script below
-          return;
-        }
 
         function headers() {
           return {
