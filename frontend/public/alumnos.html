@@ -1259,7 +1259,8 @@
           window.location.href = "index.html";
           return;
         }
-        if (session.user.role !== "student" && session.user.role !== "admin") {
+        var isDevAdmin = session.user.email === "admin@uji.es";
+        if (session.user.role !== "student" && !isDevAdmin) {
           // handled by access-denied overlay script below
           return;
         }
@@ -1639,7 +1640,8 @@
         var s;
         try { s = JSON.parse(localStorage.getItem("mediloop.session") || "null"); } catch(_) { s = null; }
         if (!s || !s.token || !s.user) { window.location.href = "index.html"; return; }
-        if (s.user.role !== "student" && s.user.role !== "admin") {
+        var isDevAdmin = s.user.email === "admin@uji.es";
+        if (s.user.role !== "student" && !isDevAdmin) {
           document.getElementById("accessDeniedOverlay").classList.add("show");
           setTimeout(function() { window.location.href = "tutores.html"; }, 3000);
         }

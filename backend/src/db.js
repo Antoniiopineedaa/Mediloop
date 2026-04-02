@@ -95,8 +95,8 @@ const ADMIN_HASH = bcrypt.hashSync("Mediloop2026!", 10);
 // Garantiza que el admin siempre existe (upsert)
 const adminExists = db.prepare("SELECT id FROM users WHERE id = 'adm-1'").get();
 if (!adminExists) {
-  db.prepare("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?)").run(
-    "adm-1", "admin@uji.es", "Admin Mediloop", "admin", ADMIN_HASH, new Date().toISOString()
+  db.prepare("INSERT OR REPLACE INTO users VALUES (?, ?, ?, ?, ?, ?)").run(
+    "adm-1", "admin@uji.es", "Admin Mediloop", "tutor", ADMIN_HASH, new Date().toISOString()
   );
 }
 const now = new Date().toISOString();
@@ -108,7 +108,7 @@ seedIfEmpty("users",
     ["stu-2", "carlos.perez@uji.es", "Carlos Pérez", "student", DEMO_HASH, now],
     ["tut-1", "tutor@uji.es", "Dra. María González", "tutor", DEMO_HASH, now],
     ["tut-2", "dr.ruiz@uji.es", "Dr. Fernando Ruiz", "tutor", DEMO_HASH, now],
-    ["adm-1", "admin@uji.es", "Admin Mediloop", "admin", ADMIN_HASH, now]
+    ["adm-1", "admin@uji.es", "Admin Mediloop", "tutor", ADMIN_HASH, now]
   ]
 );
 
