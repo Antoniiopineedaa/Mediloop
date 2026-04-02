@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mediloop · Escanear QR</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: linear-gradient(135deg, #2563eb, #4f46e5);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        padding: 1.5rem 1rem;
+      }
+      .logo { font-weight: 700; font-size: 1.3rem; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+      .subtitle { font-size: 0.9rem; opacity: 0.85; margin-bottom: 1.5rem; text-align: center; }
+      .card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 1.5rem;
+        width: 100%;
+        max-width: 360px;
+        color: #111827;
+        box-shadow: 0 16px 40px rgba(15,23,42,0.35);
+      }
+      #reader {
+        width: 100%;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      #reader video { width: 100% !important; border-radius: 12px; }
+      .status {
+        margin-top: 1rem;
+        padding: 0.7rem 1rem;
+        border-radius: 10px;
+        font-size: 0.88rem;
+        font-weight: 500;
+        text-align: center;
+        display: none;
+      }
+      .status.info    { background: #eff6ff; color: #1d4ed8; display: block; }
+      .status.success { background: #f0fdf4; color: #16a34a; display: block; }
+      .status.error   { background: #fef2f2; color: #dc2626; display: block; }
+      .back-btn {
+        display: block;
+        margin-top: 1rem;
+        text-align: center;
+        color: #4f46e5;
+        font-size: 0.85rem;
+        text-decoration: none;
+        font-weight: 500;
+      }
+      .back-btn:hover { text-decoration: underline; }
+      .scan-hint { font-size: 0.82rem; color: #6b7280; text-align: center; margin-top: 0.75rem; }
+    </style>
+  </head>
+  <body>
+    <div class="logo">Mediloop</div>
+    <div class="subtitle">Apunta la cámara al código QR de tu área de prácticas</div>
+
+    <div class="card">
+      <div id="reader"></div>
+      <div class="scan-hint">Mantén el QR dentro del encuadre</div>
+      <div id="status" class="status info">Iniciando cámara...</div>
+      <a href="alumnos.html" class="back-btn">← Volver al área de alumnos</a>
+    </div>
+
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script>
+      (function () {
+        var API_BASE = window.location.hostname === "localhost" ? "http://localhost:4000/api" : "/api";
+        var session;
+        try { session = JSON.parse(localStorage.getItem("mediloop.session") || "null"); } catch (_) { session = null; }
+        if (!session || !session.token) { window.location.href = "index.html"; return; }
+        if (session.user.role !== "student") { window.location.href = "tutores.html"; return; }
+
+        var statusEl = document.getElementById("status");
+        var scanned = false;
+
+        function showStatus(type, text) {
+          statusEl.className = "status " + type;
+          statusEl.textContent = text;
+        }
+
+        var html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: { width: 220, height: 220 } },
+          function (decodedText) {
+            if (scanned) return;
+            scanned = true;
+            html5QrCode.stop().catch(function () {});
+            showStatus("info", "QR detectado. Registrando asistencia...");
+
+            fetch(API_BASE + "/attendance/qr-checkin", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + session.token
+              },
+              body: JSON.stringify({ token: decodedText })
+            })
+              .then(function (res) { return res.json().then(function (d) { return { ok: res.ok, data: d }; }); })
+              .then(function (result) {
+                if (!result.ok) {
+                  showStatus("error", result.data.message || "No se pudo registrar la asistencia.");
+                  setTimeout(function () { scanned = false; html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 220 }, arguments.callee).catch(function(){}); }, 2500);
+                  return;
+                }
+                showStatus("success", "✓ Asistencia registrada. El tutor la confirmará en breve.");
+                setTimeout(function () { window.location.href = "alumnos.html"; }, 2500);
+              })
+              .catch(function () {
+                showStatus("error", "Error de conexión. Inténtalo de nuevo.");
+                setTimeout(function () { scanned = false; }, 2500);
+              });
+          },
+          function () {}
+        ).then(function () {
+          showStatus("info", "Cámara lista. Escanea el QR de tu área.");
+        }).catch(function (err) {
+          showStatus("error", "No se pudo acceder a la cámara: " + (err.message || err));
+        });
+      })();
+    </script>
+  </body>
+</html>

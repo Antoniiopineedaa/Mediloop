@@ -854,7 +854,7 @@
         <a href="#comunidad">Comunidad</a>
       </nav>
       <div class="user-block">
-        <span class="user-avatar" aria-hidden="true">AM</span>
+        <span class="user-avatar" id="user-avatar" aria-hidden="true">?</span>
         <span class="user-name">Ana M.</span>
         <a href="index.html" class="landing-link">Landing</a>
         <a href="index.html" class="salir">Salir</a>
@@ -990,6 +990,7 @@
             <div class="row" style="justify-content:space-between"><span style="display:flex;align-items:center;gap:0.5rem"><span class="dot" style="background:var(--purple)"></span><span>Trabajo en Equipo</span></span><span class="nivel" style="color:var(--purple);font-weight:600">Avanzado</span></div>
             <div class="bar" style="margin-top:0.25rem"><span style="width:72%;background:var(--purple)"></span></div>
           </div>
+          <div id="mis-evaluaciones" style="margin-top:0.9rem"></div>
           <button type="button" class="btn-gradient js-go" data-target="novedades" style="margin-top:0.75rem;width:100%">Ver Evaluaciones Detalladas</button>
         </div>
         <div class="card">
@@ -1098,11 +1099,11 @@
       <div class="mapa-wrap">
         <div class="mapa-schema" style="position:relative">
           <div style="grid-column:1/-1;text-align:center;font-weight:700;font-size:0.8rem;color:#166534;background:#dcfce7;padding:0.4rem;border-radius:8px;margin-bottom:0.5rem">ENTRADA</div>
-          <div class="mapa-block red" style="grid-column:1;grid-row:2"><span class="qr">QR</span><div class="name">URGENCIAS</div><div class="desc">24 Horas</div></div>
-          <div class="mapa-block blue" style="grid-column:2;grid-row:2"><span class="qr">QR</span><div class="name">RECEPCIÓN</div><div class="desc">Información General</div></div>
-          <div class="mapa-block green" style="grid-column:3;grid-row:2"><span class="qr">QR</span><div class="name">LABORATORIO</div><div class="desc">Análisis Clínicos</div></div>
-          <div class="mapa-block orange" style="grid-column:1;grid-row:3"><span class="qr">QR</span><div class="name">RADIOLOGÍA</div><div class="desc">Rayos X - TAC</div></div>
-          <div class="mapa-block purple" style="grid-column:3;grid-row:3"><span class="qr">QR</span><div class="name">FARMACIA</div><div class="desc">Medicamentos</div></div>
+          <div class="mapa-block red js-qr-scan" data-area="Urgencias" style="grid-column:1;grid-row:2;cursor:pointer"><span class="qr">QR</span><div class="name">URGENCIAS</div><div class="desc">24 Horas</div></div>
+          <div class="mapa-block blue js-qr-scan" data-area="Recepción" style="grid-column:2;grid-row:2;cursor:pointer"><span class="qr">QR</span><div class="name">RECEPCIÓN</div><div class="desc">Información General</div></div>
+          <div class="mapa-block green js-qr-scan" data-area="Laboratorio" style="grid-column:3;grid-row:2;cursor:pointer"><span class="qr">QR</span><div class="name">LABORATORIO</div><div class="desc">Análisis Clínicos</div></div>
+          <div class="mapa-block orange js-qr-scan" data-area="Radiología" style="grid-column:1;grid-row:3;cursor:pointer"><span class="qr">QR</span><div class="name">RADIOLOGÍA</div><div class="desc">Rayos X - TAC</div></div>
+          <div class="mapa-block purple js-qr-scan" data-area="Farmacia" style="grid-column:3;grid-row:3;cursor:pointer"><span class="qr">QR</span><div class="name">FARMACIA</div><div class="desc">Medicamentos</div></div>
         </div>
         <div class="leyenda">
           <span><span class="cuadro" style="background:#fecaca"></span> Urgencias/Quirófanos</span>
@@ -1172,22 +1173,11 @@
       <div class="comunidad-grid">
         <div>
           <h3 style="margin-bottom:1rem">Discusiones Recientes</h3>
-          <article class="post-card">
-            <div class="avatar blue">M</div>
-            <div class="content">
-              <div class="author">María Rodríguez</div>
-              <div class="text">¿Alguien puede explicar la diferencia entre taquicardia sinusal y fibrilación auricular?</div>
-              <div class="meta">hace 2 horas · 👍 12 · 💬 5</div>
-            </div>
-          </article>
-          <article class="post-card verde">
-            <div class="avatar green">J</div>
-            <div class="content">
-              <div class="author">Juan Pérez</div>
-              <div class="text">Compartiendo mis apuntes de neuroanatomía. ¡Espero que os sirvan!</div>
-              <div class="meta">hace 4 horas · 👍 28 · 💬 15</div>
-            </div>
-          </article>
+          <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:0.85rem;margin-bottom:1rem">
+            <textarea id="student-post-text" style="width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:0.6rem 0.75rem;font-size:0.88rem;resize:vertical;min-height:60px;font-family:inherit" placeholder="Comparte algo con la comunidad de estudiantes..."></textarea>
+            <button type="button" id="publish-student-post" style="margin-top:0.5rem;border:none;border-radius:8px;background:linear-gradient(90deg,#2563eb,#4f46e5);color:#fff;padding:0.55rem 1.1rem;font-size:0.88rem;font-weight:600;cursor:pointer">Publicar</button>
+          </div>
+          <div id="student-posts-list"></div>
         </div>
         <div>
           <h3 style="margin-bottom:1rem">Grupos de Estudio</h3>
@@ -1455,6 +1445,8 @@
           el.addEventListener("click", function (event) {
             event.preventDefault();
             showStatus("info", el.getAttribute("data-message") || "Funcionalidad disponible en la siguiente fase.");
+            var href = el.getAttribute("href") || "";
+            if (href.startsWith("#")) goToSection(href.slice(1));
           });
         });
         document.querySelectorAll(".js-go").forEach(function (btn) {
@@ -1467,17 +1459,130 @@
         });
 
         document.querySelectorAll(".js-join-group").forEach(function (btn) {
+          var titleEl = btn.closest("article") && btn.closest("article").querySelector("h4");
+          var storageKey = "mediloop.grupo." + (titleEl ? titleEl.textContent.trim() : btn.className);
+          if (localStorage.getItem(storageKey) === "1") {
+            btn.textContent = "Unido ✓";
+            btn.disabled = true;
+            btn.style.opacity = "0.85";
+          }
           btn.addEventListener("click", function () {
             btn.disabled = true;
             btn.textContent = "Uniendo...";
-            btn.disabled = true;
             setTimeout(function () {
-              btn.textContent = "Unido";
+              btn.textContent = "Unido ✓";
               btn.style.opacity = "0.85";
+              localStorage.setItem(storageKey, "1");
               showStatus("success", "Te has unido al grupo correctamente.");
             }, 450);
           });
         });
+        // Avatar dinámico
+        var avatarEl = document.getElementById("user-avatar");
+        if (avatarEl && session.user.name) {
+          avatarEl.textContent = session.user.name.charAt(0).toUpperCase();
+        }
+
+        // Comunidad de estudiantes
+        function renderStudentPost(post) {
+          var colors = ["blue","green","purple"];
+          var color = colors[post.author.charCodeAt(0) % colors.length];
+          var article = document.createElement("article");
+          article.className = "post-card" + (color === "green" ? " verde" : "");
+          article.innerHTML = '<div class="avatar ' + color + '">' + post.author.charAt(0).toUpperCase() + '</div>' +
+            '<div class="content"><div class="author">' + post.author + '</div>' +
+            '<div class="text">' + post.text.replace(/</g,"&lt;") + '</div>' +
+            '<div class="meta">' + post.ago + ' · <button type="button" class="btn-like-post" data-like-id="' + post.id + '" style="background:none;border:none;cursor:pointer;font-size:0.85rem;color:#6b7280;padding:0">👍 ' + post.likes + '</button></div></div>';
+          return article;
+        }
+
+        function loadStudentPosts() {
+          var list = document.getElementById("student-posts-list");
+          if (!list) return;
+          fetch(API_BASE + "/community/student-posts", { headers: authHeaders() })
+            .then(function(r) { return r.json(); })
+            .then(function(posts) {
+              list.innerHTML = "";
+              if (!posts.length) {
+                list.innerHTML = '<p style="color:#6b7280;font-size:0.88rem">Sé el primero en publicar.</p>';
+                return;
+              }
+              posts.forEach(function(p) { list.appendChild(renderStudentPost(p)); });
+            })
+            .catch(function() {});
+        }
+
+        var publishBtn = document.getElementById("publish-student-post");
+        if (publishBtn) {
+          publishBtn.addEventListener("click", function() {
+            var textarea = document.getElementById("student-post-text");
+            var text = textarea ? textarea.value.trim() : "";
+            if (!text) return;
+            publishBtn.disabled = true;
+            publishBtn.textContent = "Publicando...";
+            fetch(API_BASE + "/community/student-posts", {
+              method: "POST",
+              headers: authHeaders(),
+              body: JSON.stringify({ text: text })
+            })
+              .then(function(r) { return r.json(); })
+              .then(function() {
+                if (textarea) textarea.value = "";
+                loadStudentPosts();
+                showStatus("success", "Post publicado.");
+              })
+              .catch(function() { showStatus("error", "No se pudo publicar."); })
+              .finally(function() {
+                publishBtn.disabled = false;
+                publishBtn.textContent = "Publicar";
+              });
+          });
+        }
+        loadStudentPosts();
+
+        var studentPostsList = document.getElementById("student-posts-list");
+        if (studentPostsList) {
+          studentPostsList.addEventListener("click", function (e) {
+            var btn = e.target.closest(".btn-like-post");
+            if (!btn) return;
+            var id = btn.getAttribute("data-like-id");
+            btn.disabled = true;
+            fetch(API_BASE + "/community/student-posts/" + id + "/like", { method: "POST", headers: authHeaders() })
+              .then(function (r) { return r.json(); })
+              .then(function (data) { btn.textContent = "👍 " + data.likes; })
+              .catch(function () {})
+              .finally(function () { btn.disabled = false; });
+          });
+        }
+
+        // QR check-in → abre escáner de cámara
+        document.querySelectorAll(".js-qr-scan").forEach(function(block) {
+          block.addEventListener("click", function() {
+            window.location.href = "qr-scan.html";
+          });
+        });
+
+        // Evaluaciones recibidas
+        function loadEvaluaciones() {
+          var container = document.getElementById("mis-evaluaciones");
+          if (!container) return;
+          fetch(API_BASE + "/evaluations", { headers: authHeaders() })
+            .then(function(r) { return r.json(); })
+            .then(function(evals) {
+              if (!evals.length) return;
+              var html = '<div style="border-top:1px solid #e5e7eb;padding-top:0.75rem;margin-top:0.5rem"><strong style="font-size:0.88rem;color:#374151">Evaluaciones recibidas</strong>';
+              evals.slice(0, 3).forEach(function(e) {
+                html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid #f3f4f6;font-size:0.85rem">' +
+                  '<span>' + e.rotation + '</span>' +
+                  '<span style="font-weight:700;color:#2563eb">' + e.total + '/5</span></div>';
+              });
+              html += '</div>';
+              container.innerHTML = html;
+            })
+            .catch(function() {});
+        }
+        loadEvaluaciones();
+
         window.addEventListener("online", updateSystemIndicator);
         window.addEventListener("offline", updateSystemIndicator);
         updateSystemIndicator();

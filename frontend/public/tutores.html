@@ -758,6 +758,31 @@
         nav { gap: 0.75rem; }
         .gam-grid, .network-grid, .panel-grid, .form-grid, .kpi-row { grid-template-columns: 1fr; }
       }
+      .rot-input {
+        width: 100%;
+        padding: 0.6rem 0.8rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 0.88rem;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .rot-input:focus { border-color: #4f46e5; }
+      .rot-card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        padding: 1.1rem;
+      }
+      .rot-card h4 { margin: 0 0 0.4rem; font-size: 0.95rem; }
+      .rot-card .rot-meta { font-size: 0.8rem; color: #6b7280; margin-bottom: 0.75rem; }
+      .rot-card .rot-qr { text-align: center; margin: 0.75rem 0; }
+      .rot-card .rot-qr img { width: 140px; height: 140px; border-radius: 8px; border: 1px solid #e5e7eb; }
+      .rot-enroll { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+      .rot-enroll input { flex: 1; padding: 0.45rem 0.7rem; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 0.82rem; outline: none; }
+      .rot-enroll button { border: none; border-radius: 8px; background: #4f46e5; color: #fff; font-size: 0.82rem; padding: 0.45rem 0.85rem; cursor: pointer; white-space: nowrap; }
+      .rot-students { font-size: 0.82rem; color: #374151; margin-top: 0.5rem; }
+      .rot-students span { display: inline-block; background: #eff6ff; color: #1d4ed8; border-radius: 6px; padding: 0.2rem 0.5rem; margin: 0.15rem 0.15rem 0 0; }
       @media (max-width: 1200px) {
         .side-nav { display: none; }
         .pref-actions { display: none; }
@@ -816,6 +841,23 @@
       <h1>Revoluciona la Educación Médica</h1>
       <p>Plataforma integral para tutores y médicos clínicos con verificación digital, evaluación avanzada y networking profesional</p>
       <a href="#verificacion" class="btn-primary">Comenzar Ahora</a>
+    </section>
+
+    <section class="section" id="rotaciones">
+      <h2>Mis Rotaciones</h2>
+      <div id="rotaciones-list" style="display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))"></div>
+      <div class="card" style="margin-top:1.25rem;padding:1.25rem;max-width:560px">
+        <h4 style="margin:0 0 1rem;font-size:1rem">➕ Crear nueva rotación</h4>
+        <div style="display:grid;gap:0.6rem">
+          <input id="rot-hospital" class="rot-input" type="text" placeholder="Hospital / Centro de salud" />
+          <input id="rot-service"  class="rot-input" type="text" placeholder="Servicio (ej: Medicina Interna)" />
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem">
+            <input id="rot-start" class="rot-input" type="date" />
+            <input id="rot-end"   class="rot-input" type="date" />
+          </div>
+          <button id="create-rot-btn" class="btn-primary" type="button" style="font-size:0.88rem;padding:0.65rem 1rem">Crear rotación</button>
+        </div>
+      </div>
     </section>
 
     <section class="section" id="verificacion">
@@ -1431,14 +1473,140 @@
         }
         var uploadVideoBtn = document.getElementById("upload-video");
         if (uploadVideoBtn) {
-          uploadVideoBtn.addEventListener("click", function () {
-            showStatus("info", "Subida de video disponible en la siguiente fase.");
+          var fileInput = document.createElement("input");
+          fileInput.type = "file";
+          fileInput.accept = "video/*";
+          fileInput.style.display = "none";
+          document.body.appendChild(fileInput);
+          fileInput.addEventListener("change", function () {
+            var file = fileInput.files[0];
+            if (file) showStatus("success", "Video seleccionado: " + file.name + " (" + (file.size / 1024 / 1024).toFixed(1) + " MB)");
+            fileInput.value = "";
+          });
+          uploadVideoBtn.addEventListener("click", function () { fileInput.click(); });
+        }
+
+        var goalStorageKey = "mediloop.tutor.goals";
+        var goalList = document.querySelector(".goal-list");
+        if (goalList) {
+          var savedGoals = {};
+          try { savedGoals = JSON.parse(localStorage.getItem(goalStorageKey) || "{}"); } catch (_) {}
+          goalList.querySelectorAll("li").forEach(function (li, idx) {
+            if (savedGoals[idx]) li.style.textDecoration = "line-through";
+            li.style.cursor = "pointer";
+            li.addEventListener("click", function () {
+              var done = li.style.textDecoration === "line-through";
+              li.style.textDecoration = done ? "" : "line-through";
+              savedGoals[idx] = !done;
+              localStorage.setItem(goalStorageKey, JSON.stringify(savedGoals));
+            });
           });
         }
         var updateGoalsBtn = document.getElementById("update-goals");
         if (updateGoalsBtn) {
           updateGoalsBtn.addEventListener("click", function () {
-            showStatus("success", "Objetivos actualizados correctamente.");
+            localStorage.setItem(goalStorageKey + ".ts", new Date().toLocaleString("es-ES"));
+            showStatus("success", "Objetivos guardados · " + new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }));
+          });
+        }
+
+        // ── Rotaciones ──────────────────────────────────────────────────────
+        function loadRotaciones() {
+          var wrap = document.getElementById("rotaciones-list");
+          if (!wrap) return Promise.resolve();
+          return fetch(API_BASE + "/rotations", { headers: headers() })
+            .then(function (r) { return r.json(); })
+            .then(function (rotations) {
+              if (!rotations.length) {
+                wrap.innerHTML = '<p style="color:#6b7280;font-size:0.88rem">No tienes rotaciones asignadas. Crea una nueva.</p>';
+                return;
+              }
+              wrap.innerHTML = "";
+              rotations.forEach(function (rot) {
+                var card = document.createElement("div");
+                card.className = "rot-card";
+                var statusColor = rot.status === "en curso" ? "#16a34a" : rot.status === "planificada" ? "#2563eb" : "#6b7280";
+                card.innerHTML =
+                  '<h4>' + rot.service + '</h4>' +
+                  '<div class="rot-meta">' + rot.hospital + ' · <span style="color:' + statusColor + ';font-weight:600">' + rot.status + '</span></div>' +
+                  '<div class="rot-meta">' + rot.start_date + ' → ' + rot.end_date + '</div>' +
+                  '<div class="rot-qr"><img src="' + API_BASE + '/qr-image/' + rot.qr_token + '" alt="QR ' + rot.service + '" title="QR para que los alumnos escaneen" /></div>' +
+                  '<div id="students-' + rot.id + '" class="rot-students">Cargando alumnos...</div>' +
+                  '<div class="rot-enroll">' +
+                    '<input type="email" placeholder="alumno@uji.es" id="enroll-input-' + rot.id + '" />' +
+                    '<button type="button" data-rot-id="' + rot.id + '" class="enroll-btn">Añadir</button>' +
+                  '</div>';
+                wrap.appendChild(card);
+
+                // Cargar alumnos de esta rotación
+                fetch(API_BASE + "/rotations/" + rot.id + "/students", { headers: headers() })
+                  .then(function (r) { return r.json(); })
+                  .then(function (students) {
+                    var el = document.getElementById("students-" + rot.id);
+                    if (!el) return;
+                    if (!students.length) { el.innerHTML = '<em style="color:#9ca3af">Sin alumnos aún</em>'; return; }
+                    el.innerHTML = students.map(function (s) { return '<span>' + s.name + '</span>'; }).join("");
+                  })
+                  .catch(function () {});
+              });
+
+              // Evento para botones de añadir alumno
+              wrap.querySelectorAll(".enroll-btn").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                  var rotId = btn.getAttribute("data-rot-id");
+                  var input = document.getElementById("enroll-input-" + rotId);
+                  var email = input ? input.value.trim() : "";
+                  if (!email) return;
+                  btn.disabled = true;
+                  fetch(API_BASE + "/rotations/" + rotId + "/enroll", {
+                    method: "POST",
+                    headers: headers(),
+                    body: JSON.stringify({ studentEmail: email })
+                  })
+                    .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+                    .then(function (result) {
+                      if (!result.ok) { showStatus("error", result.data.message || "No se pudo añadir al alumno."); return; }
+                      showStatus("success", result.data.student.name + " añadido a la rotación.");
+                      if (input) input.value = "";
+                      loadRotaciones();
+                    })
+                    .catch(function () { showStatus("error", "Error al añadir alumno."); })
+                    .finally(function () { btn.disabled = false; });
+                });
+              });
+            })
+            .catch(function () {});
+        }
+
+        var createRotBtn = document.getElementById("create-rot-btn");
+        if (createRotBtn) {
+          createRotBtn.addEventListener("click", function () {
+            var hospital = document.getElementById("rot-hospital").value.trim();
+            var service  = document.getElementById("rot-service").value.trim();
+            var startDate = document.getElementById("rot-start").value;
+            var endDate   = document.getElementById("rot-end").value;
+            if (!hospital || !service || !startDate || !endDate) {
+              showStatus("error", "Completa todos los campos de la rotación.");
+              return;
+            }
+            setButtonLoading(createRotBtn, "Creando...", true);
+            fetch(API_BASE + "/rotations", {
+              method: "POST",
+              headers: headers(),
+              body: JSON.stringify({ hospital: hospital, service: service, startDate: startDate, endDate: endDate })
+            })
+              .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+              .then(function (result) {
+                if (!result.ok) { showStatus("error", result.data.message || "Error al crear rotación."); return; }
+                showStatus("success", "Rotación creada: " + result.data.service);
+                document.getElementById("rot-hospital").value = "";
+                document.getElementById("rot-service").value = "";
+                document.getElementById("rot-start").value = "";
+                document.getElementById("rot-end").value = "";
+                loadRotaciones();
+              })
+              .catch(function () { showStatus("error", "Error al crear rotación."); })
+              .finally(function () { setButtonLoading(createRotBtn, "Crear rotación", false); });
           });
         }
 
@@ -1452,11 +1620,28 @@
                 return '<div class="post ' + (idx % 2 ? "green" : "") + '">' +
                   "<strong>" + post.author + "</strong>" +
                   '<div class="small">' + post.text + "</div>" +
-                  '<div class="meta">👍 ' + post.likes + " · 💬 " + post.comments + " · " + post.ago + "</div>" +
+                  '<div class="meta"><button type="button" class="btn-like-post" data-like-id="' + post.id + '" style="background:none;border:none;cursor:pointer;font-size:0.85rem;color:#6b7280;padding:0">👍 ' + post.likes + "</button> · 💬 " + post.comments + " · " + post.ago + "</div>" +
                 "</div>";
               }).join("");
             });
         }
+
+        var tutorPostsWrap = document.getElementById("tutor-posts");
+        if (tutorPostsWrap) {
+          tutorPostsWrap.addEventListener("click", function (e) {
+            var btn = e.target.closest(".btn-like-post");
+            if (!btn) return;
+            var id = btn.getAttribute("data-like-id");
+            btn.disabled = true;
+            fetch(API_BASE + "/community/tutor-posts/" + id + "/like", { method: "POST", headers: headers() })
+              .then(function (r) { return r.json(); })
+              .then(function (data) { btn.textContent = "👍 " + data.likes; })
+              .catch(function () {})
+              .finally(function () { btn.disabled = false; });
+          });
+        }
+
+        loadRotaciones();
 
         Promise.all([
           fetch(API_BASE + "/auth/me", { headers: headers() }),
