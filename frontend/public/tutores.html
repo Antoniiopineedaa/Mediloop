@@ -1662,8 +1662,7 @@
             document.getElementById("stat-rank").textContent = dashboard.stats.globalRank;
           })
           .catch(function () {
-            showStatus("error", "No se pudo cargar tu área. Inicia sesión de nuevo.");
-            logout();
+            showStatus("error", "Error al cargar datos. Comprueba tu conexión.");
           });
         window.addEventListener("online", updateSystemIndicator);
         window.addEventListener("offline", updateSystemIndicator);
