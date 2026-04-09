@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mediloop · Panel Administrador</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      :root {
+        --blue: #2563eb;
+        --indigo: #4f46e5;
+        --green: #059669;
+        --red: #dc2626;
+        --purple: #7c3aed;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --gray-900: #111827;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--gray-50);
+        color: var(--gray-900);
+      }
+      .header {
+        background: linear-gradient(135deg, #1e1b4b, #4f46e5);
+        padding: 1rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .header .logo-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+      }
+      .header .logo-mark { width: 34px; height: 34px; flex-shrink: 0; }
+      .header .logo-mark svg { width: 100%; height: 100%; display: block; }
+      .header .logo-text { color: #fff; font-weight: 700; font-size: 1.05rem; }
+      .header .badge-admin {
+        background: rgba(255,255,255,0.15);
+        color: rgba(255,255,255,0.9);
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        letter-spacing: 0.04em;
+        margin-left: 0.5rem;
+      }
+      .header .user-block {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .header .user-name { color: rgba(255,255,255,0.9); font-size: 0.88rem; }
+      .header .salir {
+        color: rgba(255,255,255,0.9);
+        text-decoration: none;
+        font-size: 0.85rem;
+        padding: 0.4rem 0.75rem;
+        border: 1px solid rgba(255,255,255,0.4);
+        border-radius: 8px;
+      }
+      .header .salir:hover { background: rgba(255,255,255,0.12); color: #fff; }
+      .main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 2.5rem 1.5rem;
+      }
+      .page-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin: 0 0 0.25rem;
+      }
+      .page-sub {
+        color: var(--gray-600);
+        font-size: 0.9rem;
+        margin: 0 0 2rem;
+      }
+      /* Stats cards */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2.5rem;
+      }
+      .stat-card {
+        background: #fff;
+        border-radius: 14px;
+        padding: 1.25rem 1.25rem 1rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+      }
+      .stat-card .label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--gray-600);
+      }
+      .stat-card .value {
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1;
+      }
+      .stat-card .icon {
+        font-size: 1.4rem;
+        margin-bottom: 0.25rem;
+      }
+      .stat-card.blue .value { color: var(--blue); }
+      .stat-card.green .value { color: var(--green); }
+      .stat-card.purple .value { color: var(--purple); }
+      .stat-card.indigo .value { color: var(--indigo); }
+      .stat-card.red .value { color: var(--red); }
+      .stat-card.teal .value { color: #0d9488; }
+      /* Table section */
+      .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+      .section-header h2 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+      }
+      .search-wrap {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+      .search-wrap input {
+        padding: 0.5rem 0.85rem;
+        border: 1px solid var(--gray-200);
+        border-radius: 10px;
+        font-size: 0.88rem;
+        outline: none;
+        background: #fff;
+        width: 220px;
+      }
+      .search-wrap input:focus { border-color: var(--blue); }
+      .filter-select {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--gray-200);
+        border-radius: 10px;
+        font-size: 0.88rem;
+        background: #fff;
+        outline: none;
+        cursor: pointer;
+      }
+      .table-wrap {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        overflow: hidden;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      thead th {
+        background: var(--gray-50);
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--gray-600);
+        border-bottom: 1px solid var(--gray-200);
+      }
+      tbody td {
+        padding: 0.85rem 1rem;
+        font-size: 0.88rem;
+        border-bottom: 1px solid var(--gray-100);
+        vertical-align: middle;
+      }
+      tbody tr:last-child td { border-bottom: none; }
+      tbody tr:hover { background: var(--gray-50); }
+      .role-badge {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+      .role-badge.student { background: #dbeafe; color: var(--blue); }
+      .role-badge.tutor   { background: #d1fae5; color: var(--green); }
+      .btn-delete {
+        padding: 0.35rem 0.7rem;
+        border: none;
+        border-radius: 8px;
+        background: #fef2f2;
+        color: var(--red);
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .btn-delete:hover { background: #fee2e2; }
+      .empty-row td {
+        text-align: center;
+        color: var(--gray-600);
+        padding: 2.5rem;
+        font-size: 0.9rem;
+      }
+      /* Confirm modal */
+      #confirm-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15,23,42,0.55);
+        z-index: 300;
+        align-items: center;
+        justify-content: center;
+      }
+      #confirm-overlay.open { display: flex; }
+      .confirm-box {
+        background: #fff;
+        border-radius: 16px;
+        padding: 1.75rem;
+        max-width: 360px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(15,23,42,0.3);
+      }
+      .confirm-box h3 { margin: 0 0 0.5rem; font-size: 1rem; }
+      .confirm-box p  { margin: 0 0 1.25rem; font-size: 0.88rem; color: var(--gray-600); }
+      .confirm-actions { display: flex; gap: 0.75rem; justify-content: flex-end; }
+      .btn-cancel {
+        padding: 0.55rem 1.1rem;
+        border: 1px solid var(--gray-200);
+        border-radius: 10px;
+        background: #fff;
+        font-size: 0.88rem;
+        cursor: pointer;
+        font-weight: 500;
+      }
+      .btn-confirm-del {
+        padding: 0.55rem 1.1rem;
+        border: none;
+        border-radius: 10px;
+        background: var(--red);
+        color: #fff;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      /* Toast */
+      #toast {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        padding: 0.75rem 1.25rem;
+        border-radius: 12px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        z-index: 400;
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+      }
+      #toast.show { opacity: 1; }
+      #toast.ok  { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+      #toast.err { background: #fef2f2; color: var(--red); border: 1px solid #fecaca; }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <a href="index.html" class="logo-link">
+        <div class="logo-mark">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs><filter id="lb"><feGaussianBlur stdDeviation="1.5"/></filter></defs>
+            <rect x="18" y="6" width="16" height="16" rx="4" fill="#c2cfff" opacity="0.95"/>
+            <rect x="12" y="12" width="16" height="16" rx="4" fill="#8a9eff" opacity="0.95"/>
+            <rect x="6" y="18" width="16" height="16" rx="4" fill="#4f46e5" filter="url(#lb)"/>
+          </svg>
+        </div>
+        <span class="logo-text">Mediloop</span>
+        <span class="badge-admin">ADMIN</span>
+      </a>
+      <div class="user-block">
+        <span class="user-name" id="admin-name">Admin Mediloop</span>
+        <a href="index.html" class="salir">Salir</a>
+      </div>
+    </header>
+
+    <main class="main">
+      <h1 class="page-title">Panel de administrador</h1>
+      <p class="page-sub">Gestión global de usuarios, rotaciones y estadísticas del sistema.</p>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="icon">👥</div>
+          <div class="label">Total usuarios</div>
+          <div class="value" id="stat-users">—</div>
+        </div>
+        <div class="stat-card green">
+          <div class="icon">🎓</div>
+          <div class="label">Alumnos</div>
+          <div class="value" id="stat-students">—</div>
+        </div>
+        <div class="stat-card purple">
+          <div class="icon">🩺</div>
+          <div class="label">Tutores</div>
+          <div class="value" id="stat-tutors">—</div>
+        </div>
+        <div class="stat-card indigo">
+          <div class="icon">🔄</div>
+          <div class="label">Rotaciones</div>
+          <div class="value" id="stat-rotations">—</div>
+        </div>
+        <div class="stat-card teal">
+          <div class="icon">✅</div>
+          <div class="label">Asistencias</div>
+          <div class="value" id="stat-attendance">—</div>
+        </div>
+        <div class="stat-card red">
+          <div class="icon">📋</div>
+          <div class="label">Evaluaciones</div>
+          <div class="value" id="stat-evals">—</div>
+        </div>
+      </div>
+
+      <!-- Users table -->
+      <div class="section-header">
+        <h2>Usuarios registrados</h2>
+        <div class="search-wrap">
+          <input type="text" id="search-input" placeholder="Buscar por nombre o email…" />
+          <select class="filter-select" id="role-filter">
+            <option value="">Todos los roles</option>
+            <option value="student">Alumnos</option>
+            <option value="tutor">Tutores</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Registrado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <tr class="empty-row"><td colspan="5">Cargando…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+
+    <!-- Confirm delete modal -->
+    <div id="confirm-overlay">
+      <div class="confirm-box">
+        <h3>Eliminar usuario</h3>
+        <p id="confirm-text">¿Seguro que quieres eliminar este usuario? Esta acción no se puede deshacer.</p>
+        <div class="confirm-actions">
+          <button class="btn-cancel" id="confirm-cancel">Cancelar</button>
+          <button class="btn-confirm-del" id="confirm-ok">Eliminar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast"></div>
+
+    <script>
+      (function () {
+        var API_BASE = window.location.hostname === "localhost" ? "http://localhost:4000/api" : "/api";
+
+        function getSession() {
+          try { return JSON.parse(localStorage.getItem("mediloop.session") || "{}"); } catch(_) { return {}; }
+        }
+        function getToken() { return getSession().token || ""; }
+        function authHdr() { return { "Content-Type": "application/json", "Authorization": "Bearer " + getToken() }; }
+
+        // Guard: redirect if not admin
+        var sess = getSession();
+        if (!sess.token || !sess.user || sess.user.role !== "admin") {
+          window.location.href = "index.html";
+          return;
+        }
+        document.getElementById("admin-name").textContent = sess.user.name || "Admin";
+
+        // Toast
+        function showToast(type, text) {
+          var el = document.getElementById("toast");
+          el.textContent = text;
+          el.className = "show " + type;
+          clearTimeout(el._t);
+          el._t = setTimeout(function() { el.className = ""; }, 3000);
+        }
+
+        // Load stats
+        fetch(API_BASE + "/admin/stats", { headers: authHdr() })
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            document.getElementById("stat-users").textContent      = d.users;
+            document.getElementById("stat-students").textContent   = d.students;
+            document.getElementById("stat-tutors").textContent     = d.tutors;
+            document.getElementById("stat-rotations").textContent  = d.rotations;
+            document.getElementById("stat-attendance").textContent = d.attendance;
+            document.getElementById("stat-evals").textContent      = d.evals;
+          })
+          .catch(function() { showToast("err", "Error al cargar estadísticas."); });
+
+        // Users list
+        var allUsers = [];
+
+        function formatDate(iso) {
+          if (!iso) return "—";
+          var d = new Date(iso);
+          return d.toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric" });
+        }
+
+        function renderTable(users) {
+          var tbody = document.getElementById("users-tbody");
+          if (!users.length) {
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Sin resultados.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = users.map(function(u) {
+            var roleLabel = u.role === "student" ? "Alumno" : u.role === "tutor" ? "Tutor" : u.role;
+            return '<tr>' +
+              '<td style="font-weight:500">' + escHtml(u.name) + '</td>' +
+              '<td style="color:var(--gray-600)">' + escHtml(u.email) + '</td>' +
+              '<td><span class="role-badge ' + u.role + '">' + roleLabel + '</span></td>' +
+              '<td style="color:var(--gray-600)">' + formatDate(u.created_at) + '</td>' +
+              '<td><button class="btn-delete" data-id="' + u.id + '" data-name="' + escAttr(u.name) + '">Eliminar</button></td>' +
+              '</tr>';
+          }).join("");
+        }
+
+        function escHtml(s) {
+          return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+        }
+        function escAttr(s) {
+          return String(s).replace(/"/g,"&quot;");
+        }
+
+        function applyFilters() {
+          var q = document.getElementById("search-input").value.trim().toLowerCase();
+          var role = document.getElementById("role-filter").value;
+          var filtered = allUsers.filter(function(u) {
+            var matchQ = !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
+            var matchRole = !role || u.role === role;
+            return matchQ && matchRole;
+          });
+          renderTable(filtered);
+        }
+
+        function loadUsers() {
+          fetch(API_BASE + "/admin/users", { headers: authHdr() })
+            .then(function(r) { return r.json(); })
+            .then(function(users) {
+              allUsers = users;
+              applyFilters();
+            })
+            .catch(function() { showToast("err", "Error al cargar usuarios."); });
+        }
+
+        loadUsers();
+
+        document.getElementById("search-input").addEventListener("input", applyFilters);
+        document.getElementById("role-filter").addEventListener("change", applyFilters);
+
+        // Delete
+        var pendingDeleteId = null;
+        var confirmOverlay = document.getElementById("confirm-overlay");
+
+        document.getElementById("users-tbody").addEventListener("click", function(e) {
+          var btn = e.target.closest(".btn-delete");
+          if (!btn) return;
+          pendingDeleteId = btn.dataset.id;
+          document.getElementById("confirm-text").textContent =
+            '¿Seguro que quieres eliminar a "' + btn.dataset.name + '"? Esta acción no se puede deshacer.';
+          confirmOverlay.classList.add("open");
+        });
+
+        document.getElementById("confirm-cancel").addEventListener("click", function() {
+          confirmOverlay.classList.remove("open");
+          pendingDeleteId = null;
+        });
+        confirmOverlay.addEventListener("click", function(e) {
+          if (e.target === confirmOverlay) { confirmOverlay.classList.remove("open"); pendingDeleteId = null; }
+        });
+
+        document.getElementById("confirm-ok").addEventListener("click", function() {
+          if (!pendingDeleteId) return;
+          var id = pendingDeleteId;
+          confirmOverlay.classList.remove("open");
+          pendingDeleteId = null;
+          fetch(API_BASE + "/admin/users/" + id, { method: "DELETE", headers: authHdr() })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(res) {
+              if (!res.ok) { showToast("err", res.data.message || "Error al eliminar."); return; }
+              showToast("ok", "Usuario eliminado correctamente.");
+              allUsers = allUsers.filter(function(u) { return u.id !== id; });
+              applyFilters();
+              // Update stats
+              var statEl = document.getElementById("stat-users");
+              if (statEl) statEl.textContent = Math.max(0, parseInt(statEl.textContent) - 1);
+            })
+            .catch(function() { showToast("err", "Error de conexión."); });
+        });
+      })();
+    </script>
+  </body>
+</html>

@@ -850,6 +850,7 @@
         <a href="#networking">Networking</a>
         <a href="#dashboard">Dashboard</a>
       </nav>
+      <button type="button" id="btn-perfil-tutor" style="background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:34px;height:34px;color:#fff;font-size:1rem;cursor:pointer;font-weight:700" title="Mi perfil">?</button>
       <a href="index.html" class="salir">Salir</a>
     </header>
 
@@ -1354,12 +1355,17 @@
             fetch(API_BASE + "/attendance/confirmed", { headers: headers() })
               .then(function (r) { return r.json(); })
               .then(function (items) {
-                var lines = ["nombre,hora"].concat(items.map(function (it) { return it.name + "," + it.time; }));
-                var blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+                var fecha = new Date().toISOString().slice(0, 10);
+                var lines = ["Nombre,Área,Hora"].concat(items.map(function (it) {
+                  return [it.name, it.area, it.time].map(function(v) {
+                    return '"' + String(v || "").replace(/"/g, '""') + '"';
+                  }).join(",");
+                }));
+                var blob = new Blob(["\uFEFF" + lines.join("\n")], { type: "text/csv;charset=utf-8;" });
                 var url = URL.createObjectURL(blob);
                 var a = document.createElement("a");
                 a.href = url;
-                a.download = "confirmados-hoy.csv";
+                a.download = "asistencia-" + fecha + ".csv";
                 a.click();
                 URL.revokeObjectURL(url);
                 showStatus("success", "CSV exportado correctamente.");
@@ -1899,6 +1905,110 @@
           renewBtn.setAttribute("data-rot-id", rotId);
           origOpen(rotId);
         };
+      })();
+    </script>
+
+    <!-- Modal Perfil ─────────────────────────────────────────────────────── -->
+    <div id="perfil-overlay" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.55);z-index:300;align-items:center;justify-content:center">
+      <div style="background:#fff;border-radius:20px;padding:2rem 1.75rem 1.5rem;max-width:380px;width:90%;box-shadow:0 20px 60px rgba(15,23,42,0.35);position:relative">
+        <button id="perfil-close" style="position:absolute;top:0.85rem;right:0.85rem;border:none;background:#f3f4f6;border-radius:8px;width:32px;height:32px;font-size:1rem;cursor:pointer;color:#6b7280">✕</button>
+        <h3 style="margin:0 0 1.25rem;font-size:1.05rem">Mi perfil</h3>
+        <!-- Datos -->
+        <div id="perfil-datos" style="margin-bottom:1rem;font-size:0.88rem;color:#374151;background:#f9fafb;border-radius:10px;padding:0.85rem 1rem">
+          <div style="margin-bottom:0.4rem"><strong>Nombre:</strong> <span id="perfil-nombre-show">—</span></div>
+          <div style="margin-bottom:0.4rem"><strong>Email:</strong> <span id="perfil-email-show">—</span></div>
+          <div><strong>Rol:</strong> <span id="perfil-rol-show">—</span></div>
+        </div>
+        <!-- Editar nombre -->
+        <div style="margin-bottom:0.75rem">
+          <label style="font-size:0.82rem;font-weight:600;color:#374151;display:block;margin-bottom:0.3rem">Cambiar nombre</label>
+          <div style="display:flex;gap:0.5rem">
+            <input id="perfil-nombre-input" type="text" style="flex:1;padding:0.55rem 0.75rem;border:1px solid #e5e7eb;border-radius:10px;font-size:0.88rem;outline:none" placeholder="Tu nombre completo" />
+            <button id="perfil-nombre-btn" style="border:none;border-radius:10px;background:#4f46e5;color:#fff;font-size:0.82rem;font-weight:600;padding:0 0.9rem;cursor:pointer;white-space:nowrap">Guardar</button>
+          </div>
+        </div>
+        <hr style="border:none;border-top:1px solid #e5e7eb;margin:1rem 0">
+        <!-- Cambiar contraseña -->
+        <label style="font-size:0.82rem;font-weight:600;color:#374151;display:block;margin-bottom:0.5rem">Cambiar contraseña</label>
+        <input id="perfil-pass-actual" type="password" style="width:100%;padding:0.55rem 0.75rem;border:1px solid #e5e7eb;border-radius:10px;font-size:0.88rem;outline:none;margin-bottom:0.4rem;box-sizing:border-box" placeholder="Contraseña actual" />
+        <input id="perfil-pass-nueva" type="password" style="width:100%;padding:0.55rem 0.75rem;border:1px solid #e5e7eb;border-radius:10px;font-size:0.88rem;outline:none;margin-bottom:0.5rem;box-sizing:border-box" placeholder="Nueva contraseña (mín. 6)" />
+        <div id="perfil-msg" style="font-size:0.82rem;padding:0.5rem 0.75rem;border-radius:8px;display:none;margin-bottom:0.5rem"></div>
+        <button id="perfil-pass-btn" style="width:100%;border:none;border-radius:10px;background:linear-gradient(90deg,#2563eb,#4f46e5);color:#fff;font-size:0.88rem;font-weight:600;padding:0.65rem;cursor:pointer">Cambiar contraseña</button>
+      </div>
+    </div>
+    <script>
+      (function () {
+        var API_BASE = window.location.hostname === "localhost" ? "http://localhost:4000/api" : "/api";
+        function getToken() { try { return JSON.parse(localStorage.getItem("mediloop.session") || "{}").token || ""; } catch (_) { return ""; } }
+        function authHdr() { return { "Content-Type": "application/json", "Authorization": "Bearer " + getToken() }; }
+
+        var overlay = document.getElementById("perfil-overlay");
+        var msgEl   = document.getElementById("perfil-msg");
+
+        function showPerfilMsg(type, text) {
+          msgEl.style.display = "block";
+          msgEl.style.background = type === "error" ? "#fef2f2" : "#f0fdf4";
+          msgEl.style.color      = type === "error" ? "#dc2626"  : "#16a34a";
+          msgEl.style.border     = "1px solid " + (type === "error" ? "#fecaca" : "#bbf7d0");
+          msgEl.textContent = text;
+        }
+
+        function openPerfil() {
+          msgEl.style.display = "none";
+          overlay.style.display = "flex";
+          fetch(API_BASE + "/auth/me", { headers: authHdr() })
+            .then(function(r) { return r.json(); })
+            .then(function(u) {
+              document.getElementById("perfil-nombre-show").textContent = u.name || "—";
+              document.getElementById("perfil-email-show").textContent  = u.email || "—";
+              document.getElementById("perfil-rol-show").textContent    = u.role === "tutor" ? "Tutor" : u.role === "student" ? "Alumno" : u.role;
+              document.getElementById("perfil-nombre-input").value = u.name || "";
+              // Actualizar avatar
+              var btn = document.getElementById("btn-perfil-tutor");
+              if (btn && u.name) btn.textContent = u.name.charAt(0).toUpperCase();
+            });
+        }
+
+        document.getElementById("btn-perfil-tutor").addEventListener("click", openPerfil);
+        document.getElementById("perfil-close").addEventListener("click", function() { overlay.style.display = "none"; });
+        overlay.addEventListener("click", function(e) { if (e.target === overlay) overlay.style.display = "none"; });
+
+        document.getElementById("perfil-nombre-btn").addEventListener("click", function() {
+          var name = document.getElementById("perfil-nombre-input").value.trim();
+          if (!name) return;
+          fetch(API_BASE + "/auth/profile", { method: "PUT", headers: authHdr(), body: JSON.stringify({ name: name }) })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(res) {
+              if (!res.ok) { showPerfilMsg("error", res.data.message || "Error al guardar."); return; }
+              document.getElementById("perfil-nombre-show").textContent = res.data.name;
+              // Actualizar nombre en el panel y avatar
+              var sub = document.querySelector(".panel-card .sub");
+              if (sub) sub.textContent = res.data.name;
+              var gamName = document.getElementById("gam-tutor-name");
+              if (gamName) gamName.textContent = res.data.name;
+              var btn = document.getElementById("btn-perfil-tutor");
+              if (btn) btn.textContent = res.data.name.charAt(0).toUpperCase();
+              // Actualizar sesión local
+              try { var s = JSON.parse(localStorage.getItem("mediloop.session")); s.user.name = res.data.name; localStorage.setItem("mediloop.session", JSON.stringify(s)); } catch(_) {}
+              showPerfilMsg("ok", "Nombre actualizado correctamente.");
+            })
+            .catch(function() { showPerfilMsg("error", "Error de conexión."); });
+        });
+
+        document.getElementById("perfil-pass-btn").addEventListener("click", function() {
+          var cur = document.getElementById("perfil-pass-actual").value;
+          var nw  = document.getElementById("perfil-pass-nueva").value;
+          if (!cur || !nw) { showPerfilMsg("error", "Completa ambos campos."); return; }
+          fetch(API_BASE + "/auth/password", { method: "PUT", headers: authHdr(), body: JSON.stringify({ currentPassword: cur, newPassword: nw }) })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(res) {
+              if (!res.ok) { showPerfilMsg("error", res.data.message || "Error al cambiar contraseña."); return; }
+              document.getElementById("perfil-pass-actual").value = "";
+              document.getElementById("perfil-pass-nueva").value  = "";
+              showPerfilMsg("ok", "Contraseña cambiada correctamente.");
+            })
+            .catch(function() { showPerfilMsg("error", "Error de conexión."); });
+        });
       })();
     </script>
 

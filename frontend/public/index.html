@@ -475,7 +475,8 @@
             .then(function (res) { return res.json().then(function (d) { if (!res.ok) throw new Error(d.message || "Credenciales inválidas"); return d; }); })
             .then(function (data) {
               localStorage.setItem("mediloop.session", JSON.stringify(data));
-              window.location.href = data.user.role === "tutor" ? "tutores.html" : "alumnos.html";
+              var role = data.user.role;
+              window.location.href = role === "admin" ? "admin.html" : role === "tutor" ? "tutores.html" : "alumnos.html";
             })
             .catch(function (err) {
               showMsg("login-msg", "error", err.message || "No se pudo iniciar sesión. Comprueba tus credenciales.");

@@ -62,6 +62,11 @@ function requireRole(role) {
   };
 }
 
+function requireAdmin(req, res, next) {
+  if (!req.user || req.user.role !== "admin") return res.status(403).json({ message: "Acceso restringido" });
+  return next();
+}
+
 // ── Health ────────────────────────────────────────────────────────────────────
 router.get("/health", (_req, res) => res.json({ ok: true }));
 
@@ -125,6 +130,44 @@ router.put("/auth/profile", requireAuth, (req, res) => {
   db.prepare("UPDATE users SET name = ? WHERE id = ?").run(String(name).trim(), req.user.sub);
   const user = db.prepare("SELECT id, email, name, role FROM users WHERE id = ?").get(req.user.sub);
   return res.json(user);
+});
+
+router.put("/auth/password", requireAuth, (req, res) => {
+  const { currentPassword, newPassword } = req.body || {};
+  if (!currentPassword || !newPassword) return res.status(400).json({ message: "Faltan campos" });
+  if (newPassword.length < 6) return res.status(400).json({ message: "La nueva contraseña debe tener al menos 6 caracteres" });
+  const user = db.prepare("SELECT * FROM users WHERE id = ?").get(req.user.sub);
+  if (!user || !bcrypt.compareSync(currentPassword, user.password_hash)) {
+    return res.status(401).json({ message: "Contraseña actual incorrecta" });
+  }
+  db.prepare("UPDATE users SET password_hash = ? WHERE id = ?").run(bcrypt.hashSync(newPassword, 10), req.user.sub);
+  return res.json({ ok: true });
+});
+
+// ── Admin ─────────────────────────────────────────────────────────────────────
+router.get("/admin/stats", requireAuth, requireAdmin, (_req, res) => {
+  return res.json({
+    users:      db.prepare("SELECT COUNT(*) as n FROM users WHERE role != 'admin'").get().n,
+    students:   db.prepare("SELECT COUNT(*) as n FROM users WHERE role = 'student'").get().n,
+    tutors:     db.prepare("SELECT COUNT(*) as n FROM users WHERE role = 'tutor'").get().n,
+    rotations:  db.prepare("SELECT COUNT(*) as n FROM rotations").get().n,
+    evals:      db.prepare("SELECT COUNT(*) as n FROM evaluations").get().n,
+    attendance: db.prepare("SELECT COUNT(*) as n FROM attendance_confirmed").get().n
+  });
+});
+
+router.get("/admin/users", requireAuth, requireAdmin, (_req, res) => {
+  const users = db.prepare("SELECT id, email, name, role, created_at FROM users WHERE role != 'admin' ORDER BY created_at DESC").all();
+  return res.json(users);
+});
+
+router.delete("/admin/users/:id", requireAuth, requireAdmin, (req, res) => {
+  const user = db.prepare("SELECT id, role FROM users WHERE id = ?").get(req.params.id);
+  if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
+  if (user.role === "admin") return res.status(403).json({ message: "No se puede eliminar al administrador" });
+  db.prepare("DELETE FROM users WHERE id = ?").run(req.params.id);
+  db.prepare("DELETE FROM rotation_students WHERE student_id = ?").run(req.params.id);
+  return res.json({ ok: true });
 });
 
 // ── Rotaciones ────────────────────────────────────────────────────────────────

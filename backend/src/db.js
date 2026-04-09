@@ -107,12 +107,15 @@ seedIfEmpty("users",
   ]
 );
 
-// Admin siempre existe (upsert tras el seed)
-const adminExists = db.prepare("SELECT id FROM users WHERE id = 'adm-1'").get();
-if (!adminExists) {
+// Admin siempre existe con role = "admin"
+const adminUser = db.prepare("SELECT id, role FROM users WHERE id = 'adm-1'").get();
+if (!adminUser) {
   db.prepare("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?)").run(
-    "adm-1", "admin@uji.es", "Admin Mediloop", "tutor", ADMIN_HASH, now
+    "adm-1", "admin@uji.es", "Admin Mediloop", "admin", ADMIN_HASH, now
   );
+} else if (adminUser.role !== "admin") {
+  // Migrar admin existente al rol correcto
+  db.prepare("UPDATE users SET role = 'admin', password_hash = ? WHERE id = 'adm-1'").run(ADMIN_HASH);
 }
 
 seedIfEmpty("rotations",
