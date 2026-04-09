@@ -28,6 +28,14 @@ app.get("/", (_req, res) => {
   res.sendFile(path.join(__dirname, "..", "..", "frontend", "public", "index.html"));
 });
 
+// 404 catch-all
+app.use((req, res) => {
+  if (req.path.startsWith("/api")) {
+    return res.status(404).json({ message: "Ruta no encontrada" });
+  }
+  res.status(404).sendFile(path.join(__dirname, "..", "..", "frontend", "public", "404.html"));
+});
+
 app.listen(PORT, () => {
   console.log(`Mediloop backend escuchando en puerto ${PORT}`);
 });

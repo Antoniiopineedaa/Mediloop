@@ -30,6 +30,8 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.5rem;
       }
       .header .logo {
         display: flex;
@@ -1611,6 +1613,19 @@
         }
 
 
+        function fmtTime(iso) {
+          if (!iso || iso === "Ahora mismo") return "Ahora mismo";
+          try {
+            var d = new Date(iso);
+            if (isNaN(d)) return iso;
+            var diff = Date.now() - d.getTime();
+            if (diff < 60000) return "hace un momento";
+            if (diff < 3600000) return "hace " + Math.floor(diff / 60000) + " min";
+            if (diff < 86400000) return d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+            return d.toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit" });
+          } catch(_) { return iso; }
+        }
+
         // Novedades y resumen desde datos reales
         function loadNovedades() {
           Promise.all([
@@ -1625,11 +1640,11 @@
 
             // Asistencias pendientes
             (att.pending || []).forEach(function(a) {
-              items.push({ color: "orange", nueva: true, title: "Asistencia pendiente de confirmación", text: a.area, time: a.scanned_at });
+              items.push({ color: "orange", nueva: true, title: "Asistencia pendiente de confirmación", text: a.area, time: fmtTime(a.scanned_at) });
             });
             // Asistencias confirmadas (últimas 2)
             (att.confirmed || []).slice(0, 2).forEach(function(a) {
-              items.push({ color: "green", nueva: false, title: "Asistencia confirmada", text: a.area, time: a.time });
+              items.push({ color: "green", nueva: false, title: "Asistencia confirmada", text: a.area, time: fmtTime(a.time) });
             });
             // Evaluaciones recibidas
             evals.slice(0, 3).forEach(function(e) {
