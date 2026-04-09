@@ -4,14 +4,9 @@
     <meta charset="UTF-8" />
     <title>Mediloop · Iniciar sesión</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Mediloop · Accede a tu plataforma educativa digital para la gestión de prácticas clínicas."
-    />
+    <meta name="description" content="Mediloop · Accede a tu plataforma educativa digital para la gestión de prácticas clínicas." />
     <style>
-      * {
-        box-sizing: border-box;
-      }
+      * { box-sizing: border-box; }
       body {
         margin: 0;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -22,294 +17,155 @@
         justify-content: center;
         color: #111827;
       }
-      .background-bubbles {
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        overflow: hidden;
-      }
-      .bubble {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        transition: transform 0.15s ease-out;
-      }
+      .background-bubbles { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+      .bubble { position: absolute; width: 100%; height: 100%; transition: transform 0.15s ease-out; }
       .bubble-inner {
         position: absolute;
         border-radius: 999px;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.25), transparent 65%);
+        background: radial-gradient(circle, rgba(255,255,255,0.25), transparent 65%);
         animation: float 8s ease-in-out infinite;
-        width: 100%;
-        height: 100%;
+        width: 100%; height: 100%;
       }
-      .bubble.b1 {
-        width: 260px;
-        height: 260px;
-        top: 8%;
-        left: 5%;
-      }
-      .bubble.b1 .bubble-inner {
-        animation-delay: 0s;
-      }
-      .bubble.b2 {
-        width: 220px;
-        height: 220px;
-        bottom: 10%;
-        right: 8%;
-      }
-      .bubble.b2 .bubble-inner {
-        animation-delay: -3s;
-      }
-      .bubble.b3 {
-        width: 140px;
-        height: 140px;
-        bottom: 20%;
-        left: 20%;
-      }
-      .bubble.b3 .bubble-inner {
-        animation-delay: -6s;
-      }
+      .bubble.b1 { width: 260px; height: 260px; top: 8%; left: 5%; }
+      .bubble.b1 .bubble-inner { animation-delay: 0s; }
+      .bubble.b2 { width: 220px; height: 220px; bottom: 10%; right: 8%; }
+      .bubble.b2 .bubble-inner { animation-delay: -3s; }
+      .bubble.b3 { width: 140px; height: 140px; bottom: 20%; left: 20%; }
+      .bubble.b3 .bubble-inner { animation-delay: -6s; }
       @keyframes float {
-        0%, 100% {
-          transform: translate3d(0, 0, 0) scale(1);
-        }
-        20% {
-          transform: translate3d(20px, -30px, 0) scale(1.06);
-        }
-        40% {
-          transform: translate3d(-25px, 10px, 0) scale(1.02);
-        }
-        60% {
-          transform: translate3d(15px, 25px, 0) scale(1.08);
-        }
-        80% {
-          transform: translate3d(-15px, -15px, 0) scale(0.98);
-        }
+        0%, 100% { transform: translate3d(0,0,0) scale(1); }
+        20%  { transform: translate3d(20px,-30px,0) scale(1.06); }
+        40%  { transform: translate3d(-25px,10px,0) scale(1.02); }
+        60%  { transform: translate3d(15px,25px,0) scale(1.08); }
+        80%  { transform: translate3d(-15px,-15px,0) scale(0.98); }
       }
       main {
-        position: relative;
-        z-index: 1;
-        width: 100%;
-        max-width: 960px;
+        position: relative; z-index: 1;
+        width: 100%; max-width: 960px;
         padding: 2rem 1rem 3rem;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 2.5rem;
+        display: flex; flex-direction: column;
+        align-items: center; gap: 2.5rem;
       }
       .login-card {
-        width: 100%;
-        max-width: 420px;
+        width: 100%; max-width: 420px;
         background: #ffffff;
         border-radius: 24px;
         padding: 2.4rem 2.2rem 2rem;
-        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.35);
+        box-shadow: 0 18px 45px rgba(15,23,42,0.35);
       }
       .logo {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        width: 100%;
-        margin-bottom: 1.4rem;
+        display: flex; align-items: center; justify-content: center;
+        gap: 0.5rem; width: 100%; margin-bottom: 1.4rem;
         transform: translateX(-12px);
       }
-      .logo-mark {
-        width: 36px;
-        height: 36px;
-        flex-shrink: 0;
+      .logo-mark { width: 36px; height: 36px; flex-shrink: 0; }
+      .logo-mark svg { width: 100%; height: 100%; display: block; }
+      .logo-text { font-weight: 700; font-size: 1.25rem; color: #4f46e5; letter-spacing: -0.02em; }
+
+      /* Tabs */
+      .tab-row {
+        display: flex; border-radius: 12px;
+        background: #f3f4f6; padding: 4px;
+        margin-bottom: 1.4rem; gap: 4px;
       }
-      .logo-mark svg {
-        width: 100%;
-        height: 100%;
-        display: block;
+      .tab-btn {
+        flex: 1; border: none; background: transparent;
+        border-radius: 9px; padding: 0.55rem 0.5rem;
+        font-size: 0.875rem; font-weight: 500; color: #6b7280;
+        cursor: pointer; transition: background 0.2s, color 0.2s, box-shadow 0.2s;
       }
-      .logo-text {
-        font-weight: 700;
-        font-size: 1.25rem;
-        color: #4f46e5;
-        letter-spacing: -0.02em;
+      .tab-btn.active {
+        background: #fff; color: #4f46e5;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.12);
       }
-      .login-title {
-        text-align: center;
-        font-weight: 600;
-        font-size: 1.1rem;
-        margin-bottom: 0.25rem;
-      }
-      .login-subtitle {
-        text-align: center;
-        font-size: 0.85rem;
-        color: #6b7280;
-        margin-bottom: 1.6rem;
-      }
-      label {
-        display: block;
-        font-size: 0.85rem;
-        font-weight: 500;
-        margin-bottom: 0.3rem;
-        color: #374151;
-      }
-      .field {
-        margin-bottom: 1rem;
-      }
-      .field-input {
-        position: relative;
-      }
+
+      .panel-title { text-align: center; font-weight: 600; font-size: 1.1rem; margin-bottom: 0.25rem; }
+      .panel-subtitle { text-align: center; font-size: 0.85rem; color: #6b7280; margin-bottom: 1.4rem; }
+
+      label { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.3rem; color: #374151; }
+      .field { margin-bottom: 1rem; }
+      .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
+      .field-row .field { margin-bottom: 0; }
+      .field-input { position: relative; }
       .field-input svg {
-        position: absolute;
-        left: 0.8rem;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 16px;
-        height: 16px;
-        opacity: 0.55;
+        position: absolute; left: 0.8rem; top: 50%;
+        transform: translateY(-50%); width: 16px; height: 16px; opacity: 0.55;
       }
       .input {
-        width: 100%;
-        padding: 0.7rem 0.9rem 0.7rem 2.3rem;
-        border-radius: 12px;
-        border: 1px solid #e5e7eb;
-        font-size: 0.9rem;
-        outline: none;
+        width: 100%; padding: 0.7rem 0.9rem 0.7rem 2.3rem;
+        border-radius: 12px; border: 1px solid #e5e7eb;
+        font-size: 0.9rem; outline: none; transition: border-color 0.2s;
       }
-      .input::placeholder {
-        color: #9ca3af;
-      }
+      .input::placeholder { color: #9ca3af; }
+      .input:focus { border-color: #4f46e5; }
+      .hint { font-size: 0.78rem; color: #9ca3af; margin-top: 0.25rem; }
+
       .role-row {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0.75rem;
-        margin-top: 0.4rem;
+        display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem; margin-top: 0.4rem;
       }
       .role-btn {
-        border-radius: 14px;
-        border: 1px solid #e5e7eb;
-        padding: 0.85rem 0.75rem;
-        font-size: 0.9rem;
-        background: #f9fafb;
-        cursor: pointer;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.4rem;
+        border-radius: 14px; border: 1px solid #e5e7eb;
+        padding: 0.85rem 0.75rem; font-size: 0.9rem;
+        background: #f9fafb; cursor: pointer;
+        display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
         transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
       }
       .role-btn:hover {
-        border-color: #c7d2fe;
-        background: #f3f4f6;
-        transform: translateY(-4px);
-        box-shadow: 0 8px 20px rgba(79, 70, 229, 0.15);
+        border-color: #c7d2fe; background: #f3f4f6;
+        transform: translateY(-4px); box-shadow: 0 8px 20px rgba(79,70,229,0.15);
       }
       .role-btn.active {
-        border-color: #4f46e5;
-        background: #eef2ff;
-        box-shadow: 0 8px 22px rgba(79, 70, 229, 0.25);
+        border-color: #4f46e5; background: #eef2ff;
+        box-shadow: 0 8px 22px rgba(79,70,229,0.25);
       }
-      .role-title {
-        font-weight: 500;
-        font-size: 0.9rem;
-        color: #374151;
-      }
-      .role-icon {
-        width: 28px;
-        height: 28px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #4b5563;
-      }
-      .role-icon svg {
-        width: 100%;
-        height: 100%;
-      }
+      .role-title { font-weight: 500; font-size: 0.9rem; color: #374151; }
+      .role-icon { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: #4b5563; }
+      .role-icon svg { width: 100%; height: 100%; }
+
       .submit-btn {
-        margin-top: 1.2rem;
-        width: 100%;
-        border: none;
-        border-radius: 999px;
-        padding: 0.85rem 1.2rem;
-        font-weight: 600;
-        font-size: 0.95rem;
+        margin-top: 1.2rem; width: 100%; border: none;
+        border-radius: 999px; padding: 0.85rem 1.2rem;
+        font-weight: 600; font-size: 0.95rem;
         background: linear-gradient(90deg, #2563eb, #4f46e5);
-        color: #ffffff;
-        cursor: pointer;
+        color: #ffffff; cursor: pointer; transition: opacity 0.2s;
       }
-      .help-links {
-        margin-top: 0.9rem;
-        font-size: 0.8rem;
-        text-align: center;
+      .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+      .form-msg {
+        display: none; margin-bottom: 0.5rem;
+        padding: 0.6rem 0.9rem; border-radius: 10px; font-size: 0.85rem;
       }
-      .help-links a {
-        color: #4f46e5;
-        text-decoration: none;
+      .form-msg.error { display: block; background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+      .form-msg.success { display: block; background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+      .help-links { margin-top: 0.9rem; font-size: 0.8rem; text-align: center; }
+      .help-links a, .help-links button.link-btn {
+        color: #4f46e5; text-decoration: none; background: none; border: none;
+        font-size: 0.8rem; cursor: pointer; padding: 0;
       }
-      .help-links a:hover {
-        text-decoration: underline;
-      }
-      .why-section {
-        width: 100%;
-        max-width: 860px;
-        text-align: center;
-        color: #f9fafb;
-      }
-      .why-title {
-        font-weight: 600;
-        margin-bottom: 1.5rem;
-        font-size: 1.2rem;
-      }
-      .why-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 1.2rem;
-      }
+      .help-links a:hover, .help-links button.link-btn:hover { text-decoration: underline; }
+
+      /* Why section */
+      .why-section { width: 100%; max-width: 860px; text-align: center; color: #f9fafb; }
+      .why-title { font-weight: 600; margin-bottom: 1.5rem; font-size: 1.2rem; }
+      .why-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.2rem; }
       .why-card {
-        background: rgba(255, 255, 255, 0.96);
-        color: #111827;
-        border-radius: 18px;
-        padding: 1.4rem 1.2rem;
-        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.28);
-        font-size: 0.88rem;
-        text-align: center;
+        background: rgba(255,255,255,0.96); color: #111827;
+        border-radius: 18px; padding: 1.4rem 1.2rem;
+        box-shadow: 0 10px 25px rgba(15,23,42,0.28);
+        font-size: 0.88rem; text-align: center;
         transition: transform 0.25s ease, box-shadow 0.25s ease;
       }
-      .why-card:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.35);
-      }
+      .why-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(15,23,42,0.35); }
       .why-card-icon {
-        width: 48px;
-        height: 48px;
-        margin: 0 auto 0.75rem;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #2563eb, #4f46e5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        width: 48px; height: 48px; margin: 0 auto 0.75rem;
+        border-radius: 50%; background: linear-gradient(135deg, #2563eb, #4f46e5);
+        display: flex; align-items: center; justify-content: center;
       }
-      .why-card-icon svg {
-        width: 24px;
-        height: 24px;
-        color: #fff;
-      }
-      .why-card h3 {
-        margin: 0 0 0.35rem;
-        font-size: 0.95rem;
-      }
-      .why-card p {
-        margin: 0;
-        color: #6b7280;
-      }
-      .footer {
-        margin-top: 1.8rem;
-        font-size: 0.75rem;
-        color: #d1d5db;
-        text-align: center;
-      }
-      @media (max-width: 640px) {
-        .login-card {
-          padding-inline: 1.6rem;
-        }
-      }
+      .why-card-icon svg { width: 24px; height: 24px; color: #fff; }
+      .why-card h3 { margin: 0 0 0.35rem; font-size: 0.95rem; }
+      .why-card p { margin: 0; color: #6b7280; }
+      .footer { margin-top: 1.8rem; font-size: 0.75rem; color: #d1d5db; text-align: center; }
+      @media (max-width: 640px) { .login-card { padding-inline: 1.6rem; } }
     </style>
   </head>
   <body>
@@ -319,17 +175,14 @@
       <div class="bubble b3"><div class="bubble-inner"></div></div>
     </div>
     <main>
-      <section class="login-card" aria-label="Inicio de sesión Mediloop">
+      <section class="login-card" aria-label="Acceso a Mediloop">
         <div class="logo">
           <div class="logo-mark" aria-hidden="true">
             <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <filter id="logo-blur" x="-20%" y="-20%" width="140%" height="140%">
                   <feGaussianBlur in="SourceGraphic" stdDeviation="0.4" result="blur"/>
-                  <feMerge>
-                    <feMergeNode in="blur"/>
-                    <feMergeNode in="SourceGraphic"/>
-                  </feMerge>
+                  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
                 </filter>
               </defs>
               <rect x="18" y="6" width="16" height="16" rx="4" fill="#c2cfff" opacity="0.9"/>
@@ -339,75 +192,131 @@
           </div>
           <span class="logo-text">Mediloop</span>
         </div>
-        <div class="login-title">Bienvenido de vuelta</div>
-        <div class="login-subtitle">Accede a tu plataforma educativa digital</div>
-        <form id="login-form">
-          <div class="field">
-            <label for="username">Correo electrónico</label>
-            <div class="field-input">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  fill="currentColor"
-                  d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-2.67 0-8 1.34-8 4v1h16v-1c0-2.66-5.33-4-8-4Z"
-                />
-              </svg>
-              <input
-                id="username"
-                class="input"
-                type="email"
-                placeholder="alumno@uji.es"
-                autocomplete="email"
-              />
+
+        <!-- Tabs -->
+        <div class="tab-row" role="tablist">
+          <button class="tab-btn active" id="tab-login" role="tab" aria-selected="true" aria-controls="panel-login">Iniciar sesión</button>
+          <button class="tab-btn" id="tab-register" role="tab" aria-selected="false" aria-controls="panel-register">Crear cuenta</button>
+        </div>
+
+        <!-- Panel: Login -->
+        <div id="panel-login" role="tabpanel">
+          <div class="panel-title">Bienvenido de vuelta</div>
+          <div class="panel-subtitle">Accede a tu plataforma educativa digital</div>
+          <form id="login-form" novalidate>
+            <div class="field">
+              <label for="login-email">Correo electrónico</label>
+              <div class="field-input">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z"/></svg>
+                <input id="login-email" class="input" type="email" placeholder="alumno@uji.es" autocomplete="email" />
+              </div>
             </div>
-          </div>
-          <div class="field">
-            <label for="password">Contraseña</label>
-            <div class="field-input">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  fill="currentColor"
-                  d="M17 8V7a5 5 0 0 0-10 0v1H5v12h14V8h-2Zm-8-1a3 3 0 0 1 6 0v1H9V7Zm8 11H7v-8h10v8Z"
-                />
-              </svg>
-              <input
-                id="password"
-                class="input"
-                type="password"
-                placeholder="Ingresa tu contraseña"
-                autocomplete="current-password"
-              />
+            <div class="field">
+              <label for="login-password">Contraseña</label>
+              <div class="field-input">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17 8V7a5 5 0 0 0-10 0v1H5v12h14V8h-2Zm-8-1a3 3 0 0 1 6 0v1H9V7Zm8 11H7v-8h10v8Z"/></svg>
+                <input id="login-password" class="input" type="password" placeholder="Ingresa tu contraseña" autocomplete="current-password" />
+              </div>
             </div>
-          </div>
-          <div class="field">
-            <label>Selecciona tu rol</label>
-            <div class="role-row">
-              <button type="button" class="role-btn" data-role="profesor" data-target="tutores.html" aria-pressed="false">
-                <span class="role-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                  </svg>
-                </span>
-                <span class="role-title">Profesor</span>
-              </button>
-              <button type="button" class="role-btn" data-role="alumno" data-target="alumnos.html" aria-pressed="false">
-                <span class="role-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 14l9-5-9-5-9 5 9 5z"/>
-                    <path d="M12 14l6.16-3.422a12.083 12.083 0 0 1 .665 6.479A11.952 11.952 0 0 0 12 20.055a11.952 11.952 0 0 0-6.824-2.998 12.078 12.078 0 0 1 .665-6.479L12 14z"/>
-                  </svg>
-                </span>
-                <span class="role-title">Alumno</span>
-              </button>
+            <div class="field">
+              <label>Selecciona tu rol</label>
+              <div class="role-row">
+                <button type="button" class="role-btn" data-role="tutor" aria-pressed="false">
+                  <span class="role-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                    </svg>
+                  </span>
+                  <span class="role-title">Profesor</span>
+                </button>
+                <button type="button" class="role-btn" data-role="student" aria-pressed="false">
+                  <span class="role-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 14l9-5-9-5-9 5 9 5z"/>
+                      <path d="M12 14l6.16-3.422a12.083 12.083 0 0 1 .665 6.479A11.952 11.952 0 0 0 12 20.055a11.952 11.952 0 0 0-6.824-2.998 12.078 12.078 0 0 1 .665-6.479L12 14z"/>
+                    </svg>
+                  </span>
+                  <span class="role-title">Alumno</span>
+                </button>
+              </div>
             </div>
-          </div>
-          <div id="login-error" style="display:none;margin-bottom:0.5rem;padding:0.6rem 0.9rem;border-radius:10px;font-size:0.85rem;background:#fef2f2;color:#dc2626;border:1px solid #fecaca"></div>
-          <button type="submit" class="submit-btn" id="submit-login">Iniciar Sesión</button>
-          <div class="help-links">
-            <div>¿No tienes cuenta? <a href="register.html">Regístrate con tu correo UJI</a></div>
-          </div>
-        </form>
+            <div id="login-msg" class="form-msg"></div>
+            <button type="submit" class="submit-btn" id="login-submit">Iniciar sesión</button>
+            <div class="help-links">
+              ¿No tienes cuenta? <button type="button" class="link-btn" id="goto-register">Créala aquí</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Panel: Registro -->
+        <div id="panel-register" role="tabpanel" style="display:none">
+          <div class="panel-title">Crear cuenta UJI</div>
+          <div class="panel-subtitle">Solo se permite el correo institucional @uji.es</div>
+          <form id="register-form" novalidate>
+            <div class="field-row">
+              <div class="field">
+                <label for="reg-nombre">Nombre</label>
+                <div class="field-input">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-2.67 0-8 1.34-8 4v1h16v-1c0-2.66-5.33-4-8-4Z"/></svg>
+                  <input id="reg-nombre" class="input" type="text" placeholder="Ana" autocomplete="given-name" />
+                </div>
+              </div>
+              <div class="field">
+                <label for="reg-apellidos">Apellidos</label>
+                <div class="field-input">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-2.67 0-8 1.34-8 4v1h16v-1c0-2.66-5.33-4-8-4Z"/></svg>
+                  <input id="reg-apellidos" class="input" type="text" placeholder="Martínez García" autocomplete="family-name" />
+                </div>
+              </div>
+            </div>
+            <div class="field">
+              <label for="reg-email">Correo UJI</label>
+              <div class="field-input">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z"/></svg>
+                <input id="reg-email" class="input" type="email" placeholder="al123456@uji.es" autocomplete="email" />
+              </div>
+              <div class="hint">Debe terminar en @uji.es</div>
+            </div>
+            <div class="field">
+              <label for="reg-password">Contraseña</label>
+              <div class="field-input">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17 8V7a5 5 0 0 0-10 0v1H5v12h14V8h-2Zm-8-1a3 3 0 0 1 6 0v1H9V7Zm8 11H7v-8h10v8Z"/></svg>
+                <input id="reg-password" class="input" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+              </div>
+            </div>
+            <div class="field">
+              <label>Rol en Mediloop</label>
+              <div class="role-row">
+                <button type="button" class="role-btn" data-role="tutor" aria-pressed="false">
+                  <span class="role-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                    </svg>
+                  </span>
+                  <span class="role-title">Tutor</span>
+                </button>
+                <button type="button" class="role-btn" data-role="student" aria-pressed="false">
+                  <span class="role-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 14l9-5-9-5-9 5 9 5z"/>
+                      <path d="M12 14l6.16-3.422a12.083 12.083 0 0 1 .665 6.479A11.952 11.952 0 0 0 12 20.055a11.952 11.952 0 0 0-6.824-2.998 12.078 12.078 0 0 1 .665-6.479L12 14z"/>
+                    </svg>
+                  </span>
+                  <span class="role-title">Alumno</span>
+                </button>
+              </div>
+            </div>
+            <div id="register-msg" class="form-msg"></div>
+            <button type="submit" class="submit-btn" id="register-submit">Crear cuenta</button>
+            <div class="help-links">
+              ¿Ya tienes cuenta? <button type="button" class="link-btn" id="goto-login">Inicia sesión aquí</button>
+            </div>
+          </form>
+        </div>
       </section>
+
       <section class="why-section" aria-label="Por qué elegir Mediloop">
         <div class="why-title">¿Por qué elegir Mediloop?</div>
         <div class="why-grid">
@@ -455,114 +364,177 @@
             <p>Logros, puntos y rankings que motivan el aprendizaje continuo.</p>
           </article>
         </div>
-        <div class="footer">
-          © 2025 Mediloop. Todos los derechos reservados.
-        </div>
+        <div class="footer">© 2025 Mediloop. Todos los derechos reservados.</div>
       </section>
     </main>
+
     <script>
+      // ── Burbujas animadas ──────────────────────────────────────────────────────
       (function () {
         var bubbles = document.getElementById('bubbles');
         if (!bubbles) return;
         var bubbleEls = bubbles.querySelectorAll('.bubble');
         var mouse = { x: 0.5, y: 0.5 };
         var current = bubbleEls.length ? [{ x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }] : [];
-
-        function onMove(e) {
+        window.addEventListener('mousemove', function (e) {
           mouse.x = e.clientX / window.innerWidth;
           mouse.y = e.clientY / window.innerHeight;
-        }
-        window.addEventListener('mousemove', onMove);
-
-        function animate() {
+        });
+        (function animate() {
           var strength = 58;
           bubbleEls.forEach(function (el, i) {
             var rect = el.getBoundingClientRect();
-            var centerX = rect.left + rect.width / 2;
-            var centerY = rect.top + rect.height / 2;
-            var dx = (mouse.x * window.innerWidth - centerX) / window.innerWidth;
-            var dy = (mouse.y * window.innerHeight - centerY) / window.innerHeight;
+            var dx = (mouse.x * window.innerWidth  - (rect.left + rect.width  / 2)) / window.innerWidth;
+            var dy = (mouse.y * window.innerHeight - (rect.top  + rect.height / 2)) / window.innerHeight;
             var mult = [1.2, -0.9, 1.1][i] || 1;
             var tx = dx * strength * mult;
             var ty = dy * strength * mult;
             if (current[i]) {
               current[i].x += (tx - current[i].x) * 0.14;
               current[i].y += (ty - current[i].y) * 0.14;
-              el.style.transform = 'translate3d(' + current[i].x + 'px, ' + current[i].y + 'px, 0)';
+              el.style.transform = 'translate3d(' + current[i].x + 'px,' + current[i].y + 'px,0)';
             }
           });
           requestAnimationFrame(animate);
-        }
-        animate();
+        })();
       })();
 
+      // ── App ────────────────────────────────────────────────────────────────────
       (function () {
-        var form = document.getElementById("login-form");
-        var submitBtn = document.getElementById("submit-login");
-        if (!form || !submitBtn) return;
         var API_BASE = window.location.hostname === "localhost" ? "http://localhost:4000/api" : "/api";
 
-        var selectedTarget = "";
-        var selectedRole = "";
-        var roleButtons = form.querySelectorAll(".role-btn[data-target]");
-        var usernameInput = document.getElementById("username");
-        var passwordInput = document.getElementById("password");
+        // ── Tab switching ──────────────────────────────────────────────────────
+        var tabLogin    = document.getElementById("tab-login");
+        var tabRegister = document.getElementById("tab-register");
+        var panelLogin  = document.getElementById("panel-login");
+        var panelReg    = document.getElementById("panel-register");
 
-        roleButtons.forEach(function (btn) {
+        function showTab(tab) {
+          if (tab === "login") {
+            tabLogin.classList.add("active");    tabLogin.setAttribute("aria-selected", "true");
+            tabRegister.classList.remove("active"); tabRegister.setAttribute("aria-selected", "false");
+            panelLogin.style.display = ""; panelReg.style.display = "none";
+          } else {
+            tabRegister.classList.add("active");  tabRegister.setAttribute("aria-selected", "true");
+            tabLogin.classList.remove("active");  tabLogin.setAttribute("aria-selected", "false");
+            panelReg.style.display = ""; panelLogin.style.display = "none";
+          }
+        }
+
+        tabLogin.addEventListener("click",    function () { showTab("login"); });
+        tabRegister.addEventListener("click", function () { showTab("register"); });
+        document.getElementById("goto-register").addEventListener("click", function () { showTab("register"); });
+        document.getElementById("goto-login").addEventListener("click",    function () { showTab("login"); });
+
+        // ── Helpers ────────────────────────────────────────────────────────────
+        function showMsg(elId, type, text) {
+          var el = document.getElementById(elId);
+          el.className = "form-msg " + type;
+          el.textContent = text;
+        }
+        function clearMsg(elId) {
+          var el = document.getElementById(elId);
+          el.className = "form-msg";
+          el.textContent = "";
+        }
+        function activateRoleBtn(form, btn) {
+          form.querySelectorAll(".role-btn").forEach(function (b) {
+            b.classList.remove("active"); b.setAttribute("aria-pressed", "false");
+          });
+          btn.classList.add("active"); btn.setAttribute("aria-pressed", "true");
+        }
+
+        // ── Login ──────────────────────────────────────────────────────────────
+        var loginForm   = document.getElementById("login-form");
+        var loginSubmit = document.getElementById("login-submit");
+        var loginRole   = "";
+
+        document.querySelectorAll("#panel-login .role-btn").forEach(function (btn) {
           btn.addEventListener("click", function () {
-            roleButtons.forEach(function (other) {
-              other.classList.remove("active");
-              other.setAttribute("aria-pressed", "false");
-            });
-            btn.classList.add("active");
-            btn.setAttribute("aria-pressed", "true");
-            selectedTarget = btn.getAttribute("data-target") || "";
-            selectedRole = btn.getAttribute("data-role") || "";
-            submitBtn.textContent = selectedRole === "profesor" ? "Entrar como Profesor" : "Entrar como Alumno";
+            activateRoleBtn(loginForm, btn);
+            loginRole = btn.getAttribute("data-role");
+            loginSubmit.textContent = loginRole === "tutor" ? "Entrar como Profesor" : "Entrar como Alumno";
           });
         });
 
-        var errorEl = document.getElementById("login-error");
-        function showLoginError(msg) {
-          if (!errorEl) return;
-          errorEl.textContent = msg;
-          errorEl.style.display = "block";
-        }
-        function hideLoginError() {
-          if (errorEl) errorEl.style.display = "none";
-        }
-
-        form.addEventListener("submit", function (event) {
-          event.preventDefault();
-          hideLoginError();
-          var email = usernameInput ? usernameInput.value.trim() : "";
-          var password = passwordInput ? passwordInput.value : "";
-          if (!email || !password) { showLoginError("Completa el correo y la contraseña."); return; }
-          submitBtn.disabled = true;
-          submitBtn.textContent = "Entrando...";
+        loginForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+          clearMsg("login-msg");
+          var email = document.getElementById("login-email").value.trim();
+          var pass  = document.getElementById("login-password").value;
+          if (!email || !pass) { showMsg("login-msg", "error", "Completa el correo y la contraseña."); return; }
+          if (!email.toLowerCase().endsWith("@uji.es")) { showMsg("login-msg", "error", "Solo se permiten correos @uji.es."); return; }
+          loginSubmit.disabled = true;
+          var prev = loginSubmit.textContent;
+          loginSubmit.textContent = "Entrando...";
           fetch(API_BASE + "/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: email, password: password })
+            body: JSON.stringify({ email: email, password: pass })
           })
-            .then(function (res) {
-              return res.json().then(function(d) {
-                if (!res.ok) throw new Error(d.message || "Credenciales inválidas");
-                return d;
-              });
-            })
+            .then(function (res) { return res.json().then(function (d) { if (!res.ok) throw new Error(d.message || "Credenciales inválidas"); return d; }); })
             .then(function (data) {
               localStorage.setItem("mediloop.session", JSON.stringify(data));
               window.location.href = data.user.role === "tutor" ? "tutores.html" : "alumnos.html";
             })
             .catch(function (err) {
-              showLoginError(err.message || "No se pudo iniciar sesión. Comprueba tus credenciales.");
-              submitBtn.disabled = false;
-              submitBtn.textContent = "Iniciar Sesión";
+              showMsg("login-msg", "error", err.message || "No se pudo iniciar sesión. Comprueba tus credenciales.");
+              loginSubmit.disabled = false;
+              loginSubmit.textContent = prev;
+            });
+        });
+
+        // ── Registro ───────────────────────────────────────────────────────────
+        var regForm   = document.getElementById("register-form");
+        var regSubmit = document.getElementById("register-submit");
+        var regRole   = "";
+
+        document.querySelectorAll("#panel-register .role-btn").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            activateRoleBtn(regForm, btn);
+            regRole = btn.getAttribute("data-role");
+          });
+        });
+
+        regForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+          clearMsg("register-msg");
+          var nombre    = document.getElementById("reg-nombre").value.trim();
+          var apellidos = document.getElementById("reg-apellidos").value.trim();
+          var email     = document.getElementById("reg-email").value.trim();
+          var pass      = document.getElementById("reg-password").value;
+
+          if (!nombre)    { showMsg("register-msg", "error", "Introduce tu nombre."); return; }
+          if (!apellidos) { showMsg("register-msg", "error", "Introduce tus apellidos."); return; }
+          if (!email)     { showMsg("register-msg", "error", "Introduce tu correo @uji.es."); return; }
+          if (!email.toLowerCase().endsWith("@uji.es")) { showMsg("register-msg", "error", "El correo debe ser @uji.es."); return; }
+          if (!pass || pass.length < 6) { showMsg("register-msg", "error", "La contraseña debe tener al menos 6 caracteres."); return; }
+          if (!regRole) { showMsg("register-msg", "error", "Selecciona tu rol."); return; }
+
+          regSubmit.disabled = true;
+          regSubmit.textContent = "Creando cuenta...";
+
+          fetch(API_BASE + "/auth/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: email, name: nombre + " " + apellidos, password: pass, role: regRole })
+          })
+            .then(function (res) { return res.json().then(function (d) { return { ok: res.ok, data: d }; }); })
+            .then(function (result) {
+              if (!result.ok) { showMsg("register-msg", "error", result.data.message || "Error al crear la cuenta."); return; }
+              localStorage.setItem("mediloop.session", JSON.stringify(result.data));
+              showMsg("register-msg", "success", "¡Cuenta creada! Redirigiendo...");
+              setTimeout(function () {
+                window.location.href = result.data.user.role === "tutor" ? "tutores.html" : "alumnos.html";
+              }, 800);
+            })
+            .catch(function () { showMsg("register-msg", "error", "No se pudo conectar con el servidor."); })
+            .finally(function () {
+              regSubmit.disabled = false;
+              regSubmit.textContent = "Crear cuenta";
             });
         });
       })();
     </script>
   </body>
-  </html>
-
+</html>

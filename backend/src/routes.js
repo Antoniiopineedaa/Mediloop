@@ -112,6 +112,14 @@ router.get("/auth/me", requireAuth, (req, res) => {
   return res.json(user);
 });
 
+router.put("/auth/profile", requireAuth, (req, res) => {
+  const { name } = req.body || {};
+  if (!name || !String(name).trim()) return res.status(400).json({ message: "El nombre es obligatorio" });
+  db.prepare("UPDATE users SET name = ? WHERE id = ?").run(String(name).trim(), req.user.sub);
+  const user = db.prepare("SELECT id, email, name, role FROM users WHERE id = ?").get(req.user.sub);
+  return res.json(user);
+});
+
 // ── Rotaciones ────────────────────────────────────────────────────────────────
 router.get("/rotations", requireAuth, (req, res) => {
   if (req.user.role === "tutor") {
