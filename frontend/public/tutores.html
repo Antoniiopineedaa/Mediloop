@@ -778,6 +778,22 @@
       .rot-card .rot-meta { font-size: 0.8rem; color: #6b7280; margin-bottom: 0.75rem; }
       .rot-card .rot-qr { text-align: center; margin: 0.75rem 0; }
       .rot-card .rot-qr img { width: 140px; height: 140px; border-radius: 8px; border: 1px solid #e5e7eb; }
+      .btn-show-qr { border: none; border-radius: 10px; background: linear-gradient(90deg,#2563eb,#4f46e5); color: #fff; font-size: 0.85rem; font-weight: 600; padding: 0.6rem 1.1rem; cursor: pointer; width: 100%; }
+      .btn-show-qr:hover { opacity: 0.9; }
+      /* Modal QR */
+      .qr-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.55); z-index: 200; align-items: center; justify-content: center; }
+      .qr-modal-overlay.open { display: flex; }
+      .qr-modal-box { background: #fff; border-radius: 20px; padding: 2rem 1.75rem 1.5rem; max-width: 360px; width: 90%; box-shadow: 0 20px 60px rgba(15,23,42,0.35); text-align: center; position: relative; }
+      .qr-modal-box .close-btn { position: absolute; top: 0.85rem; right: 0.85rem; border: none; background: #f3f4f6; border-radius: 8px; width: 32px; height: 32px; font-size: 1rem; cursor: pointer; color: #6b7280; }
+      .qr-modal-box h3 { margin: 0 0 0.25rem; font-size: 1rem; }
+      .qr-modal-box .qr-sub { font-size: 0.82rem; color: #6b7280; margin-bottom: 1rem; }
+      #qr-canvas-wrap { display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; width: 200px; height: 200px; position: relative; }
+      #qr-canvas-wrap.expired::after { content: "QR caducado"; position: absolute; inset: 0; background: rgba(0,0,0,0.65); color: #fff; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
+      .qr-valid-until { font-size: 0.82rem; color: #374151; margin-bottom: 0.5rem; }
+      .qr-progress-bar { height: 6px; border-radius: 999px; background: #e5e7eb; margin-bottom: 1rem; overflow: hidden; }
+      .qr-progress-bar span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg,#2563eb,#4f46e5); transition: width 1s linear; }
+      .btn-renew-qr { border: none; border-radius: 10px; background: #f3f4f6; color: #4f46e5; font-size: 0.85rem; font-weight: 600; padding: 0.55rem 1.1rem; cursor: pointer; display: none; }
+      .btn-renew-qr.visible { display: inline-block; }
       .rot-enroll { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
       .rot-enroll input { flex: 1; padding: 0.45rem 0.7rem; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 0.82rem; outline: none; }
       .rot-enroll button { border: none; border-radius: 8px; background: #4f46e5; color: #fff; font-size: 0.82rem; padding: 0.45rem 0.85rem; cursor: pointer; white-space: nowrap; }
@@ -1512,7 +1528,7 @@
                   '<h4>' + rot.service + '</h4>' +
                   '<div class="rot-meta">' + rot.hospital + ' · <span style="color:' + statusColor + ';font-weight:600">' + rot.status + '</span></div>' +
                   '<div class="rot-meta">' + rot.start_date + ' → ' + rot.end_date + '</div>' +
-                  '<div class="rot-qr"><img src="' + API_BASE + '/qr-image/' + rot.qr_token + '" alt="QR ' + rot.service + '" title="QR para que los alumnos escaneen" /></div>' +
+                  '<div class="rot-qr"><button type="button" class="btn-show-qr" data-rot-id="' + rot.id + '">📱 Mostrar QR</button></div>' +
                   '<div id="students-' + rot.id + '" class="rot-students">Cargando alumnos...</div>' +
                   '<div class="rot-enroll">' +
                     '<input type="email" placeholder="alumno@uji.es" id="enroll-input-' + rot.id + '" />' +
@@ -1558,6 +1574,13 @@
                   });
                 }
               }
+
+              // Evento para botones "Mostrar QR"
+              wrap.querySelectorAll(".btn-show-qr").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                  openQrModal(btn.getAttribute("data-rot-id"));
+                });
+              });
 
               // Evento para botones de añadir alumno
               wrap.querySelectorAll(".enroll-btn").forEach(function (btn) {
@@ -1729,6 +1752,134 @@
         setupUndoControls();
         setupScrollTop();
         setInterval(updateSystemIndicator, 15000);
+      })();
+    </script>
+
+    <!-- Modal QR rotatorio ──────────────────────────────────────────────── -->
+    <div class="qr-modal-overlay" id="qr-modal-overlay" role="dialog" aria-modal="true" aria-label="Código QR de asistencia">
+      <div class="qr-modal-box">
+        <button class="close-btn" id="qr-modal-close" aria-label="Cerrar">✕</button>
+        <h3 id="qr-modal-title">QR de asistencia</h3>
+        <div class="qr-sub" id="qr-modal-sub">Muestra este código a tus alumnos</div>
+        <div id="qr-canvas-wrap"></div>
+        <div class="qr-valid-until" id="qr-valid-until"></div>
+        <div class="qr-progress-bar"><span id="qr-progress-span"></span></div>
+        <button class="btn-renew-qr" id="btn-renew-qr">Renovar QR</button>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+      (function () {
+        var API_BASE = window.location.hostname === "localhost" ? "http://localhost:4000/api" : "/api";
+        function getToken() { try { return JSON.parse(localStorage.getItem("mediloop.session") || "{}").token || ""; } catch (_) { return ""; } }
+        function authHdr() { return { "Content-Type": "application/json", "Authorization": "Bearer " + getToken() }; }
+
+        var overlay   = document.getElementById("qr-modal-overlay");
+        var closeBtn  = document.getElementById("qr-modal-close");
+        var titleEl   = document.getElementById("qr-modal-title");
+        var subEl     = document.getElementById("qr-modal-sub");
+        var canvasWrap = document.getElementById("qr-canvas-wrap");
+        var validEl   = document.getElementById("qr-valid-until");
+        var progressEl = document.getElementById("qr-progress-span");
+        var renewBtn  = document.getElementById("btn-renew-qr");
+
+        var countdownTimer = null;
+        var totalMs = 0;
+        var qrObj = null;
+
+        function pad(n) { return String(n).padStart(2, "0"); }
+
+        function formatTime(ms) {
+          if (ms <= 0) return "00:00:00";
+          var s = Math.floor(ms / 1000);
+          var h = Math.floor(s / 3600);
+          var m = Math.floor((s % 3600) / 60);
+          var sec = s % 60;
+          return pad(h) + ":" + pad(m) + ":" + pad(sec);
+        }
+
+        function startCountdown(msLeft) {
+          if (countdownTimer) clearInterval(countdownTimer);
+          var deadline = Date.now() + msLeft;
+          totalMs = msLeft;
+
+          function tick() {
+            var remaining = deadline - Date.now();
+            if (remaining <= 0) {
+              clearInterval(countdownTimer);
+              validEl.textContent = "QR caducado";
+              progressEl.style.width = "0%";
+              canvasWrap.classList.add("expired");
+              renewBtn.classList.add("visible");
+              return;
+            }
+            validEl.textContent = "Válido: " + formatTime(remaining);
+            progressEl.style.width = Math.max(0, (remaining / (43200 * 1000)) * 100) + "%";
+          }
+          tick();
+          countdownTimer = setInterval(tick, 1000);
+        }
+
+        function renderQr(token) {
+          canvasWrap.innerHTML = "";
+          canvasWrap.classList.remove("expired");
+          if (qrObj) { try { qrObj.clear(); } catch (_) {} }
+          try {
+            qrObj = new QRCode(canvasWrap, {
+              text: token,
+              width: 196, height: 196,
+              colorDark: "#111827", colorLight: "#ffffff",
+              correctLevel: QRCode.CorrectLevel.M
+            });
+          } catch (_) {
+            canvasWrap.innerHTML = '<code style="font-size:0.65rem;word-break:break-all;color:#374151">' + token + '</code>';
+          }
+        }
+
+        function openQrModal(rotationId) {
+          renewBtn.classList.remove("visible");
+          canvasWrap.innerHTML = '<p style="color:#6b7280;font-size:0.85rem">Generando QR...</p>';
+          validEl.textContent = "";
+          progressEl.style.width = "100%";
+          overlay.classList.add("open");
+
+          fetch(API_BASE + "/tutor/rotations/" + rotationId + "/qr", { headers: authHdr() })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+              if (data.service) titleEl.textContent = data.service;
+              if (data.hospital) subEl.textContent = data.hospital;
+              renderQr(data.token);
+              startCountdown(data.msLeft);
+            })
+            .catch(function () {
+              canvasWrap.innerHTML = '<p style="color:#dc2626;font-size:0.85rem">Error al generar el QR.</p>';
+            });
+        }
+
+        // Exponer globalmente para que loadRotaciones() pueda llamarla
+        window.openQrModal = openQrModal;
+
+        closeBtn.addEventListener("click", function () {
+          overlay.classList.remove("open");
+          if (countdownTimer) clearInterval(countdownTimer);
+        });
+        overlay.addEventListener("click", function (e) {
+          if (e.target === overlay) {
+            overlay.classList.remove("open");
+            if (countdownTimer) clearInterval(countdownTimer);
+          }
+        });
+        renewBtn.addEventListener("click", function () {
+          var rotId = renewBtn.getAttribute("data-rot-id");
+          if (rotId) openQrModal(rotId);
+        });
+
+        // Almacenar rotationId activo en el botón renovar
+        var origOpen = window.openQrModal;
+        window.openQrModal = function (rotId) {
+          renewBtn.setAttribute("data-rot-id", rotId);
+          origOpen(rotId);
+        };
       })();
     </script>
 

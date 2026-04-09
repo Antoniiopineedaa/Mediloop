@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const QRCode = require("qrcode");
+const crypto = require("crypto");
 const db = require("./db");
 
 const router = express.Router();
@@ -30,6 +31,12 @@ function timeAgo(isoString) {
   if (diff < 3600)  return "Hace " + Math.floor(diff / 60) + " min";
   if (diff < 86400) return "Hace " + Math.floor(diff / 3600) + " h";
   return "Hace " + Math.floor(diff / 86400) + " días";
+}
+
+// Genera token QR válido 12 horas. periodOffset=-1 = período anterior (aceptado como válido)
+function makeQrToken(rotationId, tutorId, periodOffset) {
+  var period = Math.floor(Date.now() / 43200000) + (periodOffset || 0);
+  return crypto.createHash("sha256").update(rotationId + ":" + tutorId + ":" + period).digest("hex").slice(0, 32);
 }
 
 function createJWT(user) {
@@ -180,6 +187,19 @@ router.delete("/rotations/:id/enroll/:studentId", requireAuth, requireRole("tuto
   return res.json({ ok: true });
 });
 
+// Token QR rotatorio (12h) — solo el tutor dueño de la rotación
+router.get("/tutor/rotations/:id/qr", requireAuth, requireRole("tutor"), (req, res) => {
+  const rotation = db.prepare("SELECT * FROM rotations WHERE id = ? AND tutor_id = ?").get(req.params.id, req.user.sub);
+  if (!rotation) return res.status(404).json({ message: "Rotación no encontrada" });
+
+  const token = makeQrToken(rotation.id, rotation.tutor_id);
+  const period = Math.floor(Date.now() / 43200000);
+  const expiresAt = new Date((period + 1) * 43200000).toISOString();
+  const msLeft = (period + 1) * 43200000 - Date.now();
+
+  return res.json({ token, expiresAt, msLeft, rotationId: rotation.id, service: rotation.service, hospital: rotation.hospital });
+});
+
 // ── QR ────────────────────────────────────────────────────────────────────────
 router.get("/qr-image/:token", async (req, res) => {
   const rotation = db.prepare("SELECT * FROM rotations WHERE qr_token = ?").get(req.params.token);
@@ -286,8 +306,27 @@ router.post("/attendance/qr-checkin", requireAuth, requireRole("student"), (req,
   let rotationId = null;
 
   if (token) {
-    const rotation = db.prepare("SELECT * FROM rotations WHERE qr_token = ?").get(token);
-    if (!rotation) return res.status(404).json({ message: "QR inválido o expirado" });
+    // 1. Intenta con el token estático (compatibilidad hacia atrás)
+    let rotation = db.prepare("SELECT * FROM rotations WHERE qr_token = ?").get(token);
+
+    // 2. Si no coincide, valida con el token rotatorio de 12h
+    if (!rotation) {
+      const enrolled = db.prepare(`
+        SELECT r.* FROM rotations r
+        JOIN rotation_students rs ON rs.rotation_id = r.id
+        WHERE rs.student_id = ?
+      `).all(user.id);
+
+      for (var i = 0; i < enrolled.length; i++) {
+        var rot = enrolled[i];
+        if (token === makeQrToken(rot.id, rot.tutor_id) || token === makeQrToken(rot.id, rot.tutor_id, -1)) {
+          rotation = rot;
+          break;
+        }
+      }
+    }
+
+    if (!rotation) return res.status(401).json({ message: "QR inválido o expirado" });
     area = rotation.service + " · " + rotation.hospital;
     rotationId = rotation.id;
   }
@@ -300,6 +339,32 @@ router.post("/attendance/qr-checkin", requireAuth, requireRole("student"), (req,
     id, user.id, user.name, rotationId, area, "Ahora mismo"
   );
   return res.status(201).json({ ok: true, id });
+});
+
+// Simulación de check-in (sin necesidad de escanear QR físico — solo demo)
+router.post("/attendance/simulate", requireAuth, requireRole("student"), (req, res) => {
+  const user = db.prepare("SELECT * FROM users WHERE id = ?").get(req.user.sub);
+  if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
+
+  const rotationId = String(req.body?.rotationId || "").trim();
+  if (!rotationId) return res.status(400).json({ message: "Falta rotationId" });
+
+  const rotation = db.prepare(`
+    SELECT r.* FROM rotations r
+    JOIN rotation_students rs ON rs.rotation_id = r.id
+    WHERE r.id = ? AND rs.student_id = ?
+  `).get(rotationId, user.id);
+  if (!rotation) return res.status(403).json({ message: "No estás inscrito en esta rotación" });
+
+  const area = rotation.service + " · " + rotation.hospital;
+  const existing = db.prepare("SELECT id FROM attendance_pending WHERE student_id = ? AND rotation_id = ?").get(user.id, rotationId);
+  if (existing) return res.status(409).json({ message: "Ya tienes una asistencia pendiente para esta rotación" });
+
+  const id = newId("qr");
+  db.prepare("INSERT INTO attendance_pending VALUES (?, ?, ?, ?, ?, ?)").run(
+    id, user.id, user.name, rotationId, area, "Ahora mismo"
+  );
+  return res.status(201).json({ ok: true, id, area });
 });
 
 // Confirmar todos los pendientes de golpe

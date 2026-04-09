@@ -1347,15 +1347,48 @@
             wrap.innerHTML = '<p style="color:#6b7280;font-size:0.88rem">No tienes rotaciones asignadas. Cuando el tutor te añada a una, aparecerá aquí.</p>';
             return;
           }
-          wrap.innerHTML = rots.map(function (rot) {
-            return '<div style="background:#fff;border-radius:12px;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);flex-wrap:wrap">' +
+          wrap.innerHTML = "";
+          rots.forEach(function (rot) {
+            var today = new Date().toISOString().slice(0, 10);
+            var isActive = rot.start_date <= today && rot.end_date >= today;
+            var div = document.createElement("div");
+            div.style.cssText = "background:#fff;border-radius:12px;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);flex-wrap:wrap";
+            div.innerHTML =
               '<div>' +
                 '<div style="font-weight:600;font-size:0.95rem">' + rot.service + '</div>' +
                 '<div style="font-size:0.82rem;color:#6b7280">' + rot.hospital + ' · ' + rot.start_date + ' → ' + rot.end_date + '</div>' +
+                '<div id="att-status-' + rot.id + '" style="font-size:0.78rem;margin-top:0.25rem;color:#6b7280">Cargando estado...</div>' +
               '</div>' +
-              '<a href="qr-scan.html" style="background:#2563eb;color:#fff;border:none;border-radius:8px;padding:0.45rem 1rem;font-size:0.85rem;font-weight:600;text-decoration:none;white-space:nowrap">Escanear QR</a>' +
-            '</div>';
-          }).join("");
+              '<button type="button" class="btn-registrar-att" data-rot-id="' + rot.id + '" data-service="' + rot.service + '" data-hospital="' + rot.hospital + '" ' +
+                'style="background:' + (isActive ? '#2563eb' : '#9ca3af') + ';color:#fff;border:none;border-radius:8px;padding:0.45rem 1rem;font-size:0.85rem;font-weight:600;cursor:pointer;white-space:nowrap"' +
+                (isActive ? '' : ' disabled title="Rotación no activa hoy"') + '>' +
+                (isActive ? 'Registrar asistencia' : 'No activa hoy') +
+              '</button>';
+            wrap.appendChild(div);
+          });
+
+          // Cargar estado de asistencia por rotación
+          fetch(API_BASE + "/attendance/my", { headers: authHeaders() })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+              rots.forEach(function(rot) {
+                var el = document.getElementById("att-status-" + rot.id);
+                if (!el) return;
+                var pending = (data.pending || []).find(function(a) { return a.area && a.area.includes(rot.service); });
+                var confirmed = (data.confirmed || []).find(function(a) { return a.area && a.area.includes(rot.service); });
+                if (pending) el.innerHTML = '<span style="color:#b45309">⏳ Pendiente de confirmación</span>';
+                else if (confirmed) el.innerHTML = '<span style="color:#16a34a">✅ Confirmada · ' + confirmed.time + '</span>';
+                else el.innerHTML = '<span style="color:#9ca3af">Sin registro hoy</span>';
+              });
+            })
+            .catch(function() {});
+
+          // Botones de registrar asistencia
+          wrap.querySelectorAll(".btn-registrar-att").forEach(function(btn) {
+            btn.addEventListener("click", function() {
+              openAttModal(btn.getAttribute("data-rot-id"), btn.getAttribute("data-service"), btn.getAttribute("data-hospital"));
+            });
+          });
         }
 
         function renderAsistenciaHistorial(data) {
@@ -1599,6 +1632,7 @@
             }).join("");
           });
         }
+        window._loadNovedades = loadNovedades;
         loadNovedades();
 
         // Evaluaciones recibidas
@@ -1623,6 +1657,127 @@
         setupUndoControls();
         setupScrollTop();
         setInterval(updateSystemIndicator, 15000);
+      })();
+    </script>
+
+    <!-- Modal registrar asistencia ──────────────────────────────────────── -->
+    <style>
+      .att-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.55); z-index: 200; align-items: center; justify-content: center; }
+      .att-modal-overlay.open { display: flex; }
+      .att-modal-box { background: #fff; border-radius: 20px; padding: 1.75rem; max-width: 340px; width: 90%; box-shadow: 0 20px 60px rgba(15,23,42,0.35); position: relative; }
+      .att-modal-box .close-btn { position: absolute; top: 0.85rem; right: 0.85rem; border: none; background: #f3f4f6; border-radius: 8px; width: 32px; height: 32px; font-size: 1rem; cursor: pointer; color: #6b7280; }
+      .att-modal-box h3 { margin: 0 0 0.2rem; font-size: 1rem; }
+      .att-modal-box .att-sub { font-size: 0.82rem; color: #6b7280; margin-bottom: 1.25rem; }
+      .att-modal-sep { border: none; border-top: 1px solid #e5e7eb; margin: 1rem 0; }
+      .att-modal-box .att-msg { font-size: 0.85rem; padding: 0.6rem 0.85rem; border-radius: 10px; margin-bottom: 0.75rem; display: none; }
+      .att-modal-box .att-msg.error { display: block; background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+      .att-modal-box .att-msg.success { display: block; background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+      .btn-simulate { width: 100%; border: none; border-radius: 10px; padding: 0.75rem; font-size: 0.9rem; font-weight: 600; background: linear-gradient(90deg,#2563eb,#4f46e5); color: #fff; cursor: pointer; }
+      .btn-simulate:disabled { opacity: 0.6; cursor: not-allowed; }
+      .att-or { text-align: center; font-size: 0.8rem; color: #9ca3af; margin: 0.75rem 0; }
+      .att-token-row { display: flex; gap: 0.5rem; }
+      .att-token-row input { flex: 1; padding: 0.6rem 0.75rem; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 0.85rem; outline: none; }
+      .att-token-row input:focus { border-color: #4f46e5; }
+      .att-token-row button { border: none; border-radius: 10px; background: #4f46e5; color: #fff; font-size: 0.82rem; font-weight: 600; padding: 0 0.9rem; cursor: pointer; white-space: nowrap; }
+    </style>
+    <div class="att-modal-overlay" id="att-modal-overlay" role="dialog" aria-modal="true">
+      <div class="att-modal-box">
+        <button class="close-btn" id="att-modal-close" aria-label="Cerrar">✕</button>
+        <h3 id="att-modal-title">Registrar asistencia</h3>
+        <div class="att-sub" id="att-modal-sub"></div>
+        <div class="att-msg" id="att-msg"></div>
+        <button type="button" class="btn-simulate" id="btn-simulate">📲 Simular escaneo</button>
+        <div class="att-or">— o introduce el código del QR —</div>
+        <div class="att-token-row">
+          <input type="text" id="att-token-input" placeholder="Código QR del tutor" />
+          <button type="button" id="btn-submit-token">Enviar</button>
+        </div>
+      </div>
+    </div>
+    <script>
+      (function () {
+        var API_BASE = window.location.hostname === "localhost" ? "http://localhost:4000/api" : "/api";
+        function getToken() { try { return JSON.parse(localStorage.getItem("mediloop.session") || "{}").token || ""; } catch (_) { return ""; } }
+        function authHdr() { return { "Content-Type": "application/json", "Authorization": "Bearer " + getToken() }; }
+
+        var overlay    = document.getElementById("att-modal-overlay");
+        var closeBtn   = document.getElementById("att-modal-close");
+        var titleEl    = document.getElementById("att-modal-title");
+        var subEl      = document.getElementById("att-modal-sub");
+        var msgEl      = document.getElementById("att-msg");
+        var simBtn     = document.getElementById("btn-simulate");
+        var tokenInput = document.getElementById("att-token-input");
+        var submitTok  = document.getElementById("btn-submit-token");
+
+        var activeRotId = null;
+
+        function showAttMsg(type, text) { msgEl.className = "att-msg " + type; msgEl.textContent = text; }
+        function clearAttMsg() { msgEl.className = "att-msg"; msgEl.textContent = ""; }
+
+        function openAttModal(rotationId, service, hospital) {
+          activeRotId = rotationId;
+          titleEl.textContent = service || "Registrar asistencia";
+          subEl.textContent = hospital || "";
+          clearAttMsg();
+          tokenInput.value = "";
+          simBtn.disabled = false;
+          simBtn.textContent = "📲 Simular escaneo";
+          overlay.classList.add("open");
+        }
+
+        // Exponer para que renderAsistenciaQR() pueda llamarla
+        window.openAttModal = openAttModal;
+
+        function onSuccess(area) {
+          showAttMsg("success", "Asistencia registrada en: " + area + ". Pendiente de confirmación del tutor.");
+          simBtn.disabled = true;
+          submitTok.disabled = true;
+          // Recargar el historial después de 1.5s
+          setTimeout(function() {
+            overlay.classList.remove("open");
+            // Disparar recarga del historial si está disponible
+            if (window._loadNovedades) window._loadNovedades();
+          }, 1800);
+        }
+
+        simBtn.addEventListener("click", function() {
+          if (!activeRotId) return;
+          simBtn.disabled = true;
+          simBtn.textContent = "Registrando...";
+          clearAttMsg();
+          fetch(API_BASE + "/attendance/simulate", {
+            method: "POST",
+            headers: authHdr(),
+            body: JSON.stringify({ rotationId: activeRotId })
+          })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(result) {
+              if (!result.ok) { showAttMsg("error", result.data.message || "No se pudo registrar."); simBtn.disabled = false; simBtn.textContent = "📲 Simular escaneo"; return; }
+              onSuccess(result.data.area || "tu rotación");
+            })
+            .catch(function() { showAttMsg("error", "Error de conexión."); simBtn.disabled = false; simBtn.textContent = "📲 Simular escaneo"; });
+        });
+
+        submitTok.addEventListener("click", function() {
+          var tok = tokenInput.value.trim();
+          if (!tok) { showAttMsg("error", "Introduce el código QR."); return; }
+          submitTok.disabled = true;
+          clearAttMsg();
+          fetch(API_BASE + "/attendance/qr-checkin", {
+            method: "POST",
+            headers: authHdr(),
+            body: JSON.stringify({ token: tok })
+          })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(result) {
+              if (!result.ok) { showAttMsg("error", result.data.message || "QR inválido o expirado."); submitTok.disabled = false; return; }
+              onSuccess("tu rotación");
+            })
+            .catch(function() { showAttMsg("error", "Error de conexión."); submitTok.disabled = false; });
+        });
+
+        closeBtn.addEventListener("click", function() { overlay.classList.remove("open"); });
+        overlay.addEventListener("click", function(e) { if (e.target === overlay) overlay.classList.remove("open"); });
       })();
     </script>
 
