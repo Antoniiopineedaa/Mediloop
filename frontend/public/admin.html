@@ -196,6 +196,79 @@
       }
       .role-badge.student { background: #dbeafe; color: var(--blue); }
       .role-badge.tutor   { background: #d1fae5; color: var(--green); }
+      /* Tabs */
+      .tabs {
+        display: flex;
+        gap: 0.25rem;
+        background: var(--gray-100);
+        border-radius: 12px;
+        padding: 0.25rem;
+        margin-bottom: 2rem;
+        width: fit-content;
+      }
+      .tab-btn {
+        padding: 0.55rem 1.25rem;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        background: transparent;
+        color: var(--gray-600);
+        transition: all 0.15s;
+      }
+      .tab-btn.active { background: #fff; color: var(--gray-900); box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+      .tab-panel { display: none; }
+      .tab-panel.active { display: block; }
+      /* Rotation form */
+      .rot-form-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+      .rot-form-card h3 { margin: 0 0 1.25rem; font-size: 1rem; font-weight: 700; }
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+      }
+      .form-field { display: flex; flex-direction: column; gap: 0.3rem; }
+      .form-field label { font-size: 0.78rem; font-weight: 600; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.04em; }
+      .form-field input, .form-field select {
+        padding: 0.55rem 0.75rem;
+        border: 1px solid var(--gray-200);
+        border-radius: 10px;
+        font-size: 0.88rem;
+        outline: none;
+        background: #fff;
+        width: 100%;
+      }
+      .form-field input:focus, .form-field select:focus { border-color: var(--blue); }
+      .btn-create {
+        padding: 0.6rem 1.5rem;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(90deg, var(--blue), var(--indigo));
+        color: #fff;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .btn-create:disabled { opacity: 0.6; cursor: default; }
+      /* Status badge */
+      .status-badge {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+      .status-badge.en-curso  { background: #d1fae5; color: var(--green); }
+      .status-badge.planificada { background: #dbeafe; color: var(--blue); }
+      .status-badge.finalizada  { background: var(--gray-100); color: var(--gray-600); }
       .btn-delete {
         padding: 0.35rem 0.7rem;
         border: none;
@@ -349,34 +422,97 @@
         </div>
       </div>
 
-      <!-- Users table -->
-      <div class="section-header">
-        <h2>Usuarios registrados</h2>
-        <div class="search-wrap">
-          <input type="text" id="search-input" placeholder="Buscar por nombre o email…" />
-          <select class="filter-select" id="role-filter">
-            <option value="">Todos los roles</option>
-            <option value="student">Alumnos</option>
-            <option value="tutor">Tutores</option>
-          </select>
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="usuarios">Usuarios</button>
+        <button class="tab-btn" data-tab="rotaciones">Rotaciones</button>
+      </div>
+
+      <!-- Tab: Usuarios -->
+      <div class="tab-panel active" id="tab-usuarios">
+        <div class="section-header">
+          <h2>Usuarios registrados</h2>
+          <div class="search-wrap">
+            <input type="text" id="search-input" placeholder="Buscar por nombre o email…" />
+            <select class="filter-select" id="role-filter">
+              <option value="">Todos los roles</option>
+              <option value="student">Alumnos</option>
+              <option value="tutor">Tutores</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Registrado</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody">
+              <tr class="empty-row"><td colspan="5">Cargando…</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Email</th>
-              <th>Rol</th>
-              <th>Registrado</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="users-tbody">
-            <tr class="empty-row"><td colspan="5">Cargando…</td></tr>
-          </tbody>
-        </table>
+      <!-- Tab: Rotaciones -->
+      <div class="tab-panel" id="tab-rotaciones">
+        <!-- Formulario crear rotación -->
+        <div class="rot-form-card">
+          <h3>Nueva rotación</h3>
+          <div class="form-grid">
+            <div class="form-field">
+              <label>Hospital / Centro</label>
+              <input type="text" id="rot-hospital" placeholder="Hospital General de Castellón" />
+            </div>
+            <div class="form-field">
+              <label>Servicio</label>
+              <input type="text" id="rot-service" placeholder="Medicina Interna" />
+            </div>
+            <div class="form-field">
+              <label>Fecha inicio</label>
+              <input type="date" id="rot-start" />
+            </div>
+            <div class="form-field">
+              <label>Fecha fin</label>
+              <input type="date" id="rot-end" />
+            </div>
+            <div class="form-field" style="grid-column: 1 / -1">
+              <label>Tutor asignado</label>
+              <select id="rot-tutor">
+                <option value="">Sin tutor asignado</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-create" id="btn-create-rot">Crear rotación</button>
+        </div>
+
+        <!-- Tabla rotaciones -->
+        <div class="section-header">
+          <h2>Rotaciones del sistema</h2>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Servicio</th>
+                <th>Hospital</th>
+                <th>Tutor</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th>Estado</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="rot-tbody">
+              <tr class="empty-row"><td colspan="7">Cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </main>
 
@@ -499,15 +635,6 @@
         var pendingDeleteId = null;
         var confirmOverlay = document.getElementById("confirm-overlay");
 
-        document.getElementById("users-tbody").addEventListener("click", function(e) {
-          var btn = e.target.closest(".btn-delete");
-          if (!btn) return;
-          pendingDeleteId = btn.dataset.id;
-          document.getElementById("confirm-text").textContent =
-            '¿Seguro que quieres eliminar a "' + btn.dataset.name + '"? Esta acción no se puede deshacer.';
-          confirmOverlay.classList.add("open");
-        });
-
         document.getElementById("confirm-cancel").addEventListener("click", function() {
           confirmOverlay.classList.remove("open");
           pendingDeleteId = null;
@@ -519,20 +646,144 @@
         document.getElementById("confirm-ok").addEventListener("click", function() {
           if (!pendingDeleteId) return;
           var id = pendingDeleteId;
+          var type = pendingDeleteType;
           confirmOverlay.classList.remove("open");
           pendingDeleteId = null;
-          fetch(API_BASE + "/admin/users/" + id, { method: "DELETE", headers: authHdr() })
+          pendingDeleteType = null;
+          if (type === "rotation") {
+            fetch(API_BASE + "/admin/rotations/" + id, { method: "DELETE", headers: authHdr() })
+              .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+              .then(function(res) {
+                if (!res.ok) { showToast("err", res.data.message || "Error al eliminar."); return; }
+                showToast("ok", "Rotación eliminada.");
+                allRotations = allRotations.filter(function(r) { return r.id !== id; });
+                renderRotations(allRotations);
+                var statEl = document.getElementById("stat-rotations");
+                if (statEl) statEl.textContent = Math.max(0, parseInt(statEl.textContent) - 1);
+              })
+              .catch(function() { showToast("err", "Error de conexión."); });
+          } else {
+            fetch(API_BASE + "/admin/users/" + id, { method: "DELETE", headers: authHdr() })
+              .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+              .then(function(res) {
+                if (!res.ok) { showToast("err", res.data.message || "Error al eliminar."); return; }
+                showToast("ok", "Usuario eliminado correctamente.");
+                allUsers = allUsers.filter(function(u) { return u.id !== id; });
+                applyFilters();
+                var statEl = document.getElementById("stat-users");
+                if (statEl) statEl.textContent = Math.max(0, parseInt(statEl.textContent) - 1);
+              })
+              .catch(function() { showToast("err", "Error de conexión."); });
+          }
+        });
+
+        // ── Tabs ──────────────────────────────────────────────────────────────
+        document.querySelectorAll(".tab-btn").forEach(function(btn) {
+          btn.addEventListener("click", function() {
+            document.querySelectorAll(".tab-btn").forEach(function(b) { b.classList.remove("active"); });
+            document.querySelectorAll(".tab-panel").forEach(function(p) { p.classList.remove("active"); });
+            btn.classList.add("active");
+            document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
+            if (btn.dataset.tab === "rotaciones") loadRotations();
+          });
+        });
+
+        // ── Rotaciones ────────────────────────────────────────────────────────
+        var allRotations = [];
+        var allTutors = [];
+
+        function renderRotations(rows) {
+          var tbody = document.getElementById("rot-tbody");
+          if (!rows.length) {
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Sin rotaciones. Crea la primera.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = rows.map(function(r) {
+            var statusClass = r.status === "en curso" ? "en-curso" : r.status === "planificada" ? "planificada" : "finalizada";
+            return '<tr>' +
+              '<td style="font-weight:500">' + escHtml(r.service) + '</td>' +
+              '<td style="color:var(--gray-600)">' + escHtml(r.hospital) + '</td>' +
+              '<td>' + (r.tutor_name ? escHtml(r.tutor_name) : '<em style="color:#9ca3af">Sin tutor</em>') + '</td>' +
+              '<td style="color:var(--gray-600)">' + r.start_date + '</td>' +
+              '<td style="color:var(--gray-600)">' + r.end_date + '</td>' +
+              '<td><span class="status-badge ' + statusClass + '">' + r.status + '</span></td>' +
+              '<td><button class="btn-delete" data-id="' + r.id + '" data-name="' + escAttr(r.service) + '" data-type="rotation">Eliminar</button></td>' +
+              '</tr>';
+          }).join("");
+        }
+
+        function loadRotations() {
+          fetch(API_BASE + "/admin/rotations", { headers: authHdr() })
+            .then(function(r) { return r.json(); })
+            .then(function(rows) {
+              allRotations = rows;
+              renderRotations(rows);
+            })
+            .catch(function() { showToast("err", "Error al cargar rotaciones."); });
+        }
+
+        function loadTutorsForSelect() {
+          fetch(API_BASE + "/admin/users", { headers: authHdr() })
+            .then(function(r) { return r.json(); })
+            .then(function(users) {
+              allTutors = users.filter(function(u) { return u.role === "tutor"; });
+              var sel = document.getElementById("rot-tutor");
+              allTutors.forEach(function(t) {
+                var opt = document.createElement("option");
+                opt.value = t.id;
+                opt.textContent = t.name;
+                sel.appendChild(opt);
+              });
+            });
+        }
+        loadTutorsForSelect();
+
+        document.getElementById("btn-create-rot").addEventListener("click", function() {
+          var hospital = document.getElementById("rot-hospital").value.trim();
+          var service  = document.getElementById("rot-service").value.trim();
+          var startDate = document.getElementById("rot-start").value;
+          var endDate   = document.getElementById("rot-end").value;
+          var tutorId   = document.getElementById("rot-tutor").value;
+          if (!hospital || !service || !startDate || !endDate) {
+            showToast("err", "Completa hospital, servicio y fechas.");
+            return;
+          }
+          if (endDate < startDate) { showToast("err", "La fecha de fin debe ser posterior al inicio."); return; }
+          var btn = document.getElementById("btn-create-rot");
+          btn.disabled = true; btn.textContent = "Creando...";
+          fetch(API_BASE + "/admin/rotations", {
+            method: "POST",
+            headers: authHdr(),
+            body: JSON.stringify({ hospital: hospital, service: service, startDate: startDate, endDate: endDate, tutorId: tutorId || null })
+          })
             .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
             .then(function(res) {
-              if (!res.ok) { showToast("err", res.data.message || "Error al eliminar."); return; }
-              showToast("ok", "Usuario eliminado correctamente.");
-              allUsers = allUsers.filter(function(u) { return u.id !== id; });
-              applyFilters();
-              // Update stats
-              var statEl = document.getElementById("stat-users");
-              if (statEl) statEl.textContent = Math.max(0, parseInt(statEl.textContent) - 1);
+              if (!res.ok) { showToast("err", res.data.message || "Error al crear."); return; }
+              showToast("ok", "Rotación creada correctamente.");
+              document.getElementById("rot-hospital").value = "";
+              document.getElementById("rot-service").value  = "";
+              document.getElementById("rot-start").value    = "";
+              document.getElementById("rot-end").value      = "";
+              document.getElementById("rot-tutor").value    = "";
+              loadRotations();
+              var statEl = document.getElementById("stat-rotations");
+              if (statEl) statEl.textContent = parseInt(statEl.textContent || "0") + 1;
             })
-            .catch(function() { showToast("err", "Error de conexión."); });
+            .catch(function() { showToast("err", "Error de conexión."); })
+            .finally(function() { btn.disabled = false; btn.textContent = "Crear rotación"; });
+        });
+
+        // Delete (shared for users and rotations)
+        var pendingDeleteType = null;
+        document.addEventListener("click", function(e) {
+          var btn = e.target.closest(".btn-delete");
+          if (!btn) return;
+          pendingDeleteId = btn.dataset.id;
+          pendingDeleteType = btn.dataset.type || "user";
+          var name = btn.dataset.name;
+          document.getElementById("confirm-text").textContent =
+            '¿Seguro que quieres eliminar "' + name + '"? Esta acción no se puede deshacer.';
+          confirmOverlay.classList.add("open");
         });
       })();
     </script>

@@ -1688,6 +1688,32 @@
         window._loadNovedades = loadNovedades;
         loadNovedades();
 
+        // Polling de notificaciones (cada 30s)
+        var _lastPendingIds = null;
+        function pollAttendance() {
+          fetch(API_BASE + "/attendance/my", { headers: authHeaders() })
+            .then(function(r) { return r.json(); })
+            .then(function(att) {
+              var currentIds = (att.pending || []).map(function(a) { return a.id; }).sort().join(",");
+              if (_lastPendingIds === null) {
+                _lastPendingIds = currentIds;
+                return;
+              }
+              if (currentIds !== _lastPendingIds) {
+                var prev = _lastPendingIds.split(",").filter(Boolean);
+                var curr = currentIds.split(",").filter(Boolean);
+                var removed = prev.filter(function(id) { return !curr.includes(id); });
+                if (removed.length) {
+                  showStatus("success", "Tu tutor ha revisado tu asistencia.");
+                  loadNovedades();
+                }
+                _lastPendingIds = currentIds;
+              }
+            })
+            .catch(function() {});
+        }
+        setInterval(pollAttendance, 30000);
+
         // Evaluaciones recibidas
         function renderEvaluaciones(evals) {
           renderCompetencias(evals);

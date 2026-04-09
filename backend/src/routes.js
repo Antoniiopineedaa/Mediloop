@@ -170,6 +170,42 @@ router.delete("/admin/users/:id", requireAuth, requireAdmin, (req, res) => {
   return res.json({ ok: true });
 });
 
+// ── Admin rotaciones ──────────────────────────────────────────────────────────
+router.get("/admin/rotations", requireAuth, requireAdmin, (_req, res) => {
+  const rows = db.prepare(`
+    SELECT r.*, u.name as tutor_name
+    FROM rotations r
+    LEFT JOIN users u ON u.id = r.tutor_id
+    ORDER BY r.start_date DESC
+  `).all();
+  return res.json(rows);
+});
+
+router.post("/admin/rotations", requireAuth, requireAdmin, (req, res) => {
+  const { hospital, service, startDate, endDate, tutorId } = req.body || {};
+  if (!hospital || !service || !startDate || !endDate) {
+    return res.status(400).json({ message: "Faltan campos: hospital, service, startDate, endDate" });
+  }
+  if (tutorId) {
+    const tutor = db.prepare("SELECT id FROM users WHERE id = ? AND role = 'tutor'").get(tutorId);
+    if (!tutor) return res.status(404).json({ message: "Tutor no encontrado" });
+  }
+  const id = newId("rot");
+  const qr_token = newId("qr");
+  db.prepare("INSERT INTO rotations VALUES (?, ?, ?, ?, ?, ?, ?, ?)").run(
+    id, hospital, service, startDate, endDate, tutorId || null, qr_token, "planificada"
+  );
+  return res.status(201).json({ ok: true, id });
+});
+
+router.delete("/admin/rotations/:id", requireAuth, requireAdmin, (req, res) => {
+  const rotation = db.prepare("SELECT id FROM rotations WHERE id = ?").get(req.params.id);
+  if (!rotation) return res.status(404).json({ message: "Rotación no encontrada" });
+  db.prepare("DELETE FROM rotation_students WHERE rotation_id = ?").run(req.params.id);
+  db.prepare("DELETE FROM rotations WHERE id = ?").run(req.params.id);
+  return res.json({ ok: true });
+});
+
 // ── Rotaciones ────────────────────────────────────────────────────────────────
 router.get("/rotations", requireAuth, (req, res) => {
   if (req.user.role === "tutor") {
