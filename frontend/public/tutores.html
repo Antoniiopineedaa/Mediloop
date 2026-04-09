@@ -945,14 +945,14 @@
           <p style="margin:0.25rem 0 0.45rem;opacity:0.95">Tutor Clínico · UJI</p>
           <div class="xp">
             <div class="bar"><span></span></div>
-            <p>750/1000 XP al siguiente nivel</p>
+            <p>Cargando XP...</p>
           </div>
         </article>
         <article class="card insignias">
           <h4>🏆 Insignias Obtenidas</h4>
           <div class="badges">
             <div class="badge y">🏅<br>Mentor del Mes</div>
-            <div class="badge b">📊<br>100 Evaluaciones</div>
+            <div class="badge b">📊<br>— Evaluaciones</div>
             <div class="badge g">⭐<br>5 Estrellas</div>
             <div class="badge p">🎯<br>Precisión 95%</div>
             <div class="badge r">🔥<br>Racha 30 días</div>
@@ -961,10 +961,10 @@
         </article>
         <article class="card stats">
           <h4>📊 Estadísticas</h4>
-          <div class="row"><span>Estudiantes Evaluados</span><strong id="stat-students">127</strong></div>
-          <div class="row"><span>Promedio de Calificación</span><strong id="stat-avg" style="color:#16a34a">4.8/5</strong></div>
-          <div class="row"><span>Tiempo Promedio</span><strong id="stat-time" style="color:#7c3aed">15 min</strong></div>
-          <div class="row"><span>Ranking Global</span><strong id="stat-rank" style="color:#ea580c">#23</strong></div>
+          <div class="row"><span>Estudiantes Evaluados</span><strong id="stat-students">—</strong></div>
+          <div class="row"><span>Promedio de Calificación</span><strong id="stat-avg" style="color:#16a34a">—</strong></div>
+          <div class="row"><span>Tiempo Promedio</span><strong id="stat-time" style="color:#7c3aed">—</strong></div>
+          <div class="row"><span>Ranking Global</span><strong id="stat-rank" style="color:#ea580c">—</strong></div>
           <a class="btn-rank" href="#dashboard">Ver Ranking Completo</a>
         </article>
       </div>
@@ -1036,15 +1036,15 @@
         <div class="kpi-row">
           <div class="kpi g">
             <div class="label">Mis Estudiantes</div>
-            <div class="val">23</div>
+            <div class="val">—</div>
           </div>
           <div class="kpi p">
             <div class="label">Mi Promedio</div>
-            <div class="val">4.8</div>
+            <div class="val">—</div>
           </div>
           <div class="kpi o">
-            <div class="label">Mis Logros</div>
-            <div class="val">12</div>
+            <div class="label">Evaluaciones</div>
+            <div class="val">—</div>
           </div>
         </div>
         <div class="panel-grid">
@@ -1689,16 +1689,35 @@
             var me = payload[0];
             var dashboard = payload[1];
             var kpis = dashboard.kpis || {};
+            var evalCount = kpis.achievements || 0;
+
+            // Nombre del tutor
             document.querySelector(".panel-card .sub").textContent = me.name || "Tutor";
             var gamName = document.getElementById("gam-tutor-name");
             if (gamName) gamName.textContent = me.name || "Tutor";
+
+            // KPIs reales
             document.querySelector(".kpi.g .val").textContent = String(kpis.students || 0);
             document.querySelector(".kpi.p .val").textContent = String(kpis.avg || 0);
-            document.querySelector(".kpi.o .val").textContent = String(kpis.achievements || 0);
+            document.querySelector(".kpi.o .val").textContent = String(evalCount);
+
+            // Estadísticas reales
             document.getElementById("stat-students").textContent = dashboard.stats.studentsEvaluated;
             document.getElementById("stat-avg").textContent = dashboard.stats.averageScore;
             document.getElementById("stat-time").textContent = dashboard.stats.averageTime;
             document.getElementById("stat-rank").textContent = dashboard.stats.globalRank;
+
+            // XP calculada: cada evaluación = 100 XP
+            var xp = evalCount * 100;
+            var xpNext = Math.ceil((xp + 1) / 1000) * 1000;
+            var xpBar = document.querySelector(".xp .bar span");
+            var xpText = document.querySelector(".xp p");
+            if (xpBar) xpBar.style.width = Math.min(100, (xp % 1000) / 10) + "%";
+            if (xpText) xpText.textContent = (xp % 1000) + "/" + xpNext + " XP al siguiente nivel";
+
+            // Badge de evaluaciones dinámico
+            var evalBadge = document.querySelector(".badge.b");
+            if (evalBadge) evalBadge.innerHTML = "📊<br>" + evalCount + " Evaluaciones";
           })
           .catch(function () {
             showStatus("error", "Error al cargar datos. Comprueba tu conexión.");

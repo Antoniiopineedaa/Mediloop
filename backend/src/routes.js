@@ -255,7 +255,7 @@ router.get("/dashboard/tutor", requireAuth, requireRole("tutor"), (req, res) => 
       averageTime: "15 min",
       globalRank: "#1"
     },
-    kpis: { students: studentCount, avg, achievements: 12 }
+    kpis: { students: studentCount, avg, achievements: evalCount }
   });
 });
 
