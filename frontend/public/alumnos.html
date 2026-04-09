@@ -874,8 +874,8 @@
           <div class="resumen-item">
             <span class="icono rotacion">🛏</span>
             <div>
-              <span class="titulo">Rotación en curso: Cirugía General</span>
-              <p class="detalle">Hospital General · Semana 3 de 6</p>
+              <span class="titulo">Cargando rotación...</span>
+              <p class="detalle">Conectando con el servidor...</p>
             </div>
           </div>
           <div class="resumen-item" id="resumen-asistencia">
@@ -948,48 +948,18 @@
       <div class="dos-columnas">
         <div class="card">
           <h3>Competencias Desarrolladas</h3>
-          <div class="competencia-item">
-            <div class="row" style="justify-content:space-between"><span style="display:flex;align-items:center;gap:0.5rem"><span class="dot" style="background:var(--green)"></span><span>Anamnesis y Exploración</span></span><span class="nivel" style="color:var(--green);font-weight:600">Avanzado</span></div>
-            <div class="bar" style="margin-top:0.25rem"><span style="width:85%;background:var(--green)"></span></div>
-          </div>
-          <div class="competencia-item">
-            <div class="row" style="justify-content:space-between"><span style="display:flex;align-items:center;gap:0.5rem"><span class="dot" style="background:var(--blue)"></span><span>Técnicas Básicas</span></span><span class="nivel" style="color:var(--blue);font-weight:600">Intermedio</span></div>
-            <div class="bar" style="margin-top:0.25rem"><span style="width:62%;background:var(--blue)"></span></div>
-          </div>
-          <div class="competencia-item">
-            <div class="row" style="justify-content:space-between"><span style="display:flex;align-items:center;gap:0.5rem"><span class="dot" style="background:#f59e0b"></span><span>Comunicación Clínica</span></span><span class="nivel" style="color:#f59e0b;font-weight:600">Intermedio</span></div>
-            <div class="bar" style="margin-top:0.25rem"><span style="width:42%;background:#f59e0b"></span></div>
-          </div>
-          <div class="competencia-item">
-            <div class="row" style="justify-content:space-between"><span style="display:flex;align-items:center;gap:0.5rem"><span class="dot" style="background:var(--purple)"></span><span>Trabajo en Equipo</span></span><span class="nivel" style="color:var(--purple);font-weight:600">Avanzado</span></div>
-            <div class="bar" style="margin-top:0.25rem"><span style="width:72%;background:var(--purple)"></span></div>
+          <div id="comp-bars-wrap">
+            <p style="color:#9ca3af;font-size:0.85rem">Cargando competencias...</p>
           </div>
           <div id="mis-evaluaciones" style="margin-top:0.9rem"></div>
           <button type="button" class="btn-gradient js-go" data-target="progreso" style="margin-top:0.75rem;width:100%">Ver Evaluaciones Detalladas</button>
         </div>
         <div class="card">
-          <h3>Calendario de Prácticas</h3>
-          <div class="calendario-item">
-            <span class="line" style="background:var(--blue)"></span>
-            <div><strong>Guardia de Urgencias</strong><br><span style="font-size:0.85rem;color:var(--gray-600)">Hospital General</span></div>
-            <span class="time" style="background:#dbeafe;color:var(--blue)">Hoy 22:00</span>
+          <h3>Mis Rotaciones</h3>
+          <div id="cal-rotaciones">
+            <p style="color:#9ca3af;font-size:0.85rem">Cargando rotaciones...</p>
           </div>
-          <div class="calendario-item">
-            <span class="line" style="background:var(--green)"></span>
-            <div><strong>Consulta Externa</strong><br><span style="font-size:0.85rem;color:var(--gray-600)">Dr. Martínez Cirugía</span></div>
-            <span class="time" style="background:#d1fae5;color:var(--green)">Mañana 9:00</span>
-          </div>
-          <div class="calendario-item">
-            <span class="line" style="background:var(--purple)"></span>
-            <div><strong>Sesión Clínica</strong><br><span style="font-size:0.85rem;color:var(--gray-600)">Casos Complejos</span></div>
-            <span class="time" style="background:#ede9fe;color:var(--purple)">Vie 12:00</span>
-          </div>
-          <div class="calendario-item">
-            <span class="line" style="background:#f59e0b"></span>
-            <div><strong>Evaluación Práctica</strong><br><span style="font-size:0.85rem;color:var(--gray-600)">Competencias Quirúrgicas</span></div>
-            <span class="time" style="background:#ffedd5;color:#d97706">Lun 15:00</span>
-          </div>
-          <button type="button" class="btn-outline js-go" data-target="novedades" style="margin-top:0.75rem;width:100%">Ver Calendario Completo</button>
+          <button type="button" class="btn-outline js-go" data-target="novedades" style="margin-top:0.75rem;width:100%">Ver novedades</button>
         </div>
       </div>
     </section>
@@ -1042,19 +1012,19 @@
           <div class="icon-wrap blue">📖</div>
           <h3>Recursos Prácticos</h3>
           <p>Información rápida, concisa y útil para no perderte en las prácticas hospitalarias.</p>
-          <a href="#recursos" class="blue js-demo-link" data-message="Cargando recursos prácticos...">Explorar →</a>
+          <a href="#recursos" class="blue">Explorar →</a>
         </article>
         <article class="card recurso-card">
           <div class="icon-wrap green">👁</div>
           <h3>Simuladores 3D</h3>
           <p>Modelos anatómicos interactivos para práctica virtual.</p>
-          <a href="#recursos" class="green js-demo-link" data-message="Iniciando simulador 3D...">Practicar →</a>
+          <a href="#recursos" class="green">Practicar →</a>
         </article>
         <article class="card recurso-card">
           <div class="icon-wrap purple">📋</div>
           <h3>Casos Clínicos</h3>
           <p>Estudios de casos reales para desarrollar diagnóstico.</p>
-          <a href="#recursos" class="purple js-demo-link" data-message="Abriendo casos clínicos...">Estudiar →</a>
+          <a href="#recursos" class="purple">Estudiar →</a>
         </article>
       </div>
     </section>
@@ -1313,6 +1283,68 @@
           });
         });
 
+        function renderCalendario(rots) {
+          var el = document.getElementById("cal-rotaciones");
+          if (!el) return;
+          if (!rots || !rots.length) {
+            el.innerHTML = '<p style="color:#9ca3af;font-size:0.85rem">No tienes rotaciones asignadas.</p>';
+            return;
+          }
+          var today = new Date().toISOString().slice(0, 10);
+          var colors = [
+            { line: "var(--blue)",   time_bg: "#dbeafe", time_c: "var(--blue)"   },
+            { line: "var(--green)",  time_bg: "#d1fae5", time_c: "var(--green)"  },
+            { line: "var(--purple)", time_bg: "#ede9fe", time_c: "var(--purple)" },
+            { line: "#f59e0b",       time_bg: "#ffedd5", time_c: "#d97706"       }
+          ];
+          el.innerHTML = rots.map(function(rot, i) {
+            var col = colors[i % colors.length];
+            var isActive  = rot.start_date <= today && rot.end_date >= today;
+            var isPast    = rot.end_date < today;
+            var timeLabel = isPast ? "Completada" : isActive ? "En curso" : rot.start_date;
+            return '<div class="calendario-item">' +
+              '<span class="line" style="background:' + col.line + '"></span>' +
+              '<div><strong>' + rot.service + '</strong><br><span style="font-size:0.85rem;color:var(--gray-600)">' + rot.hospital + '</span></div>' +
+              '<span class="time" style="background:' + col.time_bg + ';color:' + col.time_c + '">' + timeLabel + '</span>' +
+            '</div>';
+          }).join("");
+        }
+
+        function renderCompetencias(evals) {
+          var el = document.getElementById("comp-bars-wrap");
+          if (!el) return;
+          if (!evals || !evals.length) {
+            el.innerHTML = '<p style="color:#9ca3af;font-size:0.85rem">Aún no tienes evaluaciones. Las competencias se calcularán cuando tu tutor te evalúe.</p>';
+            return;
+          }
+          var n = evals.length;
+          var sums = evals.reduce(function(s, e) {
+            return { t: s.t + (e.theory || 0), p: s.p + (e.practical || 0), c: s.c + (e.communication || 0) };
+          }, { t: 0, p: 0, c: 0 });
+          var avgT = Math.round(sums.t / n * 10) / 10;
+          var avgP = Math.round(sums.p / n * 10) / 10;
+          var avgC = Math.round(sums.c / n * 10) / 10;
+
+          function nivel(avg) {
+            if (avg >= 4.5) return "Avanzado";
+            if (avg >= 3)   return "Intermedio";
+            return "Iniciante";
+          }
+          function bar(val, color, label, niv, nivColor) {
+            return '<div class="competencia-item">' +
+              '<div class="row" style="justify-content:space-between">' +
+                '<span style="display:flex;align-items:center;gap:0.5rem"><span class="dot" style="background:' + color + '"></span><span>' + label + '</span></span>' +
+                '<span class="nivel" style="color:' + nivColor + ';font-weight:600">' + niv + ' · ' + val + '/5</span>' +
+              '</div>' +
+              '<div class="bar" style="margin-top:0.25rem"><span style="width:' + Math.round(val / 5 * 100) + '%;background:' + color + '"></span></div>' +
+            '</div>';
+          }
+          el.innerHTML =
+            bar(avgT, "var(--green)",  "Conocimiento Teórico",  nivel(avgT), "var(--green)") +
+            bar(avgP, "var(--blue)",   "Habilidades Prácticas", nivel(avgP), "var(--blue)") +
+            bar(avgC, "#f59e0b",       "Comunicación Clínica",  nivel(avgC), "#d97706");
+        }
+
         function renderRotacionesProgreso(rots) {
           var grid = document.getElementById("progreso-rotaciones-grid");
           if (!grid) return;
@@ -1434,11 +1466,12 @@
               summaryTitle.textContent = "Rotación en curso: " + dashboard.nextRotation.service;
             }
             if (summaryDetail && dashboard.nextRotation) {
-              summaryDetail.textContent = dashboard.nextRotation.hospital + " · " + dashboard.nextRotation.startDate + " a " + dashboard.nextRotation.endDate;
+              summaryDetail.textContent = dashboard.nextRotation.hospital + " · " + (dashboard.nextRotation.start_date || "") + " a " + (dashboard.nextRotation.end_date || "");
             }
 
             renderRotacionesProgreso(rots);
             renderAsistenciaQR(rots);
+            renderCalendario(rots);
 
             // Tutor asignado en sección apoyo
             var apoyoInfo = document.getElementById("apoyo-tutor-info");
@@ -1637,6 +1670,7 @@
 
         // Evaluaciones recibidas
         function renderEvaluaciones(evals) {
+          renderCompetencias(evals);
           var container = document.getElementById("mis-evaluaciones");
           if (!container || !evals.length) return;
           var html = '<div style="border-top:1px solid #e5e7eb;padding-top:0.75rem;margin-top:0.5rem"><strong style="font-size:0.88rem;color:#374151">Evaluaciones recibidas</strong>';
