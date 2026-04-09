@@ -48,7 +48,8 @@ db.exec(`
     id TEXT PRIMARY KEY,
     student_name TEXT NOT NULL,
     area TEXT NOT NULL,
-    time TEXT NOT NULL
+    time TEXT NOT NULL,
+    student_id TEXT
   );
 
   CREATE TABLE IF NOT EXISTS evaluations (
@@ -132,10 +133,10 @@ seedIfEmpty("rotation_students",
 );
 
 seedIfEmpty("attendance_confirmed",
-  "INSERT INTO attendance_confirmed VALUES (?, ?, ?, ?)",
+  "INSERT INTO attendance_confirmed VALUES (?, ?, ?, ?, ?)",
   [
-    ["att-3", "Ana Martínez", "Medicina Interna", "08:30"],
-    ["att-4", "Carlos Pérez", "Medicina Interna", "08:45"]
+    ["att-3", "Ana Martínez", "Medicina Interna", "08:30", "stu-1"],
+    ["att-4", "Carlos Pérez", "Medicina Interna", "08:45", "stu-2"]
   ]
 );
 
