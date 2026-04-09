@@ -1268,8 +1268,18 @@
             return;
           }
           wrap.innerHTML = items.map(function (it) {
+            var when = it.scannedAt;
+            try {
+              var d = new Date(it.scannedAt);
+              if (!isNaN(d)) {
+                var now = Date.now(), diff = now - d.getTime();
+                if (diff < 60000) when = "hace un momento";
+                else if (diff < 3600000) when = "hace " + Math.floor(diff / 60000) + " min";
+                else when = d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+              }
+            } catch(_) {}
             return '<div class="pending-item">' +
-              '<div><strong>' + it.name + '</strong><div class="meta">Escaneó ' + it.scannedAt + '</div></div>' +
+              '<div><strong>' + it.name + '</strong><div class="meta">Escaneó ' + when + '</div></div>' +
               '<div><button class="btn-xs btn-green" data-confirm="' + it.id + '">Confirmar</button> ' +
               '<button class="btn-xs btn-red" data-reject="' + it.id + '">Rechazar</button></div>' +
             '</div>';

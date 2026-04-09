@@ -379,7 +379,7 @@ router.post("/attendance/qr-checkin", requireAuth, requireRole("student"), (req,
 
   const id = newId("qr");
   db.prepare("INSERT INTO attendance_pending VALUES (?, ?, ?, ?, ?, ?)").run(
-    id, user.id, user.name, rotationId, area, "Ahora mismo"
+    id, user.id, user.name, rotationId, area, new Date().toISOString()
   );
   return res.status(201).json({ ok: true, id });
 });
@@ -405,14 +405,19 @@ router.post("/attendance/simulate", requireAuth, requireRole("student"), (req, r
 
   const id = newId("qr");
   db.prepare("INSERT INTO attendance_pending VALUES (?, ?, ?, ?, ?, ?)").run(
-    id, user.id, user.name, rotationId, area, "Ahora mismo"
+    id, user.id, user.name, rotationId, area, new Date().toISOString()
   );
   return res.status(201).json({ ok: true, id, area });
 });
 
-// Confirmar todos los pendientes de golpe
+// Confirmar todos los pendientes de golpe (solo los del tutor autenticado)
 router.post("/attendance/confirm-all", requireAuth, requireRole("tutor"), (req, res) => {
-  const pending = db.prepare("SELECT * FROM attendance_pending").all();
+  const pending = db.prepare(`
+    SELECT ap.* FROM attendance_pending ap
+    LEFT JOIN rotation_students rs ON rs.student_id = ap.student_id
+    LEFT JOIN rotations r ON r.id = rs.rotation_id AND r.tutor_id = ?
+    WHERE r.tutor_id = ? OR ap.rotation_id IS NULL
+  `).all(req.user.sub, req.user.sub);
   const time = new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
   const stmt = db.prepare("INSERT INTO attendance_confirmed VALUES (?, ?, ?, ?, ?)");
   pending.forEach(row => {

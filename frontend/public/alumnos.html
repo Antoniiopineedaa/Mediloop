@@ -1579,8 +1579,9 @@
               headers: authHeaders(),
               body: JSON.stringify({ text: text })
             })
-              .then(function(r) { return r.json(); })
-              .then(function() {
+              .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+              .then(function(res) {
+                if (!res.ok) { showStatus("error", res.data.message || "No se pudo publicar."); return; }
                 if (textarea) textarea.value = "";
                 loadStudentPosts();
                 showStatus("success", "Post publicado.");
