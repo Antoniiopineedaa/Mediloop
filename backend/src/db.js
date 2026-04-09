@@ -80,6 +80,9 @@ db.exec(`
   );
 `);
 
+// Migration: add student_id to attendance_confirmed if missing
+try { db.prepare("ALTER TABLE attendance_confirmed ADD COLUMN student_id TEXT").run(); } catch (_) {}
+
 function seedIfEmpty(table, sql, rows) {
   const count = db.prepare("SELECT COUNT(*) as n FROM " + table).get().n;
   if (count === 0) {

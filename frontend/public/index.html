@@ -401,6 +401,7 @@
               </button>
             </div>
           </div>
+          <div id="login-error" style="display:none;margin-bottom:0.5rem;padding:0.6rem 0.9rem;border-radius:10px;font-size:0.85rem;background:#fef2f2;color:#dc2626;border:1px solid #fecaca"></div>
           <button type="submit" class="submit-btn" id="submit-login">Iniciar Sesión</button>
           <div class="help-links">
             <div>¿No tienes cuenta? <a href="register.html">Regístrate con tu correo UJI</a></div>
@@ -521,22 +522,28 @@
           });
         });
 
+        var errorEl = document.getElementById("login-error");
+        function showLoginError(msg) {
+          if (!errorEl) return;
+          errorEl.textContent = msg;
+          errorEl.style.display = "block";
+        }
+        function hideLoginError() {
+          if (errorEl) errorEl.style.display = "none";
+        }
+
         form.addEventListener("submit", function (event) {
           event.preventDefault();
-          if (!selectedTarget) {
-            alert("Selecciona tu rol para continuar.");
-            return;
-          }
+          hideLoginError();
+          var email = usernameInput ? usernameInput.value.trim() : "";
+          var password = passwordInput ? passwordInput.value : "";
+          if (!email || !password) { showLoginError("Completa el correo y la contraseña."); return; }
           submitBtn.disabled = true;
           submitBtn.textContent = "Entrando...";
           fetch(API_BASE + "/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: usernameInput ? usernameInput.value : "",
-              password: passwordInput ? passwordInput.value : "",
-              role: selectedRole === "profesor" ? "tutor" : "student"
-            })
+            body: JSON.stringify({ email: email, password: password })
           })
             .then(function (res) {
               return res.json().then(function(d) {
@@ -549,9 +556,9 @@
               window.location.href = data.user.role === "tutor" ? "tutores.html" : "alumnos.html";
             })
             .catch(function (err) {
-              alert(err.message || "No se pudo iniciar sesión");
+              showLoginError(err.message || "No se pudo iniciar sesión. Comprueba tus credenciales.");
               submitBtn.disabled = false;
-              submitBtn.textContent = selectedRole === "profesor" ? "Entrar como Profesor" : "Entrar como Alumno";
+              submitBtn.textContent = "Iniciar Sesión";
             });
         });
       })();

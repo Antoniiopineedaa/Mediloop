@@ -885,14 +885,14 @@
         <div class="rubrica-card">
           <h4 style="margin:0 0 0.7rem;font-size:1.25rem">📋 Evaluación de Competencias Clínicas</h4>
           <div class="form-grid">
-            <label>Estudiante:
-              <input id="eval-student" type="text" placeholder="Nombre del estudiante" />
-            </label>
             <label>Rotación:
               <select id="eval-rotation">
-                <option>Medicina Interna</option>
-                <option>Cirugía General</option>
-                <option>Pediatría</option>
+                <option value="">Cargando rotaciones...</option>
+              </select>
+            </label>
+            <label>Estudiante:
+              <select id="eval-student">
+                <option value="">Selecciona una rotación primero</option>
               </select>
             </label>
           </div>
@@ -925,8 +925,8 @@
       <div class="gam-grid">
         <article class="card profile">
           <div class="avatar">👩‍⚕️</div>
-          <h3 style="margin:0">Dr. María González</h3>
-          <p style="margin:0.25rem 0 0.45rem;opacity:0.95">Nivel 15 · Tutor Experto</p>
+          <h3 style="margin:0" id="gam-tutor-name">—</h3>
+          <p style="margin:0.25rem 0 0.45rem;opacity:0.95">Tutor Clínico · UJI</p>
           <div class="xp">
             <div class="bar"><span></span></div>
             <p>750/1000 XP al siguiente nivel</p>
@@ -1016,7 +1016,7 @@
     <section class="section" id="dashboard">
       <div class="card panel-card">
         <h4>Mi Panel Personal</h4>
-        <p class="sub">Dr. María González · Medicina Interna</p>
+        <p class="sub">—</p>
         <div class="kpi-row">
           <div class="kpi g">
             <div class="label">Mis Estudiantes</div>
@@ -1032,30 +1032,13 @@
           </div>
         </div>
         <div class="panel-grid">
-          <article class="mini">
+          <article class="mini" id="panel-competencias">
             <h5>Mis Competencias Evaluadas</h5>
-            <div class="prog-row">
-              <div>Conocimiento Teórico<div class="prog-track"><span style="width:92%;background:#2563eb"></span></div></div><strong>4.6/5</strong>
-            </div>
-            <div class="prog-row">
-              <div>Habilidades Prácticas<div class="prog-track"><span style="width:88%;background:#16a34a"></span></div></div><strong>4.4/5</strong>
-            </div>
-            <div class="prog-row">
-              <div>Comunicación<div class="prog-track"><span style="width:96%;background:#7c3aed"></span></div></div><strong>4.8/5</strong>
-            </div>
-            <div class="prog-row">
-              <div>Profesionalismo<div class="prog-track"><span style="width:90%;background:#ea580c"></span></div></div><strong>4.5/5</strong>
-            </div>
+            <p style="color:#9ca3af;font-size:0.82rem">Cargando...</p>
           </article>
-          <article class="mini">
+          <article class="mini" id="panel-objetivos">
             <h5>Mis Objetivos del Mes</h5>
-            <ul class="goal-list">
-              <li>Evaluar 25 estudiantes <strong style="color:#16a34a">23/25</strong></li>
-              <li>Mantener promedio &gt;4.5 <strong style="color:#16a34a">4.8</strong></li>
-              <li>Subir 2 videos educativos <strong>1/2</strong></li>
-              <li>Participar en foro semanal <strong style="color:#6b7280">Pendiente</strong></li>
-            </ul>
-            <button class="btn-update" type="button" id="update-goals">Actualizar Mis Objetivos</button>
+            <p style="color:#9ca3af;font-size:0.82rem">Cargando...</p>
           </article>
         </div>
       </div>
@@ -1374,9 +1357,13 @@
           });
         }
 
+        // eval-rotation select: populated by loadRotaciones() below
+
         var saveEval = document.getElementById("save-eval");
         if (saveEval) {
           saveEval.addEventListener("click", function () {
+            var rotSel = document.getElementById("eval-rotation");
+            var rotLabel = rotSel.options[rotSel.selectedIndex] ? rotSel.options[rotSel.selectedIndex].text : "";
             var studentName = document.getElementById("eval-student").value.trim();
             if (!studentName) {
               showStatus("error", "Indica el nombre del estudiante.");
@@ -1389,7 +1376,7 @@
             setButtonLoading(saveEval, "Guardando...", true);
             var payload = {
               studentName: studentName,
-              rotation: document.getElementById("eval-rotation").value,
+              rotation: rotLabel,
               theory: scores.theory,
               practical: scores.practical,
               communication: scores.communication,
@@ -1545,6 +1532,33 @@
                   .catch(function () {});
               });
 
+              // Poblar select de rotación en formulario de evaluación
+              var rotSel = document.getElementById("eval-rotation");
+              var stuSel = document.getElementById("eval-student");
+              if (rotSel) {
+                rotSel.innerHTML = rotations.length
+                  ? '<option value="">Selecciona rotación...</option>' + rotations.map(function(r) {
+                      return '<option value="' + r.id + '">' + r.service + ' · ' + r.hospital + '</option>';
+                    }).join("")
+                  : '<option value="">Sin rotaciones</option>';
+                if (stuSel && !rotSel._changeListenerAdded) {
+                  rotSel._changeListenerAdded = true;
+                  rotSel.addEventListener("change", function () {
+                    var rotId = rotSel.value;
+                    stuSel.innerHTML = '<option value="">Cargando alumnos...</option>';
+                    if (!rotId) { stuSel.innerHTML = '<option value="">Selecciona una rotación primero</option>'; return; }
+                    fetch(API_BASE + "/rotations/" + rotId + "/students", { headers: headers() })
+                      .then(function(r) { return r.json(); })
+                      .then(function(students) {
+                        stuSel.innerHTML = students.length
+                          ? '<option value="">Selecciona alumno...</option>' + students.map(function(s) { return '<option value="' + s.name + '">' + s.name + '</option>'; }).join("")
+                          : '<option value="">Sin alumnos en esta rotación</option>';
+                      })
+                      .catch(function() { stuSel.innerHTML = '<option value="">Error cargando alumnos</option>'; });
+                  });
+                }
+              }
+
               // Evento para botones de añadir alumno
               wrap.querySelectorAll(".enroll-btn").forEach(function (btn) {
                 btn.addEventListener("click", function () {
@@ -1637,12 +1651,12 @@
         }
 
         loadRotaciones();
+        loadAttendance().catch(function () {});
+        loadPosts().catch(function () {});
 
         Promise.all([
           fetch(API_BASE + "/auth/me", { headers: headers() }),
-          fetch(API_BASE + "/dashboard/tutor", { headers: headers() }),
-          loadAttendance(),
-          loadPosts()
+          fetch(API_BASE + "/dashboard/tutor", { headers: headers() })
         ])
           .then(function (results) {
             if (!results[0].ok || !results[1].ok) throw new Error();
@@ -1652,7 +1666,9 @@
             var me = payload[0];
             var dashboard = payload[1];
             var kpis = dashboard.kpis || {};
-            document.querySelector(".panel-card .sub").textContent = (me.name || "Tutor") + " · Medicina Interna";
+            document.querySelector(".panel-card .sub").textContent = me.name || "Tutor";
+            var gamName = document.getElementById("gam-tutor-name");
+            if (gamName) gamName.textContent = me.name || "Tutor";
             document.querySelector(".kpi.g .val").textContent = String(kpis.students || 0);
             document.querySelector(".kpi.p .val").textContent = String(kpis.avg || 0);
             document.querySelector(".kpi.o .val").textContent = String(kpis.achievements || 0);
@@ -1664,6 +1680,47 @@
           .catch(function () {
             showStatus("error", "Error al cargar datos. Comprueba tu conexión.");
           });
+        // Panel stats: competencias reales + objetivos desde evaluaciones
+        function loadPanelStats() {
+          fetch(API_BASE + "/evaluations", { headers: headers() })
+            .then(function (r) { return r.json(); })
+            .then(function (evals) {
+              var compEl = document.getElementById("panel-competencias");
+              var goalEl = document.getElementById("panel-objetivos");
+              var n = evals.length;
+
+              var sums = n ? evals.reduce(function(s,e){ return {t:s.t+e.theory,p:s.p+e.practical,c:s.c+e.communication,tot:s.tot+e.total}; }, {t:0,p:0,c:0,tot:0}) : {t:0,p:0,c:0,tot:0};
+              var avgT = n ? Math.round(sums.t/n*10)/10 : 0;
+              var avgP = n ? Math.round(sums.p/n*10)/10 : 0;
+              var avgC = n ? Math.round(sums.c/n*10)/10 : 0;
+              var totalAvg = n ? Math.round(sums.tot/n*10)/10 : 0;
+
+              if (compEl) {
+                if (!n) {
+                  compEl.innerHTML = '<h5>Mis Competencias Evaluadas</h5><p style="color:#9ca3af;font-size:0.82rem">Aún no has registrado evaluaciones.</p>';
+                } else {
+                  function bar(val, color) {
+                    return '<div class="prog-track"><span style="width:'+Math.round(val/5*100)+'%;background:'+color+'"></span></div>';
+                  }
+                  compEl.innerHTML = '<h5>Mis Competencias Evaluadas</h5>' +
+                    '<div class="prog-row"><div>Conocimiento Teórico'+bar(avgT,'#2563eb')+'</div><strong>'+avgT+'/5</strong></div>' +
+                    '<div class="prog-row"><div>Habilidades Prácticas'+bar(avgP,'#16a34a')+'</div><strong>'+avgP+'/5</strong></div>' +
+                    '<div class="prog-row"><div>Comunicación'+bar(avgC,'#7c3aed')+'</div><strong>'+avgC+'/5</strong></div>';
+                }
+              }
+
+              if (goalEl) {
+                var avgColor = totalAvg >= 4.5 ? '#16a34a' : '#ea580c';
+                goalEl.innerHTML = '<h5>Mis Objetivos del Mes</h5><ul class="goal-list">' +
+                  '<li>Evaluar estudiantes <strong style="color:#16a34a">'+n+' registradas</strong></li>' +
+                  '<li>Mantener promedio &gt;4.5 <strong style="color:'+avgColor+'">'+(n ? totalAvg : '—')+'</strong></li>' +
+                  '</ul>';
+              }
+            })
+            .catch(function () {});
+        }
+        loadPanelStats();
+
         window.addEventListener("online", updateSystemIndicator);
         window.addEventListener("offline", updateSystemIndicator);
         updateSystemIndicator();

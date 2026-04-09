@@ -16,13 +16,6 @@
     - Contactos de referencia.
   - Buscador por palabras clave y filtrado por hospital/servicio.
 
-- **Orientación hospitalaria**
-  - Página por hospital/centro:
-    - Localización (enlace a mapa).
-    - Normas básicas.
-    - Horarios y teléfonos relevantes.
-  - Enlaces desde las tarjetas de rotación del estudiante.
-
 ### 2. Fase 3 – Experiencia avanzada y analítica
 
 **Objetivo**: Aumentar motivación, transparencia y aprovechamiento de datos.
@@ -33,11 +26,6 @@
     - Asistencia completa sin incidencias.
   - Logros (badges) visibles en el perfil del estudiante.
   - Panel para coordinación con ranking anónimo/agregado por grupo.
-
-- **Mapas interactivos**
-  - Vista de hospital con:
-    - Mapa simplificado de servicios (no planos técnicos, sino “mapa docente”).
-    - Puntos interactivos con información de cada servicio/rotación.
 
 - **Integraciones externas**
   - **Moodle**:
@@ -62,8 +50,7 @@
 ### 3. Priorización sugerida
 
 1. Incidencias y directorio de información.
-2. Orientación hospitalaria.
-3. Gamificación sencilla (puntos + algunos logros).
+2. Gamificación sencilla (puntos + algunos logros).
 4. Integración con Google Calendar y exportación PDF.
 5. Integración con Moodle.
 6. Alertas inteligentes avanzadas.

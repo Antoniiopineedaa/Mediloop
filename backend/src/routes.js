@@ -112,10 +112,12 @@ router.get("/rotations", requireAuth, (req, res) => {
     const rows = db.prepare("SELECT * FROM rotations WHERE tutor_id = ? ORDER BY start_date ASC").all(req.user.sub);
     return res.json(rows);
   }
-  // student: rotations they're enrolled in
+  // student: rotations they're enrolled in (include tutor name/email)
   const rows = db.prepare(`
-    SELECT r.* FROM rotations r
+    SELECT r.*, u.name as tutor_name, u.email as tutor_email
+    FROM rotations r
     JOIN rotation_students rs ON rs.rotation_id = r.id
+    LEFT JOIN users u ON u.id = r.tutor_id
     WHERE rs.student_id = ?
     ORDER BY r.start_date ASC
   `).all(req.user.sub);
@@ -165,7 +167,7 @@ router.delete("/rotations/:id/enroll/:studentId", requireAuth, requireRole("tuto
 });
 
 // ── QR ────────────────────────────────────────────────────────────────────────
-router.get("/qr-image/:token", requireAuth, async (req, res) => {
+router.get("/qr-image/:token", async (req, res) => {
   const rotation = db.prepare("SELECT * FROM rotations WHERE qr_token = ?").get(req.params.token);
   if (!rotation) return res.status(404).json({ message: "Rotación no encontrada" });
   try {
@@ -244,7 +246,7 @@ router.post("/attendance/:id/confirm", requireAuth, requireRole("tutor"), (req, 
   if (!row) return res.status(404).json({ message: "Asistencia no encontrada" });
   const time = new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
   db.prepare("DELETE FROM attendance_pending WHERE id = ?").run(req.params.id);
-  db.prepare("INSERT INTO attendance_confirmed VALUES (?, ?, ?, ?)").run(row.id, row.student_name, row.area, time);
+  db.prepare("INSERT INTO attendance_confirmed VALUES (?, ?, ?, ?, ?)").run(row.id, row.student_name, row.area, time, row.student_id);
   return res.json({ ok: true });
 });
 
@@ -253,6 +255,12 @@ router.post("/attendance/:id/reject", requireAuth, requireRole("tutor"), (req, r
   if (!row) return res.status(404).json({ message: "Asistencia no encontrada" });
   db.prepare("DELETE FROM attendance_pending WHERE id = ?").run(req.params.id);
   return res.json({ ok: true });
+});
+
+router.get("/attendance/my", requireAuth, requireRole("student"), (req, res) => {
+  const pending = db.prepare("SELECT id, area, scanned_at FROM attendance_pending WHERE student_id = ? ORDER BY rowid DESC").all(req.user.sub);
+  const confirmed = db.prepare("SELECT id, area, time FROM attendance_confirmed WHERE student_id = ? ORDER BY rowid DESC LIMIT 20").all(req.user.sub);
+  return res.json({ pending, confirmed });
 });
 
 router.post("/attendance/qr-checkin", requireAuth, requireRole("student"), (req, res) => {
@@ -284,10 +292,10 @@ router.post("/attendance/qr-checkin", requireAuth, requireRole("student"), (req,
 router.post("/attendance/confirm-all", requireAuth, requireRole("tutor"), (req, res) => {
   const pending = db.prepare("SELECT * FROM attendance_pending").all();
   const time = new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
-  const stmt = db.prepare("INSERT INTO attendance_confirmed VALUES (?, ?, ?, ?)");
+  const stmt = db.prepare("INSERT INTO attendance_confirmed VALUES (?, ?, ?, ?, ?)");
   pending.forEach(row => {
     db.prepare("DELETE FROM attendance_pending WHERE id = ?").run(row.id);
-    stmt.run(row.id, row.student_name, row.area, time);
+    stmt.run(row.id, row.student_name, row.area, time, row.student_id);
   });
   return res.json({ ok: true, confirmed: pending.length });
 });
@@ -324,8 +332,8 @@ router.get("/evaluations", requireAuth, (req, res) => {
   }));
   if (req.user.role === "tutor") return res.json(mapped);
   const user = db.prepare("SELECT name FROM users WHERE id = ?").get(req.user.sub);
-  const firstName = user ? user.name.split(" ")[0].toLowerCase() : "";
-  return res.json(mapped.filter(e => e.studentName.toLowerCase().includes(firstName)));
+  const name = user ? user.name.toLowerCase() : "";
+  return res.json(mapped.filter(e => e.studentName.toLowerCase() === name));
 });
 
 // ── Alumnos (para tutores) ────────────────────────────────────────────────────

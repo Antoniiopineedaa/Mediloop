@@ -816,7 +816,7 @@
       <a href="#progreso" data-spy="progreso">Progreso</a>
       <a href="#apoyo" data-spy="apoyo">Apoyo</a>
       <a href="#recursos" data-spy="recursos">Recursos</a>
-      <a href="#mapa-hospital" data-spy="mapa-hospital">Mapa</a>
+      <a href="#mapa-hospital" data-spy="mapa-hospital">Asistencia</a>
       <a href="#novedades" data-spy="novedades">Novedades</a>
       <a href="#comunidad" data-spy="comunidad">Comunidad</a>
     </aside>
@@ -878,18 +878,18 @@
               <p class="detalle">Hospital General · Semana 3 de 6</p>
             </div>
           </div>
-          <div class="resumen-item">
-            <span class="icono tarea">📄</span>
+          <div class="resumen-item" id="resumen-asistencia">
+            <span class="icono tarea">✅</span>
             <div>
-              <a href="#progreso" class="titulo">Pendiente: informe Medicina Interna</a>
-              <p class="detalle">Entrega hasta el viernes</p>
+              <span class="titulo">Asistencia pendiente de confirmación</span>
+              <p class="detalle">Cargando...</p>
             </div>
           </div>
-          <div class="resumen-item">
-            <span class="icono evento">📅</span>
+          <div class="resumen-item" id="resumen-evaluaciones">
+            <span class="icono evento">📋</span>
             <div>
-              <span class="titulo">Sesión de competencias</span>
-              <p class="detalle">Viernes 10:00 · Aula 3</p>
+              <a href="#progreso" class="titulo">Evaluaciones recibidas</a>
+              <p class="detalle">Cargando...</p>
             </div>
           </div>
         </div>
@@ -910,7 +910,7 @@
             <span class="tag blue">UCI</span>
             <span class="tag blue">Quirófanos</span>
           </div>
-          <button type="button" class="btn-card blue js-go" data-target="mapa-hospital" data-message="Mostrando ubicación y áreas del Hospital General...">Ver Detalles</button>
+          <button type="button" class="btn-card blue js-go" data-target="mapa-hospital">Ver Detalles</button>
         </article>
         <article class="card centro-card">
           <div class="icon-wrap blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
@@ -922,7 +922,7 @@
             <span class="tag green">Pediatría</span>
             <span class="tag green">Enfermería</span>
           </div>
-          <button type="button" class="btn-card green js-go" data-target="mapa-hospital" data-message="Mostrando ubicación y áreas del Centro 9 de Octubre...">Ver Detalles</button>
+          <button type="button" class="btn-card green js-go" data-target="mapa-hospital">Ver Detalles</button>
         </article>
         <article class="card centro-card">
           <div class="icon-wrap blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
@@ -934,7 +934,7 @@
             <span class="tag purple">Prevención</span>
             <span class="tag purple">Comunitaria</span>
           </div>
-          <button type="button" class="btn-card purple js-go" data-target="mapa-hospital" data-message="Mostrando ubicación y áreas de Vall d'Alba...">Ver Detalles</button>
+          <button type="button" class="btn-card purple js-go" data-target="mapa-hospital">Ver Detalles</button>
         </article>
       </div>
     </section>
@@ -942,34 +942,8 @@
     <section class="section" id="progreso">
       <h2 class="section-title">Rotaciones Clínicas y Competencias</h2>
       <p class="section-desc">Sigue tu progreso en las rotaciones hospitalarias y desarrolla competencias médicas esenciales.</p>
-      <div class="rotaciones-grid">
-        <article class="card rotacion-card borde-green">
-          <span class="badge completada">Completada</span>
-          <div class="icon-wrap green">✓</div>
-          <h3>Medicina Interna</h3>
-          <p class="sub">Hospital General - 8 semanas</p>
-          <p class="meta">Historias clínicas: <span class="ok">24/20</span></p>
-          <p class="meta">Procedimientos: <span class="ok">15/12</span></p>
-          <p class="meta">Evaluación final: <span class="ok">8.5/10</span></p>
-        </article>
-        <article class="card rotacion-card borde-blue">
-          <span class="badge en-curso">En curso</span>
-          <div class="icon-wrap blue">🛏</div>
-          <h3>Cirugía General</h3>
-          <p class="sub">Hospital General - Semana 3/6</p>
-          <p class="meta">Cirugías observadas: 8/15</p>
-          <p class="meta">Suturas practicadas: 12/20</p>
-          <div class="progress-bar"><span style="width:60%"></span></div>
-        </article>
-        <article class="card rotacion-card borde-gray">
-          <span class="badge proxima">Próxima</span>
-          <div class="icon-wrap gray">★</div>
-          <h3>Pediatría</h3>
-          <p class="sub">Centro de Salud - Inicia en 2 semanas</p>
-          <p class="meta">• Consultas pediátricas</p>
-          <p class="meta">• Vacunación infantil</p>
-          <p class="meta">• Desarrollo psicomotor</p>
-        </article>
+      <div class="rotaciones-grid" id="progreso-rotaciones-grid">
+        <p style="color:#6b7280;font-size:0.88rem">Cargando rotaciones...</p>
       </div>
       <div class="dos-columnas">
         <div class="card">
@@ -991,7 +965,7 @@
             <div class="bar" style="margin-top:0.25rem"><span style="width:72%;background:var(--purple)"></span></div>
           </div>
           <div id="mis-evaluaciones" style="margin-top:0.9rem"></div>
-          <button type="button" class="btn-gradient js-go" data-target="novedades" style="margin-top:0.75rem;width:100%">Ver Evaluaciones Detalladas</button>
+          <button type="button" class="btn-gradient js-go" data-target="progreso" style="margin-top:0.75rem;width:100%">Ver Evaluaciones Detalladas</button>
         </div>
         <div class="card">
           <h3>Calendario de Prácticas</h3>
@@ -1026,9 +1000,8 @@
       <div class="apoyo-grid">
         <div class="apoyo-card">
           <h4><span class="emoji">👤</span> Tu tutor asignado</h4>
-          <div class="tutor-info">
-            <p><span class="nombre">Dr. Carlos Ruiz</span><br>Cirugía General · Hospital General</p>
-            <p><a href="mailto:tutor.cirugia@hospital.es">tutor.cirugia@hospital.es</a><br>Ext. 2341</p>
+          <div class="tutor-info" id="apoyo-tutor-info">
+            <p><span class="nombre">Cargando...</span></p>
           </div>
         </div>
         <div class="apoyo-card">
@@ -1087,39 +1060,17 @@
     </section>
 
     <section class="section" id="mapa-hospital">
-      <h2 class="section-title">Mapa del Hospital General</h2>
-      <p class="section-desc">Escanea los códigos QR en cada área para registrar tu asistencia a prácticas.</p>
-      <div style="text-align:center">
-        <div class="tabs">
-          <button type="button" class="active">Planta Baja</button>
-          <button type="button">1ª Planta</button>
-          <button type="button">2ª Planta</button>
-        </div>
+      <h2 class="section-title">Asistencia QR</h2>
+      <p class="section-desc">Escanea el código QR de tu rotación para registrar la asistencia. El tutor lo confirmará desde su panel.</p>
+
+      <h3 style="font-size:1rem;margin:0 0 0.75rem">Mis rotaciones</h3>
+      <div id="asistencia-rotaciones" style="display:flex;flex-direction:column;gap:0.75rem;margin-bottom:1.5rem">
+        <p style="color:#6b7280;font-size:0.88rem">Cargando rotaciones...</p>
       </div>
-      <div class="mapa-wrap">
-        <div class="mapa-schema" style="position:relative">
-          <div style="grid-column:1/-1;text-align:center;font-weight:700;font-size:0.8rem;color:#166534;background:#dcfce7;padding:0.4rem;border-radius:8px;margin-bottom:0.5rem">ENTRADA</div>
-          <div class="mapa-block red js-qr-scan" data-area="Urgencias" style="grid-column:1;grid-row:2;cursor:pointer"><span class="qr">QR</span><div class="name">URGENCIAS</div><div class="desc">24 Horas</div></div>
-          <div class="mapa-block blue js-qr-scan" data-area="Recepción" style="grid-column:2;grid-row:2;cursor:pointer"><span class="qr">QR</span><div class="name">RECEPCIÓN</div><div class="desc">Información General</div></div>
-          <div class="mapa-block green js-qr-scan" data-area="Laboratorio" style="grid-column:3;grid-row:2;cursor:pointer"><span class="qr">QR</span><div class="name">LABORATORIO</div><div class="desc">Análisis Clínicos</div></div>
-          <div class="mapa-block orange js-qr-scan" data-area="Radiología" style="grid-column:1;grid-row:3;cursor:pointer"><span class="qr">QR</span><div class="name">RADIOLOGÍA</div><div class="desc">Rayos X - TAC</div></div>
-          <div class="mapa-block purple js-qr-scan" data-area="Farmacia" style="grid-column:3;grid-row:3;cursor:pointer"><span class="qr">QR</span><div class="name">FARMACIA</div><div class="desc">Medicamentos</div></div>
-        </div>
-        <div class="leyenda">
-          <span><span class="cuadro" style="background:#fecaca"></span> Urgencias/Quirófanos</span>
-          <span><span class="cuadro" style="background:#93c5fd"></span> Consultas/Recepción</span>
-          <span><span class="cuadro" style="background:#6ee7b7"></span> Laboratorio/Neurología</span>
-          <span><span class="cuadro" style="background:#c4b5fd"></span> UCI/Farmacia</span>
-        </div>
-      </div>
-      <div class="qr-instructions">
-        <h4>Cómo usar los códigos QR:</h4>
-        <ul>
-          <li>Haz clic en cualquier código QR del mapa para simular el escaneo.</li>
-          <li>En la práctica real, usa la cámara de tu móvil para escanear.</li>
-          <li>Tu asistencia se registrará automáticamente en el sistema.</li>
-          <li>Cada área tiene su propio código para un seguimiento preciso.</li>
-        </ul>
+
+      <h3 style="font-size:1rem;margin:0 0 0.75rem">Historial de asistencia</h3>
+      <div id="asistencia-historial" style="display:flex;flex-direction:column;gap:0.5rem">
+        <p style="color:#6b7280;font-size:0.88rem">Cargando historial...</p>
       </div>
     </section>
 
@@ -1129,41 +1080,10 @@
       <div class="noti-wrap">
         <div class="noti-head">
           <strong>Centro de notificaciones</strong>
-          <span class="unread">3 nuevas</span>
+          <span class="unread" id="noti-badge" style="display:none"></span>
         </div>
-        <div class="noti-list">
-          <article class="noti-item nueva">
-            <span class="dot blue"></span>
-            <div>
-              <h4>Cambio de aula en sesión clínica</h4>
-              <p>La sesión del viernes pasa del Aula 3 al Aula 5 por disponibilidad del servicio.</p>
-            </div>
-            <span class="time">Hace 25 min</span>
-          </article>
-          <article class="noti-item nueva">
-            <span class="dot green"></span>
-            <div>
-              <h4>Nuevo recurso disponible: ECG básico</h4>
-              <p>Ya puedes revisar la guía interactiva de interpretación de ECG en Recursos Digitales.</p>
-            </div>
-            <span class="time">Hace 2 h</span>
-          </article>
-          <article class="noti-item nueva">
-            <span class="dot purple"></span>
-            <div>
-              <h4>Confirmación pendiente de informe</h4>
-              <p>Recuerda subir el informe de Medicina Interna antes de las 23:59 de hoy.</p>
-            </div>
-            <span class="time">Hoy</span>
-          </article>
-          <article class="noti-item">
-            <span class="dot orange"></span>
-            <div>
-              <h4>Taller práctico de suturas</h4>
-              <p>Inscripciones abiertas. Quedan 6 plazas para la sesión del miércoles.</p>
-            </div>
-            <span class="time">Ayer</span>
-          </article>
+        <div class="noti-list" id="noti-list">
+          <article class="noti-item"><span class="dot blue"></span><div><h4>Cargando...</h4></div></article>
         </div>
       </div>
     </section>
@@ -1393,6 +1313,70 @@
           });
         });
 
+        function renderRotacionesProgreso(rots) {
+          var grid = document.getElementById("progreso-rotaciones-grid");
+          if (!grid) return;
+          if (!rots || !rots.length) {
+            grid.innerHTML = '<p style="color:#6b7280;font-size:0.88rem">No tienes rotaciones asignadas aún.</p>';
+            return;
+          }
+          var today = new Date().toISOString().slice(0, 10);
+          grid.innerHTML = rots.map(function (rot) {
+            var status, borderClass, iconClass, iconTxt, badgeClass;
+            if (rot.end_date < today) {
+              status = "Completada"; borderClass = "borde-green"; iconClass = "green"; iconTxt = "✓"; badgeClass = "completada";
+            } else if (rot.start_date <= today) {
+              status = "En curso"; borderClass = "borde-blue"; iconClass = "blue"; iconTxt = "🛏"; badgeClass = "en-curso";
+            } else {
+              status = "Próxima"; borderClass = "borde-gray"; iconClass = "gray"; iconTxt = "★"; badgeClass = "proxima";
+            }
+            return '<article class="card rotacion-card ' + borderClass + '">' +
+              '<span class="badge ' + badgeClass + '">' + status + '</span>' +
+              '<div class="icon-wrap ' + iconClass + '">' + iconTxt + '</div>' +
+              '<h3>' + rot.service + '</h3>' +
+              '<p class="sub">' + rot.hospital + '</p>' +
+              '<p class="meta">' + rot.start_date + ' → ' + rot.end_date + '</p>' +
+              '</article>';
+          }).join("");
+        }
+
+        function renderAsistenciaQR(rots) {
+          var wrap = document.getElementById("asistencia-rotaciones");
+          if (!wrap) return;
+          if (!rots || !rots.length) {
+            wrap.innerHTML = '<p style="color:#6b7280;font-size:0.88rem">No tienes rotaciones asignadas. Cuando el tutor te añada a una, aparecerá aquí.</p>';
+            return;
+          }
+          wrap.innerHTML = rots.map(function (rot) {
+            return '<div style="background:#fff;border-radius:12px;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);flex-wrap:wrap">' +
+              '<div>' +
+                '<div style="font-weight:600;font-size:0.95rem">' + rot.service + '</div>' +
+                '<div style="font-size:0.82rem;color:#6b7280">' + rot.hospital + ' · ' + rot.start_date + ' → ' + rot.end_date + '</div>' +
+              '</div>' +
+              '<a href="qr-scan.html" style="background:#2563eb;color:#fff;border:none;border-radius:8px;padding:0.45rem 1rem;font-size:0.85rem;font-weight:600;text-decoration:none;white-space:nowrap">Escanear QR</a>' +
+            '</div>';
+          }).join("");
+        }
+
+        function renderAsistenciaHistorial(data) {
+          var wrap = document.getElementById("asistencia-historial");
+          if (!wrap) return;
+          function attRow(area, bg, color, label) {
+            return '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 1rem;background:#fff;border-radius:8px;font-size:0.85rem;box-shadow:0 1px 4px rgba(0,0,0,0.06)">' +
+              '<span>' + area + '</span>' +
+              '<span style="background:' + bg + ';color:' + color + ';padding:0.2rem 0.6rem;border-radius:999px;font-size:0.78rem">' + label + '</span>' +
+            '</div>';
+          }
+          var rows = [];
+          (data.pending || []).forEach(function(a) {
+            rows.push(attRow(a.area, "#fef9c3", "#854d0e", "Pendiente confirmación"));
+          });
+          (data.confirmed || []).forEach(function(a) {
+            rows.push(attRow(a.area, "#dcfce7", "#166534", "Confirmada · " + a.time));
+          });
+          wrap.innerHTML = rows.length ? rows.join("") : '<p style="color:#6b7280;font-size:0.88rem">Aún no tienes registros de asistencia.</p>';
+        }
+
         Promise.all([
           fetch(API_BASE + "/auth/me", { headers: authHeaders() }),
           fetch(API_BASE + "/dashboard/student", { headers: authHeaders() }),
@@ -1420,15 +1404,20 @@
               summaryDetail.textContent = dashboard.nextRotation.hospital + " · " + dashboard.nextRotation.startDate + " a " + dashboard.nextRotation.endDate;
             }
 
-            var cardTitles = document.querySelectorAll(".rotacion-card h3");
-            var cardSubs = document.querySelectorAll(".rotacion-card .sub");
-            if (rots && rots.length > 0 && cardTitles[0] && cardSubs[0]) {
-              cardTitles[0].textContent = rots[0].service;
-              cardSubs[0].textContent = rots[0].hospital + " - " + rots[0].startDate + " / " + rots[0].endDate;
-            }
-            if (rots && rots.length > 1 && cardTitles[1] && cardSubs[1]) {
-              cardTitles[1].textContent = rots[1].service;
-              cardSubs[1].textContent = rots[1].hospital + " - " + rots[1].startDate + " / " + rots[1].endDate;
+            renderRotacionesProgreso(rots);
+            renderAsistenciaQR(rots);
+
+            // Tutor asignado en sección apoyo
+            var apoyoInfo = document.getElementById("apoyo-tutor-info");
+            if (apoyoInfo) {
+              var today = new Date().toISOString().slice(0, 10);
+              var activeRot = rots.find(function(r) { return r.start_date <= today && r.end_date >= today; }) || rots[0];
+              if (activeRot && activeRot.tutor_name) {
+                apoyoInfo.innerHTML = '<p><span class="nombre">' + activeRot.tutor_name + '</span><br>' + activeRot.service + ' · ' + activeRot.hospital + '</p>' +
+                  '<p><a href="mailto:' + (activeRot.tutor_email || '') + '">' + (activeRot.tutor_email || 'Sin email') + '</a></p>';
+              } else {
+                apoyoInfo.innerHTML = '<p><span class="nombre">Sin tutor asignado</span><br>Contacta con coordinación</p>';
+              }
             }
           })
           .catch(function () {
@@ -1550,33 +1539,81 @@
           });
         }
 
-        // QR check-in → abre escáner de cámara
-        document.querySelectorAll(".js-qr-scan").forEach(function(block) {
-          block.addEventListener("click", function() {
-            window.location.href = "qr-scan.html";
+
+        // Novedades y resumen desde datos reales
+        function loadNovedades() {
+          Promise.all([
+            fetch(API_BASE + "/attendance/my", { headers: authHeaders() }).then(function(r) { return r.json(); }).catch(function() { return { pending: [], confirmed: [] }; }),
+            fetch(API_BASE + "/evaluations", { headers: authHeaders() }).then(function(r) { return r.json(); }).catch(function() { return []; })
+          ]).then(function(results) {
+            var att = results[0];
+            var evals = results[1];
+            renderAsistenciaHistorial(att);
+            renderEvaluaciones(evals);
+            var items = [];
+
+            // Asistencias pendientes
+            (att.pending || []).forEach(function(a) {
+              items.push({ color: "orange", nueva: true, title: "Asistencia pendiente de confirmación", text: a.area, time: a.scanned_at });
+            });
+            // Asistencias confirmadas (últimas 2)
+            (att.confirmed || []).slice(0, 2).forEach(function(a) {
+              items.push({ color: "green", nueva: false, title: "Asistencia confirmada", text: a.area, time: a.time });
+            });
+            // Evaluaciones recibidas
+            evals.slice(0, 3).forEach(function(e) {
+              items.push({ color: "blue", nueva: true, title: "Nueva evaluación recibida", text: e.rotation + " · " + e.total + "/5", time: "" });
+            });
+
+            // Actualizar resumen card
+            var resAtt = document.getElementById("resumen-asistencia");
+            if (resAtt) {
+              var pendCount = (att.pending || []).length;
+              resAtt.querySelector(".detalle").textContent = pendCount > 0
+                ? pendCount + " pendiente" + (pendCount > 1 ? "s" : "") + " de confirmación"
+                : "Sin asistencias pendientes";
+            }
+            var resEval = document.getElementById("resumen-evaluaciones");
+            if (resEval) {
+              resEval.querySelector(".detalle").textContent = evals.length > 0
+                ? evals.length + " evaluación" + (evals.length > 1 ? "es" : "") + " recibida" + (evals.length > 1 ? "s" : "")
+                : "Aún no tienes evaluaciones";
+            }
+
+            // Renderizar lista de novedades
+            var list = document.getElementById("noti-list");
+            var badge = document.getElementById("noti-badge");
+            if (!list) return;
+            if (!items.length) {
+              list.innerHTML = '<article class="noti-item"><span class="dot blue"></span><div><h4>Sin novedades</h4><p>Todo al día. Vuelve más tarde.</p></div></article>';
+              return;
+            }
+            var nuevas = items.filter(function(i) { return i.nueva; }).length;
+            if (badge && nuevas > 0) { badge.textContent = nuevas + " nueva" + (nuevas > 1 ? "s" : ""); badge.style.display = ""; }
+            list.innerHTML = items.map(function(i) {
+              return '<article class="noti-item' + (i.nueva ? " nueva" : "") + '">' +
+                '<span class="dot ' + i.color + '"></span>' +
+                '<div><h4>' + i.title + '</h4>' + (i.text ? '<p>' + i.text + '</p>' : '') + '</div>' +
+                (i.time ? '<span class="time">' + i.time + '</span>' : '') +
+                '</article>';
+            }).join("");
           });
-        });
+        }
+        loadNovedades();
 
         // Evaluaciones recibidas
-        function loadEvaluaciones() {
+        function renderEvaluaciones(evals) {
           var container = document.getElementById("mis-evaluaciones");
-          if (!container) return;
-          fetch(API_BASE + "/evaluations", { headers: authHeaders() })
-            .then(function(r) { return r.json(); })
-            .then(function(evals) {
-              if (!evals.length) return;
-              var html = '<div style="border-top:1px solid #e5e7eb;padding-top:0.75rem;margin-top:0.5rem"><strong style="font-size:0.88rem;color:#374151">Evaluaciones recibidas</strong>';
-              evals.slice(0, 3).forEach(function(e) {
-                html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid #f3f4f6;font-size:0.85rem">' +
-                  '<span>' + e.rotation + '</span>' +
-                  '<span style="font-weight:700;color:#2563eb">' + e.total + '/5</span></div>';
-              });
-              html += '</div>';
-              container.innerHTML = html;
-            })
-            .catch(function() {});
+          if (!container || !evals.length) return;
+          var html = '<div style="border-top:1px solid #e5e7eb;padding-top:0.75rem;margin-top:0.5rem"><strong style="font-size:0.88rem;color:#374151">Evaluaciones recibidas</strong>';
+          evals.slice(0, 3).forEach(function(e) {
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid #f3f4f6;font-size:0.85rem">' +
+              '<span>' + e.rotation + '</span>' +
+              '<span style="font-weight:700;color:#2563eb">' + e.total + '/5</span></div>';
+          });
+          html += '</div>';
+          container.innerHTML = html;
         }
-        loadEvaluaciones();
 
         window.addEventListener("online", updateSystemIndicator);
         window.addEventListener("offline", updateSystemIndicator);
