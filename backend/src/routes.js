@@ -92,9 +92,15 @@ router.post("/auth/login", (req, res) => {
   const { email, password, role } = req.body || {};
   if (!email || !password) return res.status(400).json({ message: "Faltan campos obligatorios" });
 
-  const user = db.prepare("SELECT * FROM users WHERE email = ?").get(String(email).toLowerCase().trim());
-  if (!user) return res.status(401).json({ message: "Credenciales inválidas" });
-  if (!bcrypt.compareSync(password, user.password_hash)) return res.status(401).json({ message: "Credenciales inválidas" });
+  const emailLower = String(email).toLowerCase().trim();
+  if (!emailLower.endsWith("@uji.es")) {
+    return res.status(400).json({ message: "Solo se permiten correos @uji.es" });
+  }
+
+  const user = db.prepare("SELECT * FROM users WHERE email = ?").get(emailLower);
+  if (!user || !bcrypt.compareSync(password, user.password_hash)) {
+    return res.status(401).json({ message: "Credenciales inválidas" });
+  }
 
   const payload = { id: user.id, email: user.email, role: user.role, name: user.name };
   return res.json({ user: payload, token: createJWT(payload) });
