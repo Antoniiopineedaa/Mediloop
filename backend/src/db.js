@@ -26,7 +26,9 @@ db.exec(`
     end_date TEXT NOT NULL,
     tutor_id TEXT,
     qr_token TEXT UNIQUE NOT NULL,
-    status TEXT DEFAULT 'planificada'
+    status TEXT DEFAULT 'planificada',
+    course_id TEXT,
+    subject_id TEXT
   );
 
   CREATE TABLE IF NOT EXISTS rotation_students (
@@ -79,10 +81,43 @@ db.exec(`
     likes INTEGER DEFAULT 0,
     created_at TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS courses (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    year INTEGER NOT NULL,
+    created_at TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS subjects (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    course_id TEXT NOT NULL,
+    created_at TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS password_reset_tokens (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    token TEXT UNIQUE NOT NULL,
+    expires_at TEXT NOT NULL,
+    used INTEGER DEFAULT 0
+  );
+
+  CREATE TABLE IF NOT EXISTS activity_log (
+    id TEXT PRIMARY KEY,
+    user_id TEXT,
+    user_name TEXT NOT NULL,
+    action TEXT NOT NULL,
+    details TEXT,
+    created_at TEXT NOT NULL
+  );
 `);
 
-// Migration: add student_id to attendance_confirmed if missing
+// Migrations: add columns if not present (safe on existing DBs)
 try { db.prepare("ALTER TABLE attendance_confirmed ADD COLUMN student_id TEXT").run(); } catch (_) {}
+try { db.prepare("ALTER TABLE rotations ADD COLUMN course_id TEXT").run(); } catch (_) {}
+try { db.prepare("ALTER TABLE rotations ADD COLUMN subject_id TEXT").run(); } catch (_) {}
 
 function seedIfEmpty(table, sql, rows) {
   const count = db.prepare("SELECT COUNT(*) as n FROM " + table).get().n;
@@ -114,15 +149,14 @@ if (!adminUser) {
     "adm-1", "admin@uji.es", "Admin Mediloop", "admin", ADMIN_HASH, now
   );
 } else if (adminUser.role !== "admin") {
-  // Migrar admin existente al rol correcto
   db.prepare("UPDATE users SET role = 'admin', password_hash = ? WHERE id = 'adm-1'").run(ADMIN_HASH);
 }
 
 seedIfEmpty("rotations",
-  "INSERT INTO rotations VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+  "INSERT INTO rotations VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
   [
-    ["rot-1", "Hospital General de Castellón", "Medicina Interna", "2026-03-01", "2026-04-15", "tut-1", "qr-rot-1-token", "en curso"],
-    ["rot-2", "Centro de Salud 9 de Octubre", "Atención Primaria", "2026-04-20", "2026-05-20", "tut-2", "qr-rot-2-token", "planificada"]
+    ["rot-1", "Hospital General de Castellón", "Medicina Interna", "2026-03-01", "2026-04-15", "tut-1", "qr-rot-1-token", "en curso", "course-4", "subj-5"],
+    ["rot-2", "Centro de Salud 9 de Octubre", "Atención Primaria", "2026-04-20", "2026-05-20", "tut-2", "qr-rot-2-token", "planificada", "course-6", "subj-10"]
   ]
 );
 
@@ -156,6 +190,42 @@ seedIfEmpty("student_posts",
   [
     ["spost-1", "María Rodríguez", "¿Alguien puede explicar la diferencia entre taquicardia sinusal y fibrilación auricular?", 12, new Date(Date.now() - 7200000).toISOString()],
     ["spost-2", "Juan Pérez", "Compartiendo mis apuntes de neuroanatomía. ¡Espero que os sirvan!", 28, new Date(Date.now() - 14400000).toISOString()]
+  ]
+);
+
+seedIfEmpty("courses",
+  "INSERT INTO courses VALUES (?, ?, ?, ?)",
+  [
+    ["course-2", "2º Medicina", 2, now],
+    ["course-3", "3º Medicina", 3, now],
+    ["course-4", "4º Medicina", 4, now],
+    ["course-5", "5º Medicina", 5, now],
+    ["course-6", "6º Medicina", 6, now]
+  ]
+);
+
+seedIfEmpty("subjects",
+  "INSERT INTO subjects VALUES (?, ?, ?, ?)",
+  [
+    ["subj-1", "Anatomía Clínica", "course-2", now],
+    ["subj-2", "Fisiología", "course-2", now],
+    ["subj-3", "Patología General", "course-3", now],
+    ["subj-4", "Farmacología", "course-3", now],
+    ["subj-5", "Medicina Interna", "course-4", now],
+    ["subj-6", "Cirugía General", "course-4", now],
+    ["subj-7", "Pediatría", "course-5", now],
+    ["subj-8", "Ginecología y Obstetricia", "course-5", now],
+    ["subj-9", "Rotación Hospitalaria Avanzada", "course-6", now],
+    ["subj-10", "Atención Primaria", "course-6", now]
+  ]
+);
+
+seedIfEmpty("activity_log",
+  "INSERT INTO activity_log VALUES (?, ?, ?, ?, ?, ?)",
+  [
+    ["act-seed-1", "stu-1", "Ana Martínez", "Asistencia confirmada", "Medicina Interna · Hospital General", new Date(Date.now() - 3600000).toISOString()],
+    ["act-seed-2", "tut-1", "Dra. María González", "Evaluación creada", "Alumno: Carlos Pérez · Nota: 4.3/5", new Date(Date.now() - 7200000).toISOString()],
+    ["act-seed-3", "stu-2", "Carlos Pérez", "Asistencia confirmada", "Medicina Interna · Hospital General", new Date(Date.now() - 10800000).toISOString()]
   ]
 );
 

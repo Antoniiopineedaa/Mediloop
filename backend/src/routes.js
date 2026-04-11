@@ -25,6 +25,14 @@ function newId(prefix) {
   return prefix + "-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
 }
 
+function logActivity(userId, userName, action, details) {
+  try {
+    db.prepare("INSERT INTO activity_log VALUES (?, ?, ?, ?, ?, ?)").run(
+      newId("act"), userId || null, userName || "Sistema", action, details || null, new Date().toISOString()
+    );
+  } catch (_) {}
+}
+
 function timeAgo(isoString) {
   const diff = (Date.now() - new Date(isoString).getTime()) / 1000;
   if (diff < 60)    return "Ahora";
@@ -97,6 +105,7 @@ router.post("/auth/register", (req, res) => {
     id, emailLower, name.trim(), role, hash, new Date().toISOString()
   );
   const user = { id, email: emailLower, name: name.trim(), role };
+  logActivity(id, name.trim(), "Nuevo usuario registrado", "Rol: " + role + " · Email: " + emailLower);
   return res.status(201).json({ user, token: createJWT(user) });
 });
 
@@ -145,16 +154,6 @@ router.put("/auth/password", requireAuth, (req, res) => {
 });
 
 // ── Admin ─────────────────────────────────────────────────────────────────────
-router.get("/admin/stats", requireAuth, requireAdmin, (_req, res) => {
-  return res.json({
-    users:      db.prepare("SELECT COUNT(*) as n FROM users WHERE role != 'admin'").get().n,
-    students:   db.prepare("SELECT COUNT(*) as n FROM users WHERE role = 'student'").get().n,
-    tutors:     db.prepare("SELECT COUNT(*) as n FROM users WHERE role = 'tutor'").get().n,
-    rotations:  db.prepare("SELECT COUNT(*) as n FROM rotations").get().n,
-    evals:      db.prepare("SELECT COUNT(*) as n FROM evaluations").get().n,
-    attendance: db.prepare("SELECT COUNT(*) as n FROM attendance_confirmed").get().n
-  });
-});
 
 router.get("/admin/users", requireAuth, requireAdmin, (_req, res) => {
   const users = db.prepare("SELECT id, email, name, role, created_at FROM users WHERE role != 'admin' ORDER BY created_at DESC").all();
@@ -360,13 +359,17 @@ router.post("/attendance/:id/confirm", requireAuth, requireRole("tutor"), (req, 
   const time = new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
   db.prepare("DELETE FROM attendance_pending WHERE id = ?").run(req.params.id);
   db.prepare("INSERT INTO attendance_confirmed VALUES (?, ?, ?, ?, ?)").run(row.id, row.student_name, row.area, time, row.student_id);
+  const tutor = db.prepare("SELECT name FROM users WHERE id = ?").get(req.user.sub);
+  logActivity(row.student_id, row.student_name, "Asistencia confirmada", row.area + " · Confirmada por " + (tutor ? tutor.name : "Tutor"));
   return res.json({ ok: true });
 });
 
 router.post("/attendance/:id/reject", requireAuth, requireRole("tutor"), (req, res) => {
-  const row = db.prepare("SELECT id FROM attendance_pending WHERE id = ?").get(req.params.id);
+  const row = db.prepare("SELECT * FROM attendance_pending WHERE id = ?").get(req.params.id);
   if (!row) return res.status(404).json({ message: "Asistencia no encontrada" });
   db.prepare("DELETE FROM attendance_pending WHERE id = ?").run(req.params.id);
+  const tutor = db.prepare("SELECT name FROM users WHERE id = ?").get(req.user.sub);
+  logActivity(row.student_id, row.student_name, "Asistencia rechazada", row.area + " · Rechazada por " + (tutor ? tutor.name : "Tutor"));
   return res.json({ ok: true });
 });
 
@@ -482,7 +485,11 @@ router.post("/evaluations", requireAuth, requireRole("tutor"), (req, res) => {
     evaluation.theory, evaluation.practical, evaluation.communication,
     evaluation.comments, evaluation.created_at
   );
-  return res.status(201).json({ ...evaluation, total: Math.round((evaluation.theory + evaluation.practical + evaluation.communication) / 3 * 10) / 10 });
+  const total = Math.round((evaluation.theory + evaluation.practical + evaluation.communication) / 3 * 10) / 10;
+  const tutorName = db.prepare("SELECT name FROM users WHERE id = ?").get(req.user.sub);
+  logActivity(req.user.sub, tutorName ? tutorName.name : "Tutor", "Evaluación creada",
+    "Alumno: " + evaluation.student_name + " · Nota: " + total + "/5 · Rotación: " + evaluation.rotation);
+  return res.status(201).json({ ...evaluation, total });
 });
 
 router.get("/evaluations", requireAuth, (req, res) => {
@@ -547,6 +554,186 @@ router.post("/community/student-posts/:id/like", requireAuth, (req, res) => {
   if (!row) return res.status(404).json({ message: "Post no encontrado" });
   db.prepare("UPDATE student_posts SET likes = likes + 1 WHERE id = ?").run(req.params.id);
   return res.json({ likes: db.prepare("SELECT likes FROM student_posts WHERE id = ?").get(req.params.id).likes });
+});
+
+// ── Admin: Cursos ─────────────────────────────────────────────────────────────
+router.get("/admin/courses", requireAuth, requireAdmin, (_req, res) => {
+  const courses = db.prepare(`
+    SELECT c.*, COUNT(s.id) as subject_count
+    FROM courses c LEFT JOIN subjects s ON s.course_id = c.id
+    GROUP BY c.id ORDER BY c.year ASC
+  `).all();
+  return res.json(courses);
+});
+
+router.post("/admin/courses", requireAuth, requireAdmin, (req, res) => {
+  const { name, year } = req.body || {};
+  if (!name || !year) return res.status(400).json({ message: "Faltan campos: name, year" });
+  const y = parseInt(year);
+  if (y < 2 || y > 6) return res.status(400).json({ message: "El año debe ser entre 2 y 6" });
+  const existing = db.prepare("SELECT id FROM courses WHERE year = ?").get(y);
+  if (existing) return res.status(409).json({ message: "Ya existe un curso para ese año" });
+  const id = newId("course");
+  db.prepare("INSERT INTO courses VALUES (?, ?, ?, ?)").run(id, String(name).trim(), y, new Date().toISOString());
+  return res.status(201).json({ ok: true, id });
+});
+
+router.delete("/admin/courses/:id", requireAuth, requireAdmin, (req, res) => {
+  const course = db.prepare("SELECT id FROM courses WHERE id = ?").get(req.params.id);
+  if (!course) return res.status(404).json({ message: "Curso no encontrado" });
+  db.prepare("DELETE FROM subjects WHERE course_id = ?").run(req.params.id);
+  db.prepare("DELETE FROM courses WHERE id = ?").run(req.params.id);
+  return res.json({ ok: true });
+});
+
+// ── Admin: Asignaturas ────────────────────────────────────────────────────────
+router.get("/admin/subjects", requireAuth, requireAdmin, (req, res) => {
+  const courseId = req.query.courseId;
+  let rows;
+  if (courseId) {
+    rows = db.prepare(`
+      SELECT s.*, c.name as course_name, c.year as course_year
+      FROM subjects s JOIN courses c ON c.id = s.course_id
+      WHERE s.course_id = ? ORDER BY s.name ASC
+    `).all(courseId);
+  } else {
+    rows = db.prepare(`
+      SELECT s.*, c.name as course_name, c.year as course_year
+      FROM subjects s JOIN courses c ON c.id = s.course_id
+      ORDER BY c.year ASC, s.name ASC
+    `).all();
+  }
+  return res.json(rows);
+});
+
+router.post("/admin/subjects", requireAuth, requireAdmin, (req, res) => {
+  const { name, courseId } = req.body || {};
+  if (!name || !courseId) return res.status(400).json({ message: "Faltan campos: name, courseId" });
+  const course = db.prepare("SELECT id FROM courses WHERE id = ?").get(courseId);
+  if (!course) return res.status(404).json({ message: "Curso no encontrado" });
+  const id = newId("subj");
+  db.prepare("INSERT INTO subjects VALUES (?, ?, ?, ?)").run(id, String(name).trim(), courseId, new Date().toISOString());
+  return res.status(201).json({ ok: true, id });
+});
+
+router.delete("/admin/subjects/:id", requireAuth, requireAdmin, (req, res) => {
+  const subj = db.prepare("SELECT id FROM subjects WHERE id = ?").get(req.params.id);
+  if (!subj) return res.status(404).json({ message: "Asignatura no encontrada" });
+  db.prepare("DELETE FROM subjects WHERE id = ?").run(req.params.id);
+  return res.json({ ok: true });
+});
+
+// ── Admin: Actividad en tiempo real ──────────────────────────────────────────
+router.get("/admin/activity", requireAuth, requireAdmin, (_req, res) => {
+  const rows = db.prepare("SELECT * FROM activity_log ORDER BY created_at DESC LIMIT 60").all();
+  return res.json(rows);
+});
+
+// ── Admin: Alertas automáticas ────────────────────────────────────────────────
+router.get("/admin/alerts", requireAuth, requireAdmin, (_req, res) => {
+  const alerts = [];
+  const today = new Date().toISOString().slice(0, 10);
+  const nowMs = Date.now();
+
+  // 1. Rotaciones activas sin tutor
+  const noTutor = db.prepare(`
+    SELECT id, service, hospital FROM rotations
+    WHERE tutor_id IS NULL AND start_date <= ? AND end_date >= ?
+  `).all(today, today);
+  noTutor.forEach(function(r) {
+    alerts.push({ id: "no-tutor-" + r.id, severity: "critical", icon: "🔴",
+      title: "Rotación activa sin tutor", message: "\"" + r.service + "\" en " + r.hospital + " no tiene tutor asignado.", tab: "rotaciones" });
+  });
+
+  // 2. Asistencias pendientes > 24h sin revisar
+  const oldPending = db.prepare("SELECT *, student_name FROM attendance_pending ORDER BY scanned_at ASC").all();
+  oldPending.forEach(function(ap) {
+    const h = (nowMs - new Date(ap.scanned_at).getTime()) / 3600000;
+    if (h > 24) {
+      alerts.push({ id: "pending-old-" + ap.id, severity: "warning", icon: "⏳",
+        title: "Asistencia sin confirmar +" + Math.floor(h) + "h", message: ap.student_name + " lleva " + Math.floor(h) + "h esperando confirmación en " + ap.area + ".", tab: "actividad" });
+    }
+  });
+
+  // 3. Alumnos con nota media baja (< 2/5)
+  const lowGrade = db.prepare(`
+    SELECT student_name, ROUND(AVG((theory + practical + communication) / 3.0), 1) as avg_grade, COUNT(*) as cnt
+    FROM evaluations GROUP BY student_name HAVING avg_grade < 2 AND cnt >= 1
+  `).all();
+  lowGrade.forEach(function(e) {
+    alerts.push({ id: "low-grade-" + e.student_name.replace(/\s+/g, "-"), severity: "critical", icon: "📉",
+      title: "Rendimiento bajo detectado", message: e.student_name + " tiene una nota media de " + e.avg_grade + "/5 en " + e.cnt + " evaluación(es).", tab: "usuarios" });
+  });
+
+  // 4. Alumnos en rotación activa sin ninguna asistencia registrada
+  const activeRots = db.prepare("SELECT id, service, hospital FROM rotations WHERE start_date <= ? AND end_date >= ?").all(today, today);
+  activeRots.forEach(function(rot) {
+    const students = db.prepare(`
+      SELECT u.id, u.name FROM users u
+      JOIN rotation_students rs ON rs.student_id = u.id WHERE rs.rotation_id = ?
+    `).all(rot.id);
+    students.forEach(function(stu) {
+      const hasPending  = db.prepare("SELECT 1 FROM attendance_pending WHERE student_id = ?").get(stu.id);
+      const hasConfirmed = db.prepare("SELECT 1 FROM attendance_confirmed WHERE student_id = ?").get(stu.id);
+      if (!hasPending && !hasConfirmed) {
+        alerts.push({ id: "no-att-" + stu.id, severity: "warning", icon: "📍",
+          title: "Sin asistencia registrada", message: stu.name + " no tiene ninguna asistencia en \"" + rot.service + "\".", tab: "usuarios" });
+      }
+    });
+  });
+
+  return res.json(alerts);
+});
+
+// ── Admin: Stats enriquecidas ─────────────────────────────────────────────────
+router.get("/admin/stats", requireAuth, requireAdmin, (_req, res) => {
+  const today = new Date().toISOString().slice(0, 10);
+  return res.json({
+    users:       db.prepare("SELECT COUNT(*) as n FROM users WHERE role != 'admin'").get().n,
+    students:    db.prepare("SELECT COUNT(*) as n FROM users WHERE role = 'student'").get().n,
+    tutors:      db.prepare("SELECT COUNT(*) as n FROM users WHERE role = 'tutor'").get().n,
+    rotations:   db.prepare("SELECT COUNT(*) as n FROM rotations").get().n,
+    evals:       db.prepare("SELECT COUNT(*) as n FROM evaluations").get().n,
+    attendance:  db.prepare("SELECT COUNT(*) as n FROM attendance_confirmed").get().n,
+    pending:     db.prepare("SELECT COUNT(*) as n FROM attendance_pending").get().n,
+    activeRots:  db.prepare("SELECT COUNT(*) as n FROM rotations WHERE start_date <= ? AND end_date >= ?").get(today, today).n,
+    subjects:    db.prepare("SELECT COUNT(*) as n FROM subjects").get().n,
+    courses:     db.prepare("SELECT COUNT(*) as n FROM courses").get().n
+  });
+});
+
+// ── Auth: Recuperación de contraseña ─────────────────────────────────────────
+router.post("/auth/forgot-password", (req, res) => {
+  const { email } = req.body || {};
+  if (!email) return res.status(400).json({ message: "Falta el correo electrónico" });
+  const emailLower = String(email).toLowerCase().trim();
+  const user = db.prepare("SELECT id, name FROM users WHERE email = ?").get(emailLower);
+  // No revelar si el correo existe
+  if (!user) return res.json({ ok: true });
+  // Eliminar tokens anteriores caducados o del mismo usuario
+  db.prepare("DELETE FROM password_reset_tokens WHERE user_id = ? OR expires_at < ?").run(user.id, new Date().toISOString());
+  const token = crypto.randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + 3600000).toISOString(); // 1 hora
+  db.prepare("INSERT INTO password_reset_tokens VALUES (?, ?, ?, ?, 0)").run(newId("rst"), user.id, token, expiresAt);
+  logActivity(null, "Sistema", "Recuperación de contraseña solicitada", "Email: " + emailLower);
+  // En producción: enviar email con el token. En demo: devolver el link
+  return res.json({ ok: true, resetToken: token });
+});
+
+router.post("/auth/reset-password", (req, res) => {
+  const { token, newPassword } = req.body || {};
+  if (!token || !newPassword) return res.status(400).json({ message: "Faltan campos" });
+  if (newPassword.length < 6) return res.status(400).json({ message: "La contraseña debe tener al menos 6 caracteres" });
+  const row = db.prepare(`
+    SELECT prt.*, u.email FROM password_reset_tokens prt
+    JOIN users u ON u.id = prt.user_id
+    WHERE prt.token = ? AND prt.used = 0 AND prt.expires_at > ?
+  `).get(token, new Date().toISOString());
+  if (!row) return res.status(400).json({ message: "Enlace inválido o expirado. Solicita uno nuevo." });
+  db.prepare("UPDATE users SET password_hash = ? WHERE id = ?").run(bcrypt.hashSync(newPassword, 10), row.user_id);
+  db.prepare("UPDATE password_reset_tokens SET used = 1 WHERE token = ?").run(token);
+  logActivity(row.user_id, row.email, "Contraseña restablecida", null);
+  return res.json({ ok: true });
 });
 
 module.exports = router;

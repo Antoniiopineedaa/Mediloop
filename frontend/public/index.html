@@ -143,6 +143,40 @@
         font-size: 0.8rem; cursor: pointer; padding: 0;
       }
       .help-links a:hover, .help-links button.link-btn:hover { text-decoration: underline; }
+      /* Password eye toggle */
+      .pass-wrap { position: relative; }
+      .pass-wrap .input { padding-right: 2.8rem; }
+      .eye-btn {
+        position: absolute; right: 0.7rem; top: 50%; transform: translateY(-50%);
+        background: none; border: none; cursor: pointer; padding: 0.2rem;
+        color: #9ca3af; display: flex; align-items: center;
+      }
+      .eye-btn:hover { color: #4f46e5; }
+      .eye-btn svg { width: 18px; height: 18px; display: block; }
+      /* Forgot password modal */
+      #forgot-overlay {
+        display: none; position: fixed; inset: 0;
+        background: rgba(15,23,42,0.55); z-index: 300;
+        align-items: center; justify-content: center;
+      }
+      #forgot-overlay.open { display: flex; }
+      .forgot-box {
+        background: #fff; border-radius: 20px; padding: 2rem;
+        max-width: 380px; width: 90%;
+        box-shadow: 0 20px 60px rgba(15,23,42,0.3);
+      }
+      .forgot-box h3 { margin: 0 0 0.4rem; font-size: 1rem; font-weight: 700; }
+      .forgot-box p  { margin: 0 0 1.1rem; font-size: 0.85rem; color: #6b7280; }
+      .forgot-actions { display: flex; gap: 0.65rem; margin-top: 0.9rem; }
+      .forgot-actions .submit-btn { margin-top: 0; flex: 1; }
+      .btn-ghost { flex: 1; border: 1px solid #e5e7eb; border-radius: 999px; background: #fff; font-size: 0.9rem; font-weight: 500; cursor: pointer; padding: 0.75rem; }
+      .reset-link-box {
+        background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px;
+        padding: 0.75rem 1rem; font-size: 0.8rem; color: #166534; margin-top: 0.75rem;
+        word-break: break-all;
+      }
+      /* Reset password panel */
+      #panel-reset { display: none; }
 
       /* Why section */
       .why-section { width: 100%; max-width: 860px; text-align: center; color: #f9fafb; }
@@ -213,9 +247,15 @@
             </div>
             <div class="field">
               <label for="login-password">Contraseña</label>
-              <div class="field-input">
+              <div class="field-input pass-wrap">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17 8V7a5 5 0 0 0-10 0v1H5v12h14V8h-2Zm-8-1a3 3 0 0 1 6 0v1H9V7Zm8 11H7v-8h10v8Z"/></svg>
                 <input id="login-password" class="input" type="password" placeholder="Ingresa tu contraseña" autocomplete="current-password" />
+                <button type="button" class="eye-btn" data-target="login-password" aria-label="Mostrar/ocultar contraseña">
+                  <svg class="eye-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+              <div style="text-align:right;margin-top:0.3rem">
+                <button type="button" class="link-btn" id="btn-forgot">¿Olvidaste tu contraseña?</button>
               </div>
             </div>
             <div class="field">
@@ -245,6 +285,29 @@
             <button type="submit" class="submit-btn" id="login-submit">Iniciar sesión</button>
             <div class="help-links">
               ¿No tienes cuenta? <button type="button" class="link-btn" id="goto-register">Créala aquí</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Panel: Reset password (visible solo con ?reset=TOKEN en URL) -->
+        <div id="panel-reset" role="tabpanel">
+          <div class="panel-title">Nueva contraseña</div>
+          <div class="panel-subtitle">Introduce tu nueva contraseña para recuperar el acceso</div>
+          <form id="reset-form" novalidate>
+            <div class="field">
+              <label for="reset-password">Nueva contraseña</label>
+              <div class="field-input pass-wrap">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17 8V7a5 5 0 0 0-10 0v1H5v12h14V8h-2Zm-8-1a3 3 0 0 1 6 0v1H9V7Zm8 11H7v-8h10v8Z"/></svg>
+                <input id="reset-password" class="input" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+                <button type="button" class="eye-btn" data-target="reset-password" aria-label="Mostrar/ocultar contraseña">
+                  <svg class="eye-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+            <div id="reset-msg" class="form-msg"></div>
+            <button type="submit" class="submit-btn" id="reset-submit">Guardar nueva contraseña</button>
+            <div class="help-links">
+              <button type="button" class="link-btn" id="goto-login-from-reset">Volver al inicio de sesión</button>
             </div>
           </form>
         </div>
@@ -280,9 +343,12 @@
             </div>
             <div class="field">
               <label for="reg-password">Contraseña</label>
-              <div class="field-input">
+              <div class="field-input pass-wrap">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17 8V7a5 5 0 0 0-10 0v1H5v12h14V8h-2Zm-8-1a3 3 0 0 1 6 0v1H9V7Zm8 11H7v-8h10v8Z"/></svg>
                 <input id="reg-password" class="input" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+                <button type="button" class="eye-btn" data-target="reg-password" aria-label="Mostrar/ocultar contraseña">
+                  <svg class="eye-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
               </div>
             </div>
             <div class="field">
@@ -316,6 +382,27 @@
           </form>
         </div>
       </section>
+
+      <!-- Modal olvidé contraseña -->
+      <div id="forgot-overlay" role="dialog" aria-modal="true" aria-label="Recuperar contraseña">
+        <div class="forgot-box">
+          <h3>Recuperar contraseña</h3>
+          <p>Introduce tu correo @uji.es y recibirás un enlace para restablecer tu contraseña.</p>
+          <div class="field">
+            <label for="forgot-email">Correo UJI</label>
+            <div class="field-input">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z"/></svg>
+              <input id="forgot-email" class="input" type="email" placeholder="alumno@uji.es" />
+            </div>
+          </div>
+          <div id="forgot-msg" class="form-msg"></div>
+          <div id="forgot-reset-link" class="reset-link-box" style="display:none"></div>
+          <div class="forgot-actions">
+            <button class="btn-ghost" id="forgot-cancel">Cancelar</button>
+            <button class="submit-btn" id="forgot-submit">Enviar enlace</button>
+          </div>
+        </div>
+      </div>
 
       <section class="why-section" aria-label="Por qué elegir Mediloop">
         <div class="why-title">¿Por qué elegir Mediloop?</div>
@@ -535,6 +622,108 @@
               regSubmit.textContent = "Crear cuenta";
             });
         });
+
+        // ── Ojo de contraseña ──────────────────────────────────────────────────
+        document.querySelectorAll(".eye-btn").forEach(function(btn) {
+          btn.addEventListener("click", function() {
+            var input = document.getElementById(btn.dataset.target);
+            if (!input) return;
+            var showing = input.type === "text";
+            input.type = showing ? "password" : "text";
+            // Swap icon
+            btn.innerHTML = showing
+              ? '<svg class="eye-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+              : '<svg class="eye-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+          });
+        });
+
+        // ── Modal olvidé contraseña ────────────────────────────────────────────
+        var forgotOverlay = document.getElementById("forgot-overlay");
+        document.getElementById("btn-forgot").addEventListener("click", function() {
+          document.getElementById("forgot-msg").className = "form-msg";
+          document.getElementById("forgot-msg").textContent = "";
+          document.getElementById("forgot-reset-link").style.display = "none";
+          document.getElementById("forgot-email").value = "";
+          forgotOverlay.classList.add("open");
+          document.getElementById("forgot-email").focus();
+        });
+        document.getElementById("forgot-cancel").addEventListener("click", function() {
+          forgotOverlay.classList.remove("open");
+        });
+        forgotOverlay.addEventListener("click", function(e) {
+          if (e.target === forgotOverlay) forgotOverlay.classList.remove("open");
+        });
+        document.getElementById("forgot-submit").addEventListener("click", function() {
+          var email = document.getElementById("forgot-email").value.trim();
+          var msgEl = document.getElementById("forgot-msg");
+          msgEl.className = "form-msg"; msgEl.textContent = "";
+          if (!email || !email.toLowerCase().endsWith("@uji.es")) {
+            msgEl.className = "form-msg error"; msgEl.textContent = "Introduce un correo @uji.es válido."; return;
+          }
+          var btn = document.getElementById("forgot-submit");
+          btn.disabled = true; btn.textContent = "Enviando…";
+          fetch(API_BASE + "/auth/forgot-password", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: email })
+          })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+              msgEl.className = "form-msg success";
+              msgEl.textContent = "Si ese correo está registrado, recibirás instrucciones para restablecer tu contraseña.";
+              // Demo: show link
+              if (d.resetToken) {
+                var link = document.getElementById("forgot-reset-link");
+                link.style.display = "block";
+                link.innerHTML = '<strong>Enlace de demo:</strong><br><a href="index.html?reset=' + d.resetToken + '" style="color:#166534">index.html?reset=' + d.resetToken.slice(0,16) + '…</a>';
+              }
+            })
+            .catch(function() { msgEl.className = "form-msg error"; msgEl.textContent = "Error de conexión. Inténtalo de nuevo."; })
+            .finally(function() { btn.disabled = false; btn.textContent = "Enviar enlace"; });
+        });
+
+        // ── Reset de contraseña (si hay ?reset=TOKEN en la URL) ───────────────
+        var urlParams = new URLSearchParams(window.location.search);
+        var resetToken = urlParams.get("reset");
+        if (resetToken) {
+          // Ocultar tabs y mostrar panel reset
+          document.querySelector(".tab-row").style.display = "none";
+          panelLogin.style.display = "none";
+          panelReg.style.display = "none";
+          document.getElementById("panel-reset").style.display = "block";
+        }
+        document.getElementById("goto-login-from-reset").addEventListener("click", function() {
+          window.history.replaceState({}, "", window.location.pathname);
+          document.getElementById("panel-reset").style.display = "none";
+          document.querySelector(".tab-row").style.display = "";
+          showTab("login");
+        });
+        document.getElementById("reset-form").addEventListener("submit", function(e) {
+          e.preventDefault();
+          var pass = document.getElementById("reset-password").value;
+          var msgEl = document.getElementById("reset-msg");
+          msgEl.className = "form-msg"; msgEl.textContent = "";
+          if (!pass || pass.length < 6) { msgEl.className = "form-msg error"; msgEl.textContent = "La contraseña debe tener al menos 6 caracteres."; return; }
+          var btn = document.getElementById("reset-submit");
+          btn.disabled = true; btn.textContent = "Guardando…";
+          fetch(API_BASE + "/auth/reset-password", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token: resetToken, newPassword: pass })
+          })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(res) {
+              if (!res.ok) { msgEl.className = "form-msg error"; msgEl.textContent = res.data.message || "Error al restablecer la contraseña."; return; }
+              msgEl.className = "form-msg success"; msgEl.textContent = "¡Contraseña actualizada! Redirigiendo al inicio de sesión…";
+              setTimeout(function() {
+                window.history.replaceState({}, "", window.location.pathname);
+                document.getElementById("panel-reset").style.display = "none";
+                document.querySelector(".tab-row").style.display = "";
+                showTab("login");
+              }, 1500);
+            })
+            .catch(function() { msgEl.className = "form-msg error"; msgEl.textContent = "Error de conexión."; })
+            .finally(function() { btn.disabled = false; btn.textContent = "Guardar nueva contraseña"; });
+        });
+
       })();
     </script>
   </body>

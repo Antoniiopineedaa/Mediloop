@@ -6,362 +6,149 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
       :root {
-        --blue: #2563eb;
-        --indigo: #4f46e5;
-        --green: #059669;
-        --red: #dc2626;
-        --purple: #7c3aed;
-        --gray-50: #f9fafb;
-        --gray-100: #f3f4f6;
-        --gray-200: #e5e7eb;
-        --gray-600: #4b5563;
-        --gray-700: #374151;
-        --gray-900: #111827;
+        --blue: #2563eb; --indigo: #4f46e5; --green: #059669;
+        --red: #dc2626; --purple: #7c3aed; --orange: #d97706;
+        --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+        --gray-600: #4b5563; --gray-700: #374151; --gray-900: #111827;
       }
       * { box-sizing: border-box; }
-      body {
-        margin: 0;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background: var(--gray-50);
-        color: var(--gray-900);
-      }
-      .header {
-        background: linear-gradient(135deg, #1e1b4b, #4f46e5);
-        padding: 1rem 2rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-      .header .logo-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        text-decoration: none;
-      }
+      body { margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--gray-50); color: var(--gray-900); }
+      .header { background: linear-gradient(135deg, #1e1b4b, #4f46e5); padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+      .header .logo-link { display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; }
       .header .logo-mark { width: 34px; height: 34px; flex-shrink: 0; }
       .header .logo-mark svg { width: 100%; height: 100%; display: block; }
       .header .logo-text { color: #fff; font-weight: 700; font-size: 1.05rem; }
-      .header .badge-admin {
-        background: rgba(255,255,255,0.15);
-        color: rgba(255,255,255,0.9);
-        font-size: 0.75rem;
-        font-weight: 600;
-        padding: 0.2rem 0.6rem;
-        border-radius: 999px;
-        letter-spacing: 0.04em;
-        margin-left: 0.5rem;
-      }
-      .header .user-block {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-      }
+      .header .badge-admin { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.9); font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 999px; letter-spacing: 0.04em; margin-left: 0.5rem; }
+      .header .user-block { display: flex; align-items: center; gap: 0.75rem; }
       .header .user-name { color: rgba(255,255,255,0.9); font-size: 0.88rem; }
-      .header .salir {
-        color: rgba(255,255,255,0.9);
-        text-decoration: none;
-        font-size: 0.85rem;
-        padding: 0.4rem 0.75rem;
-        border: 1px solid rgba(255,255,255,0.4);
-        border-radius: 8px;
-      }
+      .header .salir { color: rgba(255,255,255,0.9); text-decoration: none; font-size: 0.85rem; padding: 0.4rem 0.75rem; border: 1px solid rgba(255,255,255,0.4); border-radius: 8px; }
       .header .salir:hover { background: rgba(255,255,255,0.12); color: #fff; }
-      .main {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 2.5rem 1.5rem;
-      }
-      .page-title {
-        font-size: 1.6rem;
-        font-weight: 700;
-        margin: 0 0 0.25rem;
-      }
-      .page-sub {
-        color: var(--gray-600);
-        font-size: 0.9rem;
-        margin: 0 0 2rem;
-      }
-      /* Stats cards */
-      .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 1rem;
-        margin-bottom: 2.5rem;
-      }
-      .stat-card {
-        background: #fff;
-        border-radius: 14px;
-        padding: 1.25rem 1.25rem 1rem;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-        display: flex;
-        flex-direction: column;
-        gap: 0.3rem;
-      }
-      .stat-card .label {
-        font-size: 0.78rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: var(--gray-600);
-      }
-      .stat-card .value {
-        font-size: 2rem;
-        font-weight: 700;
-        line-height: 1;
-      }
-      .stat-card .icon {
-        font-size: 1.4rem;
-        margin-bottom: 0.25rem;
-      }
-      .stat-card.blue .value { color: var(--blue); }
-      .stat-card.green .value { color: var(--green); }
+      .alert-badge { background: #dc2626; color: #fff; font-size: 0.7rem; font-weight: 700; padding: 0.1rem 0.45rem; border-radius: 999px; margin-left: 0.35rem; vertical-align: middle; display: none; }
+      .main { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+      .page-title { font-size: 1.6rem; font-weight: 700; margin: 0 0 0.25rem; }
+      .page-sub { color: var(--gray-600); font-size: 0.9rem; margin: 0 0 1.75rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+      .live-dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; display: inline-block; animation: pulse-dot 2s infinite; }
+      @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+      .last-update { font-size: 0.78rem; color: #9ca3af; }
+      /* Stats */
+      .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.85rem; margin-bottom: 2rem; }
+      .stat-card { background: #fff; border-radius: 14px; padding: 1.1rem 1.1rem 0.9rem; box-shadow: 0 2px 10px rgba(0,0,0,0.06); display: flex; flex-direction: column; gap: 0.25rem; }
+      .stat-card .label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gray-600); }
+      .stat-card .value { font-size: 1.9rem; font-weight: 700; line-height: 1; }
+      .stat-card .icon { font-size: 1.3rem; margin-bottom: 0.2rem; }
+      .stat-card.blue .value   { color: var(--blue); }
+      .stat-card.green .value  { color: var(--green); }
       .stat-card.purple .value { color: var(--purple); }
       .stat-card.indigo .value { color: var(--indigo); }
-      .stat-card.red .value { color: var(--red); }
-      .stat-card.teal .value { color: #0d9488; }
-      /* Table section */
-      .section-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 1rem;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-      }
-      .section-header h2 {
-        margin: 0;
-        font-size: 1.1rem;
-        font-weight: 700;
-      }
-      .search-wrap {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        flex-wrap: wrap;
-      }
-      .search-wrap input {
-        padding: 0.5rem 0.85rem;
-        border: 1px solid var(--gray-200);
-        border-radius: 10px;
-        font-size: 0.88rem;
-        outline: none;
-        background: #fff;
-        width: 220px;
-      }
-      .search-wrap input:focus { border-color: var(--blue); }
-      .filter-select {
-        padding: 0.5rem 0.75rem;
-        border: 1px solid var(--gray-200);
-        border-radius: 10px;
-        font-size: 0.88rem;
-        background: #fff;
-        outline: none;
-        cursor: pointer;
-      }
-      .table-wrap {
-        background: #fff;
-        border-radius: 16px;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-        overflow: hidden;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      thead th {
-        background: var(--gray-50);
-        padding: 0.75rem 1rem;
-        text-align: left;
-        font-size: 0.78rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: var(--gray-600);
-        border-bottom: 1px solid var(--gray-200);
-      }
-      tbody td {
-        padding: 0.85rem 1rem;
-        font-size: 0.88rem;
-        border-bottom: 1px solid var(--gray-100);
-        vertical-align: middle;
-      }
-      tbody tr:last-child td { border-bottom: none; }
-      tbody tr:hover { background: var(--gray-50); }
-      .role-badge {
-        display: inline-block;
-        padding: 0.2rem 0.6rem;
-        border-radius: 999px;
-        font-size: 0.75rem;
-        font-weight: 600;
-      }
-      .role-badge.student { background: #dbeafe; color: var(--blue); }
-      .role-badge.tutor   { background: #d1fae5; color: var(--green); }
+      .stat-card.red .value    { color: var(--red); }
+      .stat-card.teal .value   { color: #0d9488; }
+      .stat-card.orange .value { color: var(--orange); }
       /* Tabs */
-      .tabs {
-        display: flex;
-        gap: 0.25rem;
-        background: var(--gray-100);
-        border-radius: 12px;
-        padding: 0.25rem;
-        margin-bottom: 2rem;
-        width: fit-content;
-      }
-      .tab-btn {
-        padding: 0.55rem 1.25rem;
-        border: none;
-        border-radius: 10px;
-        font-size: 0.88rem;
-        font-weight: 600;
-        cursor: pointer;
-        background: transparent;
-        color: var(--gray-600);
-        transition: all 0.15s;
-      }
+      .tabs { display: flex; gap: 0.2rem; background: var(--gray-100); border-radius: 12px; padding: 0.25rem; margin-bottom: 2rem; overflow-x: auto; width: fit-content; max-width: 100%; }
+      .tab-btn { padding: 0.5rem 1.1rem; border: none; border-radius: 10px; font-size: 0.85rem; font-weight: 600; cursor: pointer; background: transparent; color: var(--gray-600); transition: all 0.15s; white-space: nowrap; }
       .tab-btn.active { background: #fff; color: var(--gray-900); box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
       .tab-panel { display: none; }
       .tab-panel.active { display: block; }
+      /* Table */
+      .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem; }
+      .section-header h2 { margin: 0; font-size: 1.1rem; font-weight: 700; }
+      .search-wrap { display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap; }
+      .search-wrap input { padding: 0.5rem 0.85rem; border: 1px solid var(--gray-200); border-radius: 10px; font-size: 0.88rem; outline: none; background: #fff; width: 200px; }
+      .search-wrap input:focus { border-color: var(--blue); }
+      .filter-select { padding: 0.5rem 0.75rem; border: 1px solid var(--gray-200); border-radius: 10px; font-size: 0.88rem; background: #fff; outline: none; cursor: pointer; }
+      .table-wrap { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; }
+      table { width: 100%; border-collapse: collapse; }
+      thead th { background: var(--gray-50); padding: 0.7rem 1rem; text-align: left; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gray-600); border-bottom: 1px solid var(--gray-200); }
+      tbody td { padding: 0.8rem 1rem; font-size: 0.88rem; border-bottom: 1px solid var(--gray-100); vertical-align: middle; }
+      tbody tr:last-child td { border-bottom: none; }
+      tbody tr:hover { background: var(--gray-50); }
+      .role-badge { display: inline-block; padding: 0.18rem 0.55rem; border-radius: 999px; font-size: 0.73rem; font-weight: 600; }
+      .role-badge.student { background: #dbeafe; color: var(--blue); }
+      .role-badge.tutor   { background: #d1fae5; color: var(--green); }
+      .status-badge { display: inline-block; padding: 0.18rem 0.55rem; border-radius: 999px; font-size: 0.73rem; font-weight: 600; }
+      .status-badge.en-curso   { background: #d1fae5; color: var(--green); }
+      .status-badge.planificada{ background: #dbeafe; color: var(--blue); }
+      .status-badge.finalizada { background: var(--gray-100); color: var(--gray-600); }
       /* Rotation form */
-      .rot-form-card {
-        background: #fff;
-        border-radius: 16px;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-      }
-      .rot-form-card h3 { margin: 0 0 1.25rem; font-size: 1rem; font-weight: 700; }
-      .form-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.75rem;
-        margin-bottom: 0.75rem;
-      }
+      .card { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 1.5rem; margin-bottom: 1.5rem; }
+      .card h3 { margin: 0 0 1.1rem; font-size: 1rem; font-weight: 700; }
+      .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; margin-bottom: 0.75rem; }
       .form-field { display: flex; flex-direction: column; gap: 0.3rem; }
-      .form-field label { font-size: 0.78rem; font-weight: 600; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.04em; }
-      .form-field input, .form-field select {
-        padding: 0.55rem 0.75rem;
-        border: 1px solid var(--gray-200);
-        border-radius: 10px;
-        font-size: 0.88rem;
-        outline: none;
-        background: #fff;
-        width: 100%;
-      }
+      .form-field label { font-size: 0.75rem; font-weight: 600; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.04em; }
+      .form-field input, .form-field select { padding: 0.5rem 0.7rem; border: 1px solid var(--gray-200); border-radius: 10px; font-size: 0.88rem; outline: none; background: #fff; width: 100%; }
       .form-field input:focus, .form-field select:focus { border-color: var(--blue); }
-      .btn-create {
-        padding: 0.6rem 1.5rem;
-        border: none;
-        border-radius: 10px;
-        background: linear-gradient(90deg, var(--blue), var(--indigo));
-        color: #fff;
-        font-size: 0.88rem;
-        font-weight: 600;
-        cursor: pointer;
-      }
-      .btn-create:disabled { opacity: 0.6; cursor: default; }
-      /* Status badge */
-      .status-badge {
-        display: inline-block;
-        padding: 0.2rem 0.6rem;
-        border-radius: 999px;
-        font-size: 0.75rem;
-        font-weight: 600;
-      }
-      .status-badge.en-curso  { background: #d1fae5; color: var(--green); }
-      .status-badge.planificada { background: #dbeafe; color: var(--blue); }
-      .status-badge.finalizada  { background: var(--gray-100); color: var(--gray-600); }
-      .btn-delete {
-        padding: 0.35rem 0.7rem;
-        border: none;
-        border-radius: 8px;
-        background: #fef2f2;
-        color: var(--red);
-        font-size: 0.8rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background 0.15s;
-      }
+      .btn-primary { padding: 0.55rem 1.4rem; border: none; border-radius: 10px; background: linear-gradient(90deg, var(--blue), var(--indigo)); color: #fff; font-size: 0.88rem; font-weight: 600; cursor: pointer; }
+      .btn-primary:disabled { opacity: 0.6; cursor: default; }
+      .btn-delete { padding: 0.32rem 0.65rem; border: none; border-radius: 8px; background: #fef2f2; color: var(--red); font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
       .btn-delete:hover { background: #fee2e2; }
-      .empty-row td {
-        text-align: center;
-        color: var(--gray-600);
-        padding: 2.5rem;
-        font-size: 0.9rem;
-      }
+      .empty-row td { text-align: center; color: var(--gray-600); padding: 2.5rem; font-size: 0.9rem; }
+      /* Cursos & Asignaturas */
+      .courses-layout { display: grid; grid-template-columns: 240px 1fr; gap: 1.25rem; }
+      .course-list { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; }
+      .course-item { padding: 0.85rem 1rem; border-bottom: 1px solid var(--gray-100); cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; transition: background 0.12s; }
+      .course-item:last-child { border-bottom: none; }
+      .course-item:hover { background: var(--gray-50); }
+      .course-item.active { background: #eef2ff; border-left: 3px solid var(--indigo); }
+      .course-item .year-badge { background: var(--indigo); color: #fff; font-size: 0.72rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 6px; }
+      .course-item .subj-count { font-size: 0.75rem; color: #9ca3af; }
+      .subjects-panel { display: flex; flex-direction: column; gap: 1rem; }
+      .subject-item { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+      .subject-item .subj-name { font-weight: 500; font-size: 0.9rem; }
+      /* Actividad */
+      .activity-feed { display: flex; flex-direction: column; gap: 0; }
+      .activity-item { display: flex; gap: 1rem; padding: 0.9rem 1.1rem; background: #fff; border-bottom: 1px solid var(--gray-100); align-items: flex-start; }
+      .activity-item:last-child { border-bottom: none; }
+      .activity-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; flex-shrink: 0; }
+      .activity-body { flex: 1; }
+      .activity-body .act-action { font-weight: 600; font-size: 0.9rem; }
+      .activity-body .act-details { font-size: 0.82rem; color: var(--gray-600); margin-top: 0.15rem; }
+      .activity-body .act-time { font-size: 0.75rem; color: #9ca3af; margin-top: 0.2rem; }
+      /* Alertas */
+      .alerts-list { display: flex; flex-direction: column; gap: 0.75rem; }
+      .alert-card { background: #fff; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 1rem 1.25rem; display: flex; gap: 1rem; align-items: flex-start; border-left: 4px solid transparent; }
+      .alert-card.critical { border-left-color: var(--red); }
+      .alert-card.warning  { border-left-color: var(--orange); }
+      .alert-card .alert-icon { font-size: 1.4rem; flex-shrink: 0; }
+      .alert-card .alert-body { flex: 1; }
+      .alert-card .alert-title { font-weight: 700; font-size: 0.9rem; }
+      .alert-card .alert-msg   { font-size: 0.83rem; color: var(--gray-600); margin-top: 0.2rem; }
+      .alert-card .btn-goto { border: none; border-radius: 8px; background: var(--gray-100); color: var(--gray-700); font-size: 0.78rem; font-weight: 600; padding: 0.3rem 0.7rem; cursor: pointer; margin-top: 0.5rem; }
+      .alert-card .btn-goto:hover { background: var(--gray-200); }
+      .no-alerts { text-align: center; padding: 3rem; color: var(--gray-600); }
+      .no-alerts .big { font-size: 2.5rem; margin-bottom: 0.5rem; }
       /* Confirm modal */
-      #confirm-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(15,23,42,0.55);
-        z-index: 300;
-        align-items: center;
-        justify-content: center;
-      }
+      #confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.55); z-index: 300; align-items: center; justify-content: center; }
       #confirm-overlay.open { display: flex; }
-      .confirm-box {
-        background: #fff;
-        border-radius: 16px;
-        padding: 1.75rem;
-        max-width: 360px;
-        width: 90%;
-        box-shadow: 0 20px 60px rgba(15,23,42,0.3);
-      }
+      .confirm-box { background: #fff; border-radius: 16px; padding: 1.75rem; max-width: 360px; width: 90%; box-shadow: 0 20px 60px rgba(15,23,42,0.3); }
       .confirm-box h3 { margin: 0 0 0.5rem; font-size: 1rem; }
       .confirm-box p  { margin: 0 0 1.25rem; font-size: 0.88rem; color: var(--gray-600); }
       .confirm-actions { display: flex; gap: 0.75rem; justify-content: flex-end; }
-      .btn-cancel {
-        padding: 0.55rem 1.1rem;
-        border: 1px solid var(--gray-200);
-        border-radius: 10px;
-        background: #fff;
-        font-size: 0.88rem;
-        cursor: pointer;
-        font-weight: 500;
-      }
-      .btn-confirm-del {
-        padding: 0.55rem 1.1rem;
-        border: none;
-        border-radius: 10px;
-        background: var(--red);
-        color: #fff;
-        font-size: 0.88rem;
-        font-weight: 600;
-        cursor: pointer;
-      }
+      .btn-cancel { padding: 0.55rem 1.1rem; border: 1px solid var(--gray-200); border-radius: 10px; background: #fff; font-size: 0.88rem; cursor: pointer; font-weight: 500; }
+      .btn-confirm-del { padding: 0.55rem 1.1rem; border: none; border-radius: 10px; background: var(--red); color: #fff; font-size: 0.88rem; font-weight: 600; cursor: pointer; }
+      /* Toast */
+      #toast { position: fixed; bottom: 1.5rem; right: 1.5rem; padding: 0.75rem 1.25rem; border-radius: 12px; font-size: 0.88rem; font-weight: 600; z-index: 400; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+      #toast.show { opacity: 1; }
+      #toast.ok  { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+      #toast.err { background: #fef2f2; color: var(--red); border: 1px solid #fecaca; }
       /* Responsive */
+      @media (max-width: 900px) {
+        .courses-layout { grid-template-columns: 1fr; }
+        .course-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+        .course-item { border-bottom: none; border-right: 1px solid var(--gray-100); }
+      }
       @media (max-width: 768px) {
-        .main { padding: 1.5rem 1rem; }
+        .main { padding: 1.25rem 1rem; }
         .header { padding: 0.75rem 1rem; }
-        .header .logo-text { font-size: 0.95rem; }
         .header .user-name { display: none; }
-        .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        .stats-grid { grid-template-columns: repeat(3, 1fr); }
         .table-wrap { overflow-x: auto; }
         table { min-width: 520px; }
-        .section-header { flex-direction: column; align-items: flex-start; }
-        .search-wrap { width: 100%; }
-        .search-wrap input { width: 100%; flex: 1; }
+        .form-grid { grid-template-columns: 1fr; }
       }
       @media (max-width: 480px) {
         .stats-grid { grid-template-columns: repeat(2, 1fr); }
         .stat-card .value { font-size: 1.6rem; }
       }
-      /* Toast */
-      #toast {
-        position: fixed;
-        bottom: 1.5rem;
-        right: 1.5rem;
-        padding: 0.75rem 1.25rem;
-        border-radius: 12px;
-        font-size: 0.88rem;
-        font-weight: 600;
-        z-index: 400;
-        opacity: 0;
-        transition: opacity 0.3s;
-        pointer-events: none;
-      }
-      #toast.show { opacity: 1; }
-      #toast.ok  { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
-      #toast.err { background: #fef2f2; color: var(--red); border: 1px solid #fecaca; }
     </style>
   </head>
   <body>
@@ -380,60 +167,45 @@
       </a>
       <div class="user-block">
         <span class="user-name" id="admin-name">Admin Mediloop</span>
-        <a href="index.html" class="salir">Salir</a>
+        <a href="index.html" class="salir" id="btn-salir">Salir</a>
       </div>
     </header>
 
     <main class="main">
       <h1 class="page-title">Panel de administrador</h1>
-      <p class="page-sub">Gestión global de usuarios, rotaciones y estadísticas del sistema.</p>
+      <p class="page-sub">
+        <span class="live-dot"></span>
+        <span>Actualización automática cada 60 s</span>
+        <span class="last-update" id="last-update">Cargando…</span>
+      </p>
 
       <!-- Stats -->
       <div class="stats-grid">
-        <div class="stat-card blue">
-          <div class="icon">👥</div>
-          <div class="label">Total usuarios</div>
-          <div class="value" id="stat-users">—</div>
-        </div>
-        <div class="stat-card green">
-          <div class="icon">🎓</div>
-          <div class="label">Alumnos</div>
-          <div class="value" id="stat-students">—</div>
-        </div>
-        <div class="stat-card purple">
-          <div class="icon">🩺</div>
-          <div class="label">Tutores</div>
-          <div class="value" id="stat-tutors">—</div>
-        </div>
-        <div class="stat-card indigo">
-          <div class="icon">🔄</div>
-          <div class="label">Rotaciones</div>
-          <div class="value" id="stat-rotations">—</div>
-        </div>
-        <div class="stat-card teal">
-          <div class="icon">✅</div>
-          <div class="label">Asistencias</div>
-          <div class="value" id="stat-attendance">—</div>
-        </div>
-        <div class="stat-card red">
-          <div class="icon">📋</div>
-          <div class="label">Evaluaciones</div>
-          <div class="value" id="stat-evals">—</div>
-        </div>
+        <div class="stat-card blue">  <div class="icon">👥</div><div class="label">Usuarios</div>     <div class="value" id="stat-users">—</div></div>
+        <div class="stat-card green"> <div class="icon">🎓</div><div class="label">Alumnos</div>      <div class="value" id="stat-students">—</div></div>
+        <div class="stat-card purple"><div class="icon">🩺</div><div class="label">Tutores</div>      <div class="value" id="stat-tutors">—</div></div>
+        <div class="stat-card indigo"><div class="icon">🔄</div><div class="label">Rotaciones</div>   <div class="value" id="stat-rotations">—</div></div>
+        <div class="stat-card teal">  <div class="icon">✅</div><div class="label">Asistencias</div> <div class="value" id="stat-attendance">—</div></div>
+        <div class="stat-card orange"><div class="icon">⏳</div><div class="label">Pendientes</div>  <div class="value" id="stat-pending">—</div></div>
+        <div class="stat-card red">   <div class="icon">📋</div><div class="label">Evaluaciones</div><div class="value" id="stat-evals">—</div></div>
+        <div class="stat-card blue">  <div class="icon">📚</div><div class="label">Asignaturas</div> <div class="value" id="stat-subjects">—</div></div>
       </div>
 
       <!-- Tabs -->
-      <div class="tabs">
-        <button class="tab-btn active" data-tab="usuarios">Usuarios</button>
-        <button class="tab-btn" data-tab="rotaciones">Rotaciones</button>
+      <div class="tabs" role="tablist">
+        <button class="tab-btn active" data-tab="usuarios">👥 Usuarios</button>
+        <button class="tab-btn" data-tab="rotaciones">🔄 Rotaciones</button>
+        <button class="tab-btn" data-tab="cursos">📚 Cursos & Asignaturas</button>
+        <button class="tab-btn" data-tab="actividad">📡 Actividad en vivo</button>
+        <button class="tab-btn" data-tab="alertas">🚨 Alertas<span class="alert-badge" id="alerts-badge">0</span></button>
       </div>
 
-      <!-- Tab: Usuarios -->
+      <!-- ── Tab: Usuarios ── -->
       <div class="tab-panel active" id="tab-usuarios">
         <div class="section-header">
           <h2>Usuarios registrados</h2>
           <div class="search-wrap">
-            <input type="text" id="search-input" placeholder="Buscar por nombre o email…" />
+            <input type="text" id="search-input" placeholder="Buscar nombre o email…" />
             <select class="filter-select" id="role-filter">
               <option value="">Todos los roles</option>
               <option value="student">Alumnos</option>
@@ -443,75 +215,98 @@
         </div>
         <div class="table-wrap">
           <table>
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Email</th>
-                <th>Rol</th>
-                <th>Registrado</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="users-tbody">
-              <tr class="empty-row"><td colspan="5">Cargando…</td></tr>
-            </tbody>
+            <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Registrado</th><th></th></tr></thead>
+            <tbody id="users-tbody"><tr class="empty-row"><td colspan="5">Cargando…</td></tr></tbody>
           </table>
         </div>
       </div>
 
-      <!-- Tab: Rotaciones -->
+      <!-- ── Tab: Rotaciones ── -->
       <div class="tab-panel" id="tab-rotaciones">
-        <!-- Formulario crear rotación -->
-        <div class="rot-form-card">
+        <div class="card">
           <h3>Nueva rotación</h3>
           <div class="form-grid">
-            <div class="form-field">
-              <label>Hospital / Centro</label>
-              <input type="text" id="rot-hospital" placeholder="Hospital General de Castellón" />
-            </div>
-            <div class="form-field">
-              <label>Servicio</label>
-              <input type="text" id="rot-service" placeholder="Medicina Interna" />
-            </div>
-            <div class="form-field">
-              <label>Fecha inicio</label>
-              <input type="date" id="rot-start" />
-            </div>
-            <div class="form-field">
-              <label>Fecha fin</label>
-              <input type="date" id="rot-end" />
-            </div>
-            <div class="form-field" style="grid-column: 1 / -1">
-              <label>Tutor asignado</label>
-              <select id="rot-tutor">
-                <option value="">Sin tutor asignado</option>
-              </select>
-            </div>
+            <div class="form-field"><label>Hospital / Centro</label><input type="text" id="rot-hospital" placeholder="Hospital General de Castellón" /></div>
+            <div class="form-field"><label>Servicio</label><input type="text" id="rot-service" placeholder="Medicina Interna" /></div>
+            <div class="form-field"><label>Fecha inicio</label><input type="date" id="rot-start" /></div>
+            <div class="form-field"><label>Fecha fin</label><input type="date" id="rot-end" /></div>
+            <div class="form-field"><label>Tutor asignado</label><select id="rot-tutor"><option value="">Sin tutor asignado</option></select></div>
+            <div class="form-field"><label>Curso</label><select id="rot-course"><option value="">Sin curso</option></select></div>
           </div>
-          <button class="btn-create" id="btn-create-rot">Crear rotación</button>
+          <button class="btn-primary" id="btn-create-rot">Crear rotación</button>
         </div>
-
-        <!-- Tabla rotaciones -->
         <div class="section-header">
-          <h2>Rotaciones del sistema</h2>
+          <h2>Todas las rotaciones</h2>
+          <div class="search-wrap">
+            <select class="filter-select" id="rot-status-filter">
+              <option value="">Todos los estados</option>
+              <option value="en curso">En curso</option>
+              <option value="planificada">Planificadas</option>
+              <option value="finalizada">Finalizadas</option>
+            </select>
+          </div>
         </div>
         <div class="table-wrap">
           <table>
-            <thead>
-              <tr>
-                <th>Servicio</th>
-                <th>Hospital</th>
-                <th>Tutor</th>
-                <th>Inicio</th>
-                <th>Fin</th>
-                <th>Estado</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="rot-tbody">
-              <tr class="empty-row"><td colspan="7">Cargando…</td></tr>
-            </tbody>
+            <thead><tr><th>Servicio</th><th>Hospital</th><th>Tutor</th><th>Inicio</th><th>Fin</th><th>Estado</th><th></th></tr></thead>
+            <tbody id="rot-tbody"><tr class="empty-row"><td colspan="7">Cargando…</td></tr></tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- ── Tab: Cursos & Asignaturas ── -->
+      <div class="tab-panel" id="tab-cursos">
+        <div class="card" style="margin-bottom:1.25rem">
+          <h3>Añadir asignatura</h3>
+          <div class="form-grid">
+            <div class="form-field">
+              <label>Curso</label>
+              <select id="new-subj-course"><option value="">Selecciona un curso…</option></select>
+            </div>
+            <div class="form-field">
+              <label>Nombre de la asignatura</label>
+              <input type="text" id="new-subj-name" placeholder="Ej: Cardiología Clínica" />
+            </div>
+          </div>
+          <button class="btn-primary" id="btn-add-subj">Añadir asignatura</button>
+        </div>
+        <div class="courses-layout">
+          <div>
+            <h3 style="font-size:0.9rem;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:.05em;margin:0 0 0.75rem">Cursos (2º – 6º)</h3>
+            <div class="course-list" id="course-list">
+              <div style="padding:1.5rem;text-align:center;color:#9ca3af">Cargando…</div>
+            </div>
+          </div>
+          <div class="subjects-panel" id="subjects-panel">
+            <div style="background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);padding:2rem;text-align:center;color:#9ca3af">
+              <div style="font-size:1.8rem;margin-bottom:.5rem">📚</div>
+              Selecciona un curso para ver sus asignaturas
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Tab: Actividad en vivo ── -->
+      <div class="tab-panel" id="tab-actividad">
+        <div class="section-header">
+          <h2>Actividad reciente</h2>
+          <button class="btn-primary" id="btn-refresh-activity" style="font-size:0.82rem;padding:0.45rem 1rem">Actualizar ahora</button>
+        </div>
+        <div class="table-wrap">
+          <div class="activity-feed" id="activity-feed">
+            <div style="padding:2.5rem;text-align:center;color:#9ca3af">Cargando actividad…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Tab: Alertas ── -->
+      <div class="tab-panel" id="tab-alertas">
+        <div class="section-header">
+          <h2>Alertas del sistema</h2>
+          <button class="btn-primary" id="btn-refresh-alerts" style="font-size:0.82rem;padding:0.45rem 1rem">Actualizar alertas</button>
+        </div>
+        <div id="alerts-container">
+          <div style="padding:2.5rem;text-align:center;color:#9ca3af">Comprobando alertas…</div>
         </div>
       </div>
     </main>
@@ -519,8 +314,8 @@
     <!-- Confirm delete modal -->
     <div id="confirm-overlay">
       <div class="confirm-box">
-        <h3>Eliminar usuario</h3>
-        <p id="confirm-text">¿Seguro que quieres eliminar este usuario? Esta acción no se puede deshacer.</p>
+        <h3 id="confirm-title">Confirmar eliminación</h3>
+        <p id="confirm-text">¿Seguro que quieres eliminar esto? Esta acción no se puede deshacer.</p>
         <div class="confirm-actions">
           <button class="btn-cancel" id="confirm-cancel">Cancelar</button>
           <button class="btn-confirm-del" id="confirm-ok">Eliminar</button>
@@ -532,260 +327,420 @@
     <div id="toast"></div>
 
     <script>
-      (function () {
-        var API_BASE = window.location.hostname === "localhost" ? "http://localhost:4000/api" : "/api";
+    (function () {
+      var API_BASE = window.location.hostname === "localhost" ? "http://localhost:4000/api" : "/api";
 
-        function getSession() {
-          try { return JSON.parse(localStorage.getItem("mediloop.session") || "{}"); } catch(_) { return {}; }
-        }
-        function getToken() { return getSession().token || ""; }
-        function authHdr() { return { "Content-Type": "application/json", "Authorization": "Bearer " + getToken() }; }
+      function getSession() { try { return JSON.parse(localStorage.getItem("mediloop.session") || "{}"); } catch(_) { return {}; } }
+      function getToken()   { return getSession().token || ""; }
+      function authHdr()    { return { "Content-Type": "application/json", "Authorization": "Bearer " + getToken() }; }
 
-        // Guard: redirect if not admin
-        var sess = getSession();
-        if (!sess.token || !sess.user || sess.user.role !== "admin") {
-          window.location.href = "index.html";
-          return;
-        }
-        document.getElementById("admin-name").textContent = sess.user.name || "Admin";
+      // Guard
+      var sess = getSession();
+      if (!sess.token || !sess.user || sess.user.role !== "admin") { window.location.href = "index.html"; return; }
+      document.getElementById("admin-name").textContent = sess.user.name || "Admin";
 
-        // Toast
-        function showToast(type, text) {
-          var el = document.getElementById("toast");
-          el.textContent = text;
-          el.className = "show " + type;
-          clearTimeout(el._t);
-          el._t = setTimeout(function() { el.className = ""; }, 3000);
-        }
+      // Salir
+      document.getElementById("btn-salir").addEventListener("click", function(e) {
+        e.preventDefault();
+        localStorage.removeItem("mediloop.session");
+        window.location.href = "index.html";
+      });
 
-        // Load stats
+      // ── Toast ─────────────────────────────────────────────────────────────────
+      function showToast(type, text) {
+        var el = document.getElementById("toast");
+        el.textContent = text; el.className = "show " + type;
+        clearTimeout(el._t);
+        el._t = setTimeout(function() { el.className = ""; }, 3500);
+      }
+
+      // ── escHtml ───────────────────────────────────────────────────────────────
+      function esc(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+      function fmtDate(iso) {
+        if (!iso) return "—";
+        return new Date(iso).toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric" });
+      }
+      function timeAgo(iso) {
+        var d = (Date.now() - new Date(iso).getTime()) / 1000;
+        if (d < 60)    return "Ahora";
+        if (d < 3600)  return "Hace " + Math.floor(d/60) + " min";
+        if (d < 86400) return "Hace " + Math.floor(d/3600) + " h";
+        return "Hace " + Math.floor(d/86400) + " días";
+      }
+      function initials(name) {
+        return (name||"?").split(" ").slice(0,2).map(function(w){return w[0]||"";}).join("").toUpperCase();
+      }
+      var colors = ["#4f46e5","#059669","#d97706","#dc2626","#7c3aed","#0d9488","#2563eb"];
+      function avatarColor(name) { var h=0; for(var i=0;i<(name||"").length;i++) h=(h*31+name.charCodeAt(i))&0xffffff; return colors[h%colors.length]; }
+
+      // ── Stats ─────────────────────────────────────────────────────────────────
+      function loadStats() {
         fetch(API_BASE + "/admin/stats", { headers: authHdr() })
-          .then(function(r) { return r.json(); })
+          .then(function(r){return r.json();})
           .then(function(d) {
             document.getElementById("stat-users").textContent      = d.users;
             document.getElementById("stat-students").textContent   = d.students;
             document.getElementById("stat-tutors").textContent     = d.tutors;
             document.getElementById("stat-rotations").textContent  = d.rotations;
             document.getElementById("stat-attendance").textContent = d.attendance;
+            document.getElementById("stat-pending").textContent    = d.pending || 0;
             document.getElementById("stat-evals").textContent      = d.evals;
+            document.getElementById("stat-subjects").textContent   = d.subjects || 0;
+            document.getElementById("last-update").textContent     = "Última actualización: " + new Date().toLocaleTimeString("es-ES", {hour:"2-digit",minute:"2-digit"});
           })
-          .catch(function() { showToast("err", "Error al cargar estadísticas."); });
+          .catch(function(){showToast("err","Error al cargar estadísticas.");});
+      }
+      loadStats();
 
-        // Users list
-        var allUsers = [];
+      // ── Tabs ──────────────────────────────────────────────────────────────────
+      var tabHandlers = {};
+      document.querySelectorAll(".tab-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          document.querySelectorAll(".tab-btn").forEach(function(b){b.classList.remove("active");});
+          document.querySelectorAll(".tab-panel").forEach(function(p){p.classList.remove("active");});
+          btn.classList.add("active");
+          var tab = btn.dataset.tab;
+          document.getElementById("tab-"+tab).classList.add("active");
+          if (tabHandlers[tab]) tabHandlers[tab]();
+        });
+      });
 
-        function formatDate(iso) {
-          if (!iso) return "—";
-          var d = new Date(iso);
-          return d.toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric" });
-        }
+      // ── Usuarios ──────────────────────────────────────────────────────────────
+      var allUsers = [];
+      function renderUsers(users) {
+        var tbody = document.getElementById("users-tbody");
+        if (!users.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Sin resultados.</td></tr>'; return; }
+        tbody.innerHTML = users.map(function(u) {
+          var roleLabel = u.role === "student" ? "Alumno" : u.role === "tutor" ? "Tutor" : u.role;
+          return '<tr>' +
+            '<td style="font-weight:500">' + esc(u.name) + '</td>' +
+            '<td style="color:var(--gray-600)">' + esc(u.email) + '</td>' +
+            '<td><span class="role-badge ' + u.role + '">' + roleLabel + '</span></td>' +
+            '<td style="color:var(--gray-600)">' + fmtDate(u.created_at) + '</td>' +
+            '<td><button class="btn-delete" data-id="' + esc(u.id) + '" data-name="' + esc(u.name) + '" data-type="user">Eliminar</button></td>' +
+            '</tr>';
+        }).join("");
+      }
+      function applyUserFilters() {
+        var q = document.getElementById("search-input").value.trim().toLowerCase();
+        var role = document.getElementById("role-filter").value;
+        renderUsers(allUsers.filter(function(u){ return (!q||(u.name.toLowerCase().includes(q)||u.email.toLowerCase().includes(q)))&&(!role||u.role===role); }));
+      }
+      function loadUsers() {
+        fetch(API_BASE + "/admin/users", { headers: authHdr() })
+          .then(function(r){return r.json();})
+          .then(function(users){ allUsers = users; applyUserFilters(); })
+          .catch(function(){showToast("err","Error al cargar usuarios.");});
+      }
+      loadUsers();
+      document.getElementById("search-input").addEventListener("input", applyUserFilters);
+      document.getElementById("role-filter").addEventListener("change", applyUserFilters);
 
-        function renderTable(users) {
-          var tbody = document.getElementById("users-tbody");
-          if (!users.length) {
-            tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Sin resultados.</td></tr>';
-            return;
-          }
-          tbody.innerHTML = users.map(function(u) {
-            var roleLabel = u.role === "student" ? "Alumno" : u.role === "tutor" ? "Tutor" : u.role;
-            return '<tr>' +
-              '<td style="font-weight:500">' + escHtml(u.name) + '</td>' +
-              '<td style="color:var(--gray-600)">' + escHtml(u.email) + '</td>' +
-              '<td><span class="role-badge ' + u.role + '">' + roleLabel + '</span></td>' +
-              '<td style="color:var(--gray-600)">' + formatDate(u.created_at) + '</td>' +
-              '<td><button class="btn-delete" data-id="' + u.id + '" data-name="' + escAttr(u.name) + '">Eliminar</button></td>' +
-              '</tr>';
-          }).join("");
-        }
+      // ── Rotaciones ────────────────────────────────────────────────────────────
+      var allRotations = [];
+      function renderRotations(rows) {
+        var tbody = document.getElementById("rot-tbody");
+        if (!rows.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Sin rotaciones.</td></tr>'; return; }
+        tbody.innerHTML = rows.map(function(r) {
+          var sc = r.status === "en curso" ? "en-curso" : r.status === "planificada" ? "planificada" : "finalizada";
+          return '<tr>' +
+            '<td style="font-weight:500">' + esc(r.service) + '</td>' +
+            '<td style="color:var(--gray-600)">' + esc(r.hospital) + '</td>' +
+            '<td>' + (r.tutor_name ? esc(r.tutor_name) : '<em style="color:#9ca3af">Sin tutor</em>') + '</td>' +
+            '<td style="color:var(--gray-600)">' + (r.start_date||"") + '</td>' +
+            '<td style="color:var(--gray-600)">' + (r.end_date||"") + '</td>' +
+            '<td><span class="status-badge ' + sc + '">' + r.status + '</span></td>' +
+            '<td><button class="btn-delete" data-id="' + esc(r.id) + '" data-name="' + esc(r.service) + '" data-type="rotation">Eliminar</button></td>' +
+            '</tr>';
+        }).join("");
+      }
+      function loadRotations() {
+        fetch(API_BASE + "/admin/rotations", { headers: authHdr() })
+          .then(function(r){return r.json();})
+          .then(function(rows){ allRotations = rows; applyRotFilter(); })
+          .catch(function(){showToast("err","Error al cargar rotaciones.");});
+      }
+      function applyRotFilter() {
+        var status = document.getElementById("rot-status-filter").value;
+        renderRotations(status ? allRotations.filter(function(r){return r.status===status;}) : allRotations);
+      }
+      document.getElementById("rot-status-filter").addEventListener("change", applyRotFilter);
+      tabHandlers["rotaciones"] = loadRotations;
 
-        function escHtml(s) {
-          return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-        }
-        function escAttr(s) {
-          return String(s).replace(/"/g,"&quot;");
-        }
-
-        function applyFilters() {
-          var q = document.getElementById("search-input").value.trim().toLowerCase();
-          var role = document.getElementById("role-filter").value;
-          var filtered = allUsers.filter(function(u) {
-            var matchQ = !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
-            var matchRole = !role || u.role === role;
-            return matchQ && matchRole;
+      // Tutors select
+      function loadTutorsForSelect() {
+        fetch(API_BASE + "/admin/users", { headers: authHdr() })
+          .then(function(r){return r.json();})
+          .then(function(users){
+            var sel = document.getElementById("rot-tutor");
+            users.filter(function(u){return u.role==="tutor";}).forEach(function(t){
+              var o = document.createElement("option"); o.value = t.id; o.textContent = t.name; sel.appendChild(o);
+            });
           });
-          renderTable(filtered);
-        }
+      }
+      loadTutorsForSelect();
 
-        function loadUsers() {
-          fetch(API_BASE + "/admin/users", { headers: authHdr() })
-            .then(function(r) { return r.json(); })
-            .then(function(users) {
-              allUsers = users;
-              applyFilters();
-            })
-            .catch(function() { showToast("err", "Error al cargar usuarios."); });
-        }
+      // Courses in rotation form
+      function loadCoursesForRotForm() {
+        fetch(API_BASE + "/admin/courses", { headers: authHdr() })
+          .then(function(r){return r.json();})
+          .then(function(courses){
+            var sel = document.getElementById("rot-course");
+            courses.forEach(function(c){
+              var o = document.createElement("option"); o.value = c.id; o.textContent = c.name; sel.appendChild(o);
+            });
+          });
+      }
+      loadCoursesForRotForm();
 
-        loadUsers();
+      // Crear rotación
+      document.getElementById("btn-create-rot").addEventListener("click", function() {
+        var hospital = document.getElementById("rot-hospital").value.trim();
+        var service  = document.getElementById("rot-service").value.trim();
+        var startDate = document.getElementById("rot-start").value;
+        var endDate   = document.getElementById("rot-end").value;
+        var tutorId   = document.getElementById("rot-tutor").value;
+        var courseId  = document.getElementById("rot-course").value;
+        if (!hospital || !service || !startDate || !endDate) { showToast("err","Completa hospital, servicio y fechas."); return; }
+        if (endDate < startDate) { showToast("err","La fecha fin debe ser posterior al inicio."); return; }
+        var btn = document.getElementById("btn-create-rot");
+        btn.disabled = true; btn.textContent = "Creando…";
+        fetch(API_BASE + "/admin/rotations", {
+          method: "POST", headers: authHdr(),
+          body: JSON.stringify({ hospital, service, startDate, endDate, tutorId: tutorId||null, courseId: courseId||null })
+        })
+          .then(function(r){return r.json().then(function(d){return{ok:r.ok,data:d};});})
+          .then(function(res){
+            if (!res.ok) { showToast("err",res.data.message||"Error al crear."); return; }
+            showToast("ok","Rotación creada correctamente.");
+            ["rot-hospital","rot-service","rot-start","rot-end"].forEach(function(id){document.getElementById(id).value="";});
+            document.getElementById("rot-tutor").value=""; document.getElementById("rot-course").value="";
+            loadRotations();
+            var el = document.getElementById("stat-rotations"); if(el) el.textContent = parseInt(el.textContent||0)+1;
+          })
+          .catch(function(){showToast("err","Error de conexión.");})
+          .finally(function(){btn.disabled=false;btn.textContent="Crear rotación";});
+      });
 
-        document.getElementById("search-input").addEventListener("input", applyFilters);
-        document.getElementById("role-filter").addEventListener("change", applyFilters);
+      // ── Cursos & Asignaturas ──────────────────────────────────────────────────
+      var allCourses = [];
+      var selectedCourseId = null;
 
-        // Delete
-        var pendingDeleteId = null;
-        var confirmOverlay = document.getElementById("confirm-overlay");
+      function loadCourses() {
+        fetch(API_BASE + "/admin/courses", { headers: authHdr() })
+          .then(function(r){return r.json();})
+          .then(function(courses){
+            allCourses = courses;
+            renderCourseList();
+            // Populate new-subj select
+            var sel = document.getElementById("new-subj-course");
+            sel.innerHTML = '<option value="">Selecciona un curso…</option>' + courses.map(function(c){
+              return '<option value="' + esc(c.id) + '">' + esc(c.name) + '</option>';
+            }).join("");
+          })
+          .catch(function(){showToast("err","Error al cargar cursos.");});
+      }
 
-        document.getElementById("confirm-cancel").addEventListener("click", function() {
-          confirmOverlay.classList.remove("open");
-          pendingDeleteId = null;
-        });
-        confirmOverlay.addEventListener("click", function(e) {
-          if (e.target === confirmOverlay) { confirmOverlay.classList.remove("open"); pendingDeleteId = null; }
-        });
-
-        document.getElementById("confirm-ok").addEventListener("click", function() {
-          if (!pendingDeleteId) return;
-          var id = pendingDeleteId;
-          var type = pendingDeleteType;
-          confirmOverlay.classList.remove("open");
-          pendingDeleteId = null;
-          pendingDeleteType = null;
-          if (type === "rotation") {
-            fetch(API_BASE + "/admin/rotations/" + id, { method: "DELETE", headers: authHdr() })
-              .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
-              .then(function(res) {
-                if (!res.ok) { showToast("err", res.data.message || "Error al eliminar."); return; }
-                showToast("ok", "Rotación eliminada.");
-                allRotations = allRotations.filter(function(r) { return r.id !== id; });
-                renderRotations(allRotations);
-                var statEl = document.getElementById("stat-rotations");
-                if (statEl) statEl.textContent = Math.max(0, parseInt(statEl.textContent) - 1);
-              })
-              .catch(function() { showToast("err", "Error de conexión."); });
-          } else {
-            fetch(API_BASE + "/admin/users/" + id, { method: "DELETE", headers: authHdr() })
-              .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
-              .then(function(res) {
-                if (!res.ok) { showToast("err", res.data.message || "Error al eliminar."); return; }
-                showToast("ok", "Usuario eliminado correctamente.");
-                allUsers = allUsers.filter(function(u) { return u.id !== id; });
-                applyFilters();
-                var statEl = document.getElementById("stat-users");
-                if (statEl) statEl.textContent = Math.max(0, parseInt(statEl.textContent) - 1);
-              })
-              .catch(function() { showToast("err", "Error de conexión."); });
-          }
-        });
-
-        // ── Tabs ──────────────────────────────────────────────────────────────
-        document.querySelectorAll(".tab-btn").forEach(function(btn) {
-          btn.addEventListener("click", function() {
-            document.querySelectorAll(".tab-btn").forEach(function(b) { b.classList.remove("active"); });
-            document.querySelectorAll(".tab-panel").forEach(function(p) { p.classList.remove("active"); });
-            btn.classList.add("active");
-            document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
-            if (btn.dataset.tab === "rotaciones") loadRotations();
+      function renderCourseList() {
+        var el = document.getElementById("course-list");
+        if (!allCourses.length) { el.innerHTML = '<div style="padding:1.5rem;text-align:center;color:#9ca3af">Sin cursos</div>'; return; }
+        el.innerHTML = allCourses.map(function(c){
+          return '<div class="course-item' + (c.id===selectedCourseId?" active":"") + '" data-id="' + esc(c.id) + '">' +
+            '<div><span class="year-badge">' + c.year + 'º</span> <span style="font-weight:600;font-size:.9rem">' + esc(c.name) + '</span></div>' +
+            '<span class="subj-count">' + (c.subject_count||0) + ' asig.</span>' +
+            '</div>';
+        }).join("");
+        el.querySelectorAll(".course-item").forEach(function(item){
+          item.addEventListener("click", function(){
+            selectedCourseId = item.dataset.id;
+            renderCourseList();
+            loadSubjects(selectedCourseId);
           });
         });
+      }
 
-        // ── Rotaciones ────────────────────────────────────────────────────────
-        var allRotations = [];
-        var allTutors = [];
+      function loadSubjects(courseId) {
+        fetch(API_BASE + "/admin/subjects?courseId=" + courseId, { headers: authHdr() })
+          .then(function(r){return r.json();})
+          .then(function(subjects){
+            var course = allCourses.find(function(c){return c.id===courseId;});
+            var panel = document.getElementById("subjects-panel");
+            if (!subjects.length) {
+              panel.innerHTML = '<div style="background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);padding:2rem;text-align:center;color:#9ca3af"><div style="font-size:1.5rem;margin-bottom:.5rem">📭</div>Sin asignaturas en ' + esc(course?course.name:"este curso") + '</div>';
+              return;
+            }
+            panel.innerHTML = '<h3 style="margin:0 0 0.75rem;font-size:.9rem;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:.05em">Asignaturas de ' + esc(course?course.name:"") + '</h3>' +
+              subjects.map(function(s){
+                return '<div class="subject-item">' +
+                  '<span class="subj-name">' + esc(s.name) + '</span>' +
+                  '<button class="btn-delete" data-id="' + esc(s.id) + '" data-name="' + esc(s.name) + '" data-type="subject">Eliminar</button>' +
+                  '</div>';
+              }).join("");
+          })
+          .catch(function(){showToast("err","Error al cargar asignaturas.");});
+      }
 
-        function renderRotations(rows) {
-          var tbody = document.getElementById("rot-tbody");
-          if (!rows.length) {
-            tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Sin rotaciones. Crea la primera.</td></tr>';
-            return;
-          }
-          tbody.innerHTML = rows.map(function(r) {
-            var statusClass = r.status === "en curso" ? "en-curso" : r.status === "planificada" ? "planificada" : "finalizada";
-            return '<tr>' +
-              '<td style="font-weight:500">' + escHtml(r.service) + '</td>' +
-              '<td style="color:var(--gray-600)">' + escHtml(r.hospital) + '</td>' +
-              '<td>' + (r.tutor_name ? escHtml(r.tutor_name) : '<em style="color:#9ca3af">Sin tutor</em>') + '</td>' +
-              '<td style="color:var(--gray-600)">' + r.start_date + '</td>' +
-              '<td style="color:var(--gray-600)">' + r.end_date + '</td>' +
-              '<td><span class="status-badge ' + statusClass + '">' + r.status + '</span></td>' +
-              '<td><button class="btn-delete" data-id="' + r.id + '" data-name="' + escAttr(r.service) + '" data-type="rotation">Eliminar</button></td>' +
-              '</tr>';
-          }).join("");
-        }
+      document.getElementById("btn-add-subj").addEventListener("click", function() {
+        var courseId = document.getElementById("new-subj-course").value;
+        var name = document.getElementById("new-subj-name").value.trim();
+        if (!courseId) { showToast("err","Selecciona un curso."); return; }
+        if (!name) { showToast("err","Introduce el nombre de la asignatura."); return; }
+        var btn = document.getElementById("btn-add-subj");
+        btn.disabled = true; btn.textContent = "Añadiendo…";
+        fetch(API_BASE + "/admin/subjects", {
+          method: "POST", headers: authHdr(),
+          body: JSON.stringify({ name, courseId })
+        })
+          .then(function(r){return r.json().then(function(d){return{ok:r.ok,data:d};});})
+          .then(function(res){
+            if (!res.ok) { showToast("err",res.data.message||"Error."); return; }
+            showToast("ok","Asignatura añadida.");
+            document.getElementById("new-subj-name").value = "";
+            loadCourses();
+            if (selectedCourseId === courseId) loadSubjects(courseId);
+          })
+          .catch(function(){showToast("err","Error de conexión.");})
+          .finally(function(){btn.disabled=false;btn.textContent="Añadir asignatura";});
+      });
 
-        function loadRotations() {
-          fetch(API_BASE + "/admin/rotations", { headers: authHdr() })
-            .then(function(r) { return r.json(); })
-            .then(function(rows) {
-              allRotations = rows;
-              renderRotations(rows);
-            })
-            .catch(function() { showToast("err", "Error al cargar rotaciones."); });
-        }
+      tabHandlers["cursos"] = loadCourses;
 
-        function loadTutorsForSelect() {
-          fetch(API_BASE + "/admin/users", { headers: authHdr() })
-            .then(function(r) { return r.json(); })
-            .then(function(users) {
-              allTutors = users.filter(function(u) { return u.role === "tutor"; });
-              var sel = document.getElementById("rot-tutor");
-              allTutors.forEach(function(t) {
-                var opt = document.createElement("option");
-                opt.value = t.id;
-                opt.textContent = t.name;
-                sel.appendChild(opt);
+      // ── Actividad en vivo ─────────────────────────────────────────────────────
+      function loadActivity() {
+        fetch(API_BASE + "/admin/activity", { headers: authHdr() })
+          .then(function(r){return r.json();})
+          .then(function(rows){
+            var feed = document.getElementById("activity-feed");
+            if (!rows.length) {
+              feed.innerHTML = '<div style="padding:2.5rem;text-align:center;color:#9ca3af">Sin actividad registrada aún.</div>';
+              return;
+            }
+            feed.innerHTML = rows.map(function(row){
+              var color = avatarColor(row.user_name);
+              var icon = row.action.includes("confirmada")?"✅":row.action.includes("rechazada")?"❌":row.action.includes("Evaluación")?"📋":row.action.includes("registrado")?"🎓":row.action.includes("contraseña")?"🔑":"📌";
+              return '<div class="activity-item">' +
+                '<div class="activity-avatar" style="background:' + color + ';color:#fff">' + initials(row.user_name) + '</div>' +
+                '<div class="activity-body">' +
+                  '<div class="act-action">' + icon + ' ' + esc(row.action) + '</div>' +
+                  (row.details ? '<div class="act-details">' + esc(row.details) + '</div>' : '') +
+                  '<div class="act-time">' + esc(row.user_name) + ' · ' + timeAgo(row.created_at) + '</div>' +
+                '</div>' +
+                '</div>';
+            }).join("");
+          })
+          .catch(function(){showToast("err","Error al cargar actividad.");});
+      }
+      document.getElementById("btn-refresh-activity").addEventListener("click", loadActivity);
+      tabHandlers["actividad"] = loadActivity;
+
+      // ── Alertas ───────────────────────────────────────────────────────────────
+      function loadAlerts() {
+        fetch(API_BASE + "/admin/alerts", { headers: authHdr() })
+          .then(function(r){return r.json();})
+          .then(function(alerts){
+            // Update badge
+            var badge = document.getElementById("alerts-badge");
+            if (alerts.length > 0) { badge.textContent = alerts.length; badge.style.display = "inline-block"; }
+            else { badge.style.display = "none"; }
+
+            var container = document.getElementById("alerts-container");
+            if (!alerts.length) {
+              container.innerHTML = '<div class="no-alerts"><div class="big">✅</div><div style="font-weight:600;font-size:1rem">Todo en orden</div><div style="font-size:0.85rem;color:#9ca3af;margin-top:.25rem">No hay irregularidades detectadas en este momento.</div></div>';
+              return;
+            }
+            var sorted = alerts.slice().sort(function(a,b){ return a.severity==="critical"&&b.severity!=="critical"?-1:1; });
+            container.innerHTML = '<div class="alerts-list">' + sorted.map(function(alert){
+              return '<div class="alert-card ' + esc(alert.severity) + '">' +
+                '<div class="alert-icon">' + alert.icon + '</div>' +
+                '<div class="alert-body">' +
+                  '<div class="alert-title">' + esc(alert.title) + '</div>' +
+                  '<div class="alert-msg">' + esc(alert.message) + '</div>' +
+                  '<button class="btn-goto" data-tab="' + esc(alert.tab) + '">Ir a ' + esc(alert.tab) + '</button>' +
+                '</div>' +
+                '</div>';
+            }).join("") + '</div>';
+
+            // Wire "Ir a" buttons
+            container.querySelectorAll(".btn-goto").forEach(function(btn){
+              btn.addEventListener("click", function(){
+                var tab = btn.dataset.tab;
+                document.querySelectorAll(".tab-btn").forEach(function(b){ if(b.dataset.tab===tab) b.click(); });
               });
             });
-        }
-        loadTutorsForSelect();
-
-        document.getElementById("btn-create-rot").addEventListener("click", function() {
-          var hospital = document.getElementById("rot-hospital").value.trim();
-          var service  = document.getElementById("rot-service").value.trim();
-          var startDate = document.getElementById("rot-start").value;
-          var endDate   = document.getElementById("rot-end").value;
-          var tutorId   = document.getElementById("rot-tutor").value;
-          if (!hospital || !service || !startDate || !endDate) {
-            showToast("err", "Completa hospital, servicio y fechas.");
-            return;
-          }
-          if (endDate < startDate) { showToast("err", "La fecha de fin debe ser posterior al inicio."); return; }
-          var btn = document.getElementById("btn-create-rot");
-          btn.disabled = true; btn.textContent = "Creando...";
-          fetch(API_BASE + "/admin/rotations", {
-            method: "POST",
-            headers: authHdr(),
-            body: JSON.stringify({ hospital: hospital, service: service, startDate: startDate, endDate: endDate, tutorId: tutorId || null })
           })
-            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
-            .then(function(res) {
-              if (!res.ok) { showToast("err", res.data.message || "Error al crear."); return; }
-              showToast("ok", "Rotación creada correctamente.");
-              document.getElementById("rot-hospital").value = "";
-              document.getElementById("rot-service").value  = "";
-              document.getElementById("rot-start").value    = "";
-              document.getElementById("rot-end").value      = "";
-              document.getElementById("rot-tutor").value    = "";
-              loadRotations();
-              var statEl = document.getElementById("stat-rotations");
-              if (statEl) statEl.textContent = parseInt(statEl.textContent || "0") + 1;
-            })
-            .catch(function() { showToast("err", "Error de conexión."); })
-            .finally(function() { btn.disabled = false; btn.textContent = "Crear rotación"; });
-        });
+          .catch(function(){showToast("err","Error al cargar alertas.");});
+      }
+      document.getElementById("btn-refresh-alerts").addEventListener("click", loadAlerts);
+      tabHandlers["alertas"] = loadAlerts;
+      // Load alerts on start (for badge)
+      loadAlerts();
 
-        // Delete (shared for users and rotations)
-        var pendingDeleteType = null;
-        document.addEventListener("click", function(e) {
-          var btn = e.target.closest(".btn-delete");
-          if (!btn) return;
-          pendingDeleteId = btn.dataset.id;
-          pendingDeleteType = btn.dataset.type || "user";
-          var name = btn.dataset.name;
-          document.getElementById("confirm-text").textContent =
-            '¿Seguro que quieres eliminar "' + name + '"? Esta acción no se puede deshacer.';
-          confirmOverlay.classList.add("open");
-        });
-      })();
+      // ── Delete modal ──────────────────────────────────────────────────────────
+      var pendingDeleteId = null;
+      var pendingDeleteType = null;
+      var confirmOverlay = document.getElementById("confirm-overlay");
+
+      document.getElementById("confirm-cancel").addEventListener("click", function(){
+        confirmOverlay.classList.remove("open"); pendingDeleteId = null; pendingDeleteType = null;
+      });
+      confirmOverlay.addEventListener("click", function(e){
+        if (e.target === confirmOverlay) { confirmOverlay.classList.remove("open"); pendingDeleteId = null; pendingDeleteType = null; }
+      });
+
+      document.getElementById("confirm-ok").addEventListener("click", function(){
+        if (!pendingDeleteId) return;
+        var id = pendingDeleteId; var type = pendingDeleteType;
+        confirmOverlay.classList.remove("open"); pendingDeleteId = null; pendingDeleteType = null;
+
+        var urls = { user: "/admin/users/", rotation: "/admin/rotations/", subject: "/admin/subjects/" };
+        var url = API_BASE + (urls[type]||"/admin/users/") + id;
+        fetch(url, { method: "DELETE", headers: authHdr() })
+          .then(function(r){return r.json().then(function(d){return{ok:r.ok,data:d};});})
+          .then(function(res){
+            if (!res.ok) { showToast("err",res.data.message||"Error al eliminar."); return; }
+            if (type === "user") {
+              showToast("ok","Usuario eliminado.");
+              allUsers = allUsers.filter(function(u){return u.id!==id;});
+              applyUserFilters();
+            } else if (type === "rotation") {
+              showToast("ok","Rotación eliminada.");
+              allRotations = allRotations.filter(function(r){return r.id!==id;});
+              applyRotFilter();
+            } else if (type === "subject") {
+              showToast("ok","Asignatura eliminada.");
+              if (selectedCourseId) loadSubjects(selectedCourseId);
+              loadCourses();
+            }
+            loadStats();
+          })
+          .catch(function(){showToast("err","Error de conexión.");});
+      });
+
+      document.addEventListener("click", function(e){
+        var btn = e.target.closest(".btn-delete");
+        if (!btn) return;
+        pendingDeleteId = btn.dataset.id;
+        pendingDeleteType = btn.dataset.type || "user";
+        var name = btn.dataset.name || "este elemento";
+        var labels = { user:"usuario", rotation:"rotación", subject:"asignatura" };
+        document.getElementById("confirm-title").textContent = "Eliminar " + (labels[pendingDeleteType]||"elemento");
+        document.getElementById("confirm-text").textContent = '¿Seguro que quieres eliminar "' + name + '"? Esta acción no se puede deshacer.';
+        confirmOverlay.classList.add("open");
+      });
+
+      // ── Auto-refresh cada 60 s ────────────────────────────────────────────────
+      setInterval(function(){
+        loadStats();
+        loadAlerts();
+        var activeTab = document.querySelector(".tab-btn.active");
+        if (activeTab) {
+          var tab = activeTab.dataset.tab;
+          if (tabHandlers[tab]) tabHandlers[tab]();
+        }
+      }, 60000);
+
+    })();
     </script>
   </body>
 </html>

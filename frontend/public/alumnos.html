@@ -1880,8 +1880,14 @@
         </div>
         <hr style="border:none;border-top:1px solid #e5e7eb;margin:1rem 0">
         <label style="font-size:0.82rem;font-weight:600;color:#374151;display:block;margin-bottom:0.5rem">Cambiar contraseña</label>
-        <input id="perfil-pass-actual" type="password" style="width:100%;padding:0.55rem 0.75rem;border:1px solid #e5e7eb;border-radius:10px;font-size:0.88rem;outline:none;margin-bottom:0.4rem;box-sizing:border-box" placeholder="Contraseña actual" />
-        <input id="perfil-pass-nueva" type="password" style="width:100%;padding:0.55rem 0.75rem;border:1px solid #e5e7eb;border-radius:10px;font-size:0.88rem;outline:none;margin-bottom:0.5rem;box-sizing:border-box" placeholder="Nueva contraseña (mín. 6)" />
+        <div style="position:relative;margin-bottom:0.4rem">
+          <input id="perfil-pass-actual" type="password" style="width:100%;padding:0.55rem 2.5rem 0.55rem 0.75rem;border:1px solid #e5e7eb;border-radius:10px;font-size:0.88rem;outline:none;box-sizing:border-box" placeholder="Contraseña actual" />
+          <button type="button" onclick="(function(b){var i=document.getElementById('perfil-pass-actual');i.type=i.type==='text'?'password':'text';b.textContent=i.type==='text'?'🙈':'👁';})(this)" style="position:absolute;right:0.6rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;line-height:1;padding:0.1rem;color:#9ca3af" aria-label="Mostrar contraseña">👁</button>
+        </div>
+        <div style="position:relative;margin-bottom:0.5rem">
+          <input id="perfil-pass-nueva" type="password" style="width:100%;padding:0.55rem 2.5rem 0.55rem 0.75rem;border:1px solid #e5e7eb;border-radius:10px;font-size:0.88rem;outline:none;box-sizing:border-box" placeholder="Nueva contraseña (mín. 6)" />
+          <button type="button" onclick="(function(b){var i=document.getElementById('perfil-pass-nueva');i.type=i.type==='text'?'password':'text';b.textContent=i.type==='text'?'🙈':'👁';})(this)" style="position:absolute;right:0.6rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;line-height:1;padding:0.1rem;color:#9ca3af" aria-label="Mostrar contraseña">👁</button>
+        </div>
         <div id="perfil-msg" style="font-size:0.82rem;padding:0.5rem 0.75rem;border-radius:8px;display:none;margin-bottom:0.5rem"></div>
         <button id="perfil-pass-btn" style="width:100%;border:none;border-radius:10px;background:linear-gradient(90deg,#2563eb,#4f46e5);color:#fff;font-size:0.88rem;font-weight:600;padding:0.65rem;cursor:pointer">Cambiar contraseña</button>
       </div>
