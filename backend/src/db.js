@@ -57,6 +57,7 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS evaluations (
     id TEXT PRIMARY KEY,
     student_name TEXT NOT NULL,
+    student_id TEXT,
     rotation TEXT NOT NULL,
     theory INTEGER DEFAULT 0,
     practical INTEGER DEFAULT 0,
@@ -118,6 +119,7 @@ db.exec(`
 try { db.prepare("ALTER TABLE attendance_confirmed ADD COLUMN student_id TEXT").run(); } catch (_) {}
 try { db.prepare("ALTER TABLE rotations ADD COLUMN course_id TEXT").run(); } catch (_) {}
 try { db.prepare("ALTER TABLE rotations ADD COLUMN subject_id TEXT").run(); } catch (_) {}
+try { db.prepare("ALTER TABLE evaluations ADD COLUMN student_id TEXT").run(); } catch (_) {}
 
 function seedIfEmpty(table, sql, rows) {
   const count = db.prepare("SELECT COUNT(*) as n FROM " + table).get().n;

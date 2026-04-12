@@ -1012,21 +1012,21 @@
       <div class="recursos-grid">
         <article class="card recurso-card">
           <div class="icon-wrap blue">📖</div>
-          <h3>Recursos Prácticos</h3>
-          <p>Información rápida, concisa y útil para no perderte en las prácticas hospitalarias.</p>
-          <a href="#recursos" class="blue">Explorar →</a>
+          <h3>Manual MSD</h3>
+          <p>Referencia médica completa: diagnóstico, tratamiento y guías clínicas en español.</p>
+          <a href="https://www.msdmanuals.com/es-es/professional" target="_blank" rel="noopener" class="blue">Explorar →</a>
         </article>
         <article class="card recurso-card">
           <div class="icon-wrap green">👁</div>
-          <h3>Simuladores 3D</h3>
-          <p>Modelos anatómicos interactivos para práctica virtual.</p>
-          <a href="#recursos" class="green">Practicar →</a>
+          <h3>Anatomía 3D</h3>
+          <p>Modelos anatómicos interactivos para explorar el cuerpo humano en 3D.</p>
+          <a href="https://www.zygotebody.com" target="_blank" rel="noopener" class="green">Practicar →</a>
         </article>
         <article class="card recurso-card">
           <div class="icon-wrap purple">📋</div>
-          <h3>Casos Clínicos</h3>
-          <p>Estudios de casos reales para desarrollar diagnóstico.</p>
-          <a href="#recursos" class="purple">Estudiar →</a>
+          <h3>Casos Clínicos NEJM</h3>
+          <p>Casos interactivos del New England Journal of Medicine para desarrollar diagnóstico.</p>
+          <a href="https://www.nejm.org/multimedia/interactive-medical-cases" target="_blank" rel="noopener" class="purple">Estudiar →</a>
         </article>
       </div>
     </section>
@@ -1511,23 +1511,11 @@
         });
 
         document.querySelectorAll(".js-join-group").forEach(function (btn) {
-          var titleEl = btn.closest("article") && btn.closest("article").querySelector("h4");
-          var storageKey = "mediloop.grupo." + (titleEl ? titleEl.textContent.trim() : btn.className);
-          if (localStorage.getItem(storageKey) === "1") {
-            btn.textContent = "Unido ✓";
-            btn.disabled = true;
-            btn.style.opacity = "0.85";
-          }
-          btn.addEventListener("click", function () {
-            btn.disabled = true;
-            btn.textContent = "Uniendo...";
-            setTimeout(function () {
-              btn.textContent = "Unido ✓";
-              btn.style.opacity = "0.85";
-              localStorage.setItem(storageKey, "1");
-              showStatus("success", "Te has unido al grupo correctamente.");
-            }, 450);
-          });
+          btn.disabled = true;
+          btn.textContent = "Próximamente";
+          btn.style.opacity = "0.5";
+          btn.style.cursor = "not-allowed";
+          btn.title = "Los grupos de estudio se activarán próximamente";
         });
         // Avatar dinámico
         var avatarEl = document.getElementById("btn-perfil-alumno");

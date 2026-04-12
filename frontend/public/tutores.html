@@ -965,8 +965,8 @@
           <h4>📊 Estadísticas</h4>
           <div class="row"><span>Estudiantes Evaluados</span><strong id="stat-students">—</strong></div>
           <div class="row"><span>Promedio de Calificación</span><strong id="stat-avg" style="color:#16a34a">—</strong></div>
-          <div class="row"><span>Tiempo Promedio</span><strong id="stat-time" style="color:#7c3aed">—</strong></div>
           <div class="row"><span>Ranking Global</span><strong id="stat-rank" style="color:#ea580c">—</strong></div>
+          <strong id="stat-time" style="display:none"></strong>
           <a class="btn-rank" href="#dashboard">Ver Ranking Completo</a>
         </article>
       </div>
@@ -1397,9 +1397,11 @@
           saveEval.addEventListener("click", function () {
             var rotSel = document.getElementById("eval-rotation");
             var rotLabel = rotSel.options[rotSel.selectedIndex] ? rotSel.options[rotSel.selectedIndex].text : "";
-            var studentName = document.getElementById("eval-student").value.trim();
-            if (!studentName) {
-              showStatus("error", "Indica el nombre del estudiante.");
+            var stuSel = document.getElementById("eval-student");
+            var studentId = stuSel.value.trim();
+            var studentName = stuSel.options[stuSel.selectedIndex] ? (stuSel.options[stuSel.selectedIndex].dataset.name || stuSel.options[stuSel.selectedIndex].text) : "";
+            if (!studentId || !studentName || studentName === "Selecciona alumno...") {
+              showStatus("error", "Selecciona un alumno de la lista.");
               return;
             }
             if (!scores.theory || !scores.practical || !scores.communication) {
@@ -1408,6 +1410,7 @@
             }
             setButtonLoading(saveEval, "Guardando...", true);
             var payload = {
+              studentId: studentId,
               studentName: studentName,
               rotation: rotLabel,
               theory: scores.theory,
@@ -1447,7 +1450,26 @@
             fetch(API_BASE + "/evaluations", { headers: headers() })
               .then(function (r) { return r.json(); })
               .then(function (items) {
-                showStatus("info", "Total evaluaciones registradas: " + items.length);
+                if (!items.length) { showStatus("info", "No hay evaluaciones registradas aún."); return; }
+                var bom = "\uFEFF";
+                var header = "Alumno,Rotación,Teórico,Práctico,Comunicación,Media,Comentarios,Fecha";
+                var lines = items.map(function(e) {
+                  return [
+                    e.studentName, e.rotation,
+                    e.theory, e.practical, e.communication, e.total,
+                    (e.comments || "").replace(/,/g, ";"),
+                    (e.createdAt || "").slice(0, 10)
+                  ].map(function(v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(",");
+                });
+                var csv = bom + header + "\n" + lines.join("\n");
+                var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement("a");
+                a.href = url;
+                a.download = "evaluaciones_" + new Date().toISOString().slice(0, 10) + ".csv";
+                a.click();
+                URL.revokeObjectURL(url);
+                showStatus("success", "Reporte descargado: " + items.length + " evaluaciones.");
               })
               .catch(function () {
                 showStatus("error", "No se pudo generar el reporte.");
@@ -1488,17 +1510,11 @@
         }
         var uploadVideoBtn = document.getElementById("upload-video");
         if (uploadVideoBtn) {
-          var fileInput = document.createElement("input");
-          fileInput.type = "file";
-          fileInput.accept = "video/*";
-          fileInput.style.display = "none";
-          document.body.appendChild(fileInput);
-          fileInput.addEventListener("change", function () {
-            var file = fileInput.files[0];
-            if (file) showStatus("success", "Video seleccionado: " + file.name + " (" + (file.size / 1024 / 1024).toFixed(1) + " MB)");
-            fileInput.value = "";
-          });
-          uploadVideoBtn.addEventListener("click", function () { fileInput.click(); });
+          uploadVideoBtn.disabled = true;
+          uploadVideoBtn.title = "Próximamente";
+          uploadVideoBtn.style.opacity = "0.5";
+          uploadVideoBtn.style.cursor = "not-allowed";
+          uploadVideoBtn.textContent = "Subir video (próximamente)";
         }
 
         var goalStorageKey = "mediloop.tutor.goals";
@@ -1521,7 +1537,7 @@
         if (updateGoalsBtn) {
           updateGoalsBtn.addEventListener("click", function () {
             localStorage.setItem(goalStorageKey + ".ts", new Date().toLocaleString("es-ES"));
-            showStatus("success", "Objetivos guardados · " + new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }));
+            showStatus("info", "Notas guardadas localmente en este dispositivo.");
           });
         }
 
@@ -1584,7 +1600,9 @@
                       .then(function(r) { return r.json(); })
                       .then(function(students) {
                         stuSel.innerHTML = students.length
-                          ? '<option value="">Selecciona alumno...</option>' + students.map(function(s) { return '<option value="' + s.name + '">' + s.name + '</option>'; }).join("")
+                          ? '<option value="">Selecciona alumno...</option>' + students.map(function(s) {
+                              return '<option value="' + s.id + '" data-name="' + s.name.replace(/"/g, '&quot;') + '">' + s.name + '</option>';
+                            }).join("")
                           : '<option value="">Sin alumnos en esta rotación</option>';
                       })
                       .catch(function() { stuSel.innerHTML = '<option value="">Error cargando alumnos</option>'; });
@@ -1721,7 +1739,8 @@
             // Estadísticas reales
             document.getElementById("stat-students").textContent = dashboard.stats.studentsEvaluated;
             document.getElementById("stat-avg").textContent = dashboard.stats.averageScore;
-            document.getElementById("stat-time").textContent = dashboard.stats.averageTime;
+            var statTimeRow = document.getElementById("stat-time");
+            if (statTimeRow && statTimeRow.closest(".row")) statTimeRow.closest(".row").style.display = "none";
             document.getElementById("stat-rank").textContent = dashboard.stats.globalRank;
 
             // XP calculada: cada evaluación = 100 XP
@@ -1732,9 +1751,37 @@
             if (xpBar) xpBar.style.width = Math.min(100, (xp % 1000) / 10) + "%";
             if (xpText) xpText.textContent = (xp % 1000) + "/" + xpNext + " XP al siguiente nivel";
 
-            // Badge de evaluaciones dinámico
+            // Insignias dinámicas basadas en datos reales
             var evalBadge = document.querySelector(".badge.b");
             if (evalBadge) evalBadge.innerHTML = "📊<br>" + evalCount + " Evaluaciones";
+
+            var mentorBadge = document.querySelector(".badge.y");
+            if (mentorBadge) {
+              var earned = evalCount >= 5;
+              mentorBadge.innerHTML = "🏅<br>Mentor del Mes";
+              mentorBadge.style.opacity = earned ? "1" : "0.3";
+              mentorBadge.title = earned ? "Desbloqueado: 5+ evaluaciones" : "Requiere 5 evaluaciones";
+            }
+            var avgBadge = document.querySelector(".badge.g");
+            if (avgBadge) {
+              var avgNum = kpis.avg || 0;
+              var avgEarned = avgNum >= 4.5;
+              avgBadge.innerHTML = "⭐<br>5 Estrellas";
+              avgBadge.style.opacity = avgEarned ? "1" : "0.3";
+              avgBadge.title = avgEarned ? "Desbloqueado: promedio ≥ 4.5" : "Requiere promedio ≥ 4.5";
+            }
+            var rankBadge = document.querySelector(".badge.p");
+            if (rankBadge) {
+              var isTop = dashboard.stats.globalRank && dashboard.stats.globalRank.startsWith("#1");
+              rankBadge.innerHTML = "🎯<br>Nº1 del Centro";
+              rankBadge.style.opacity = isTop ? "1" : "0.3";
+              rankBadge.title = isTop ? "Desbloqueado: ranking #1" : "Requiere ser el tutor con mejor promedio";
+            }
+            // Racha y próxima meta sin datos suficientes → desactivadas visualmente
+            var strakBadge = document.querySelector(".badge.r");
+            if (strakBadge) { strakBadge.style.opacity = "0.3"; strakBadge.title = "Próximamente"; }
+            var nextBadge = document.querySelector(".badge.n");
+            if (nextBadge) { nextBadge.innerHTML = "🥈<br>Próxima meta"; nextBadge.style.opacity = "0.3"; nextBadge.title = "Próximamente"; }
           })
           .catch(function () {
             showStatus("error", "Error al cargar datos. Comprueba tu conexión.");

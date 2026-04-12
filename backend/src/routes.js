@@ -309,31 +309,48 @@ router.get("/dashboard/student", requireAuth, requireRole("student"), (req, res)
     progress: { completed: rotations.filter(r => r.end_date < now).length, total: rotations.length },
     nextRotation: active,
     rotations,
-    pendingEvaluations: evalCount === 0 ? [{ id: "eval-1", type: "tutor->estudiante" }] : [],
+    pendingEvaluations: [],
     pendingSignatures: []
   });
 });
 
 router.get("/dashboard/tutor", requireAuth, requireRole("tutor"), (req, res) => {
-  const evalCount = db.prepare("SELECT COUNT(*) as n FROM evaluations").get().n;
-  const avgRow = evalCount > 0
-    ? db.prepare("SELECT AVG((theory + practical + communication) / 3.0) as avg FROM evaluations").get()
-    : { avg: 4.8 };
-  const avg = Math.round((avgRow.avg || 4.8) * 10) / 10;
+  const myEvalCount = db.prepare("SELECT COUNT(*) as n FROM evaluations WHERE student_id IN (SELECT student_id FROM rotation_students rs JOIN rotations r ON r.id = rs.rotation_id WHERE r.tutor_id = ?) OR student_id IS NULL").get(req.user.sub).n;
+  const totalEvalCount = db.prepare("SELECT COUNT(*) as n FROM evaluations").get().n;
+  const avgRow = myEvalCount > 0
+    ? db.prepare("SELECT AVG((theory + practical + communication) / 3.0) as avg FROM evaluations WHERE student_id IN (SELECT student_id FROM rotation_students rs JOIN rotations r ON r.id = rs.rotation_id WHERE r.tutor_id = ?)").get(req.user.sub)
+    : null;
+  const avg = avgRow && avgRow.avg != null ? Math.round(avgRow.avg * 10) / 10 : 0;
 
   const studentCount = db.prepare(`
     SELECT COUNT(DISTINCT rs.student_id) as n FROM rotation_students rs
     JOIN rotations r ON r.id = rs.rotation_id WHERE r.tutor_id = ?
   `).get(req.user.sub).n;
 
+  // Calcular ranking real: posición del tutor por promedio de notas entre todos los tutores
+  const allTutors = db.prepare(`
+    SELECT r.tutor_id, AVG((e.theory + e.practical + e.communication) / 3.0) as avg
+    FROM evaluations e
+    JOIN rotation_students rs ON rs.student_id = e.student_id
+    JOIN rotations r ON r.id = rs.rotation_id
+    WHERE r.tutor_id IS NOT NULL
+    GROUP BY r.tutor_id
+    ORDER BY avg DESC
+  `).all();
+  let rank = 1;
+  for (var i = 0; i < allTutors.length; i++) {
+    if (allTutors[i].tutor_id === req.user.sub) { rank = i + 1; break; }
+  }
+  const totalTutors = db.prepare("SELECT COUNT(*) as n FROM users WHERE role = 'tutor'").get().n;
+  const rankStr = allTutors.length > 0 ? "#" + rank + " de " + totalTutors : "Sin datos";
+
   return res.json({
     stats: {
-      studentsEvaluated: evalCount || 0,
-      averageScore: avg + "/5",
-      averageTime: "15 min",
-      globalRank: "#1"
+      studentsEvaluated: myEvalCount || 0,
+      averageScore: avg > 0 ? avg + "/5" : "—",
+      globalRank: rankStr
     },
-    kpis: { students: studentCount, avg, achievements: evalCount }
+    kpis: { students: studentCount, avg, achievements: myEvalCount }
   });
 });
 
@@ -468,11 +485,12 @@ router.post("/attendance/confirm-all", requireAuth, requireRole("tutor"), (req, 
 
 // ── Evaluaciones ─────────────────────────────────────────────────────────────
 router.post("/evaluations", requireAuth, requireRole("tutor"), (req, res) => {
-  const { studentName, rotation, theory, practical, communication, comments } = req.body || {};
+  const { studentName, studentId, rotation, theory, practical, communication, comments } = req.body || {};
   if (!studentName || !rotation) return res.status(400).json({ message: "Faltan campos obligatorios" });
   const evaluation = {
     id:            newId("eval"),
     student_name:  studentName,
+    student_id:    studentId || null,
     rotation,
     theory:        Number(theory || 0),
     practical:     Number(practical || 0),
@@ -480,8 +498,8 @@ router.post("/evaluations", requireAuth, requireRole("tutor"), (req, res) => {
     comments:      comments || "",
     created_at:    new Date().toISOString()
   };
-  db.prepare("INSERT INTO evaluations VALUES (?, ?, ?, ?, ?, ?, ?, ?)").run(
-    evaluation.id, evaluation.student_name, evaluation.rotation,
+  db.prepare("INSERT INTO evaluations VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)").run(
+    evaluation.id, evaluation.student_name, evaluation.student_id, evaluation.rotation,
     evaluation.theory, evaluation.practical, evaluation.communication,
     evaluation.comments, evaluation.created_at
   );
@@ -495,15 +513,19 @@ router.post("/evaluations", requireAuth, requireRole("tutor"), (req, res) => {
 router.get("/evaluations", requireAuth, (req, res) => {
   const rows = db.prepare("SELECT * FROM evaluations ORDER BY created_at DESC").all();
   const mapped = rows.map(r => ({
-    id: r.id, studentName: r.student_name, rotation: r.rotation,
+    id: r.id, studentName: r.student_name, studentId: r.student_id, rotation: r.rotation,
     theory: r.theory, practical: r.practical, communication: r.communication,
     comments: r.comments, createdAt: r.created_at,
     total: Math.round((r.theory + r.practical + r.communication) / 3 * 10) / 10
   }));
   if (req.user.role === "tutor") return res.json(mapped);
+  // Para alumnos: filtrar por student_id si existe, si no por nombre (retrocompat)
   const user = db.prepare("SELECT name FROM users WHERE id = ?").get(req.user.sub);
   const name = user ? user.name.toLowerCase() : "";
-  return res.json(mapped.filter(e => e.studentName.toLowerCase() === name));
+  return res.json(mapped.filter(e =>
+    (e.studentId && e.studentId === req.user.sub) ||
+    (!e.studentId && e.studentName.toLowerCase() === name)
+  ));
 });
 
 // ── Alumnos (para tutores) ────────────────────────────────────────────────────
