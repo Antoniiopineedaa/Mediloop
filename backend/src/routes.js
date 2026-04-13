@@ -36,9 +36,10 @@ function logActivity(userId, userName, action, details) {
 function timeAgo(isoString) {
   const diff = (Date.now() - new Date(isoString).getTime()) / 1000;
   if (diff < 60)    return "Ahora";
-  if (diff < 3600)  return "Hace " + Math.floor(diff / 60) + " min";
-  if (diff < 86400) return "Hace " + Math.floor(diff / 3600) + " h";
-  return "Hace " + Math.floor(diff / 86400) + " días";
+  if (diff < 3600)  { const m = Math.floor(diff / 60); return "Hace " + m + " min"; }
+  if (diff < 86400) { const h = Math.floor(diff / 3600); return "Hace " + h + " h"; }
+  const d = Math.floor(diff / 86400);
+  return "Hace " + d + (d === 1 ? " día" : " días");
 }
 
 // Genera token QR válido 12 horas. periodOffset=-1 = período anterior (aceptado como válido)
@@ -361,7 +362,7 @@ router.get("/attendance/pending", requireAuth, requireRole("tutor"), (req, res) 
     LEFT JOIN rotation_students rs ON rs.student_id = ap.student_id
     LEFT JOIN rotations r ON r.id = rs.rotation_id AND r.tutor_id = ?
     WHERE r.tutor_id = ? OR ap.rotation_id IS NULL
-    ORDER BY rowid ASC
+    ORDER BY ap.scanned_at ASC
   `).all(req.user.sub, req.user.sub);
   return res.json(rows.map(r => ({ id: r.id, name: r.student_name, area: r.area, scannedAt: r.scanned_at })));
 });
