@@ -116,6 +116,25 @@
       .alert-card .btn-goto:hover { background: var(--gray-200); }
       .no-alerts { text-align: center; padding: 3rem; color: var(--gray-600); }
       .no-alerts .big { font-size: 2.5rem; margin-bottom: 0.5rem; }
+      /* Rotation students modal */
+      #rot-students-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.55); z-index: 300; align-items: center; justify-content: center; }
+      #rot-students-overlay.open { display: flex; }
+      .rot-students-box { background: #fff; border-radius: 16px; padding: 1.75rem; max-width: 480px; width: 94%; box-shadow: 0 20px 60px rgba(15,23,42,0.3); max-height: 90vh; display: flex; flex-direction: column; }
+      .rot-students-box h3 { margin: 0 0 0.25rem; font-size: 1rem; }
+      .rot-students-box .rot-sub { font-size: 0.82rem; color: var(--gray-600); margin: 0 0 1rem; }
+      .rot-students-list { flex: 1; overflow-y: auto; min-height: 60px; max-height: 240px; border: 1px solid var(--gray-200); border-radius: 10px; padding: 0.5rem; margin-bottom: 1rem; }
+      .rot-student-row { display: flex; align-items: center; justify-content: space-between; padding: 0.45rem 0.5rem; border-radius: 8px; font-size: 0.88rem; }
+      .rot-student-row:hover { background: var(--gray-50); }
+      .rot-student-row .s-name { font-weight: 500; }
+      .rot-student-row .s-email { font-size: 0.78rem; color: var(--gray-600); margin-left: 0.5rem; }
+      .rot-student-row .btn-rm { border: none; background: #fef2f2; color: var(--red); font-size: 0.75rem; font-weight: 600; border-radius: 6px; padding: 0.2rem 0.5rem; cursor: pointer; }
+      .rot-student-row .btn-rm:hover { background: #fee2e2; }
+      .rot-add-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+      .rot-add-row input { flex: 1; padding: 0.5rem 0.75rem; border: 1px solid var(--gray-200); border-radius: 10px; font-size: 0.88rem; outline: none; }
+      .rot-add-row input:focus { border-color: var(--blue); }
+      .rot-add-row button { border: none; border-radius: 10px; background: linear-gradient(90deg,var(--blue),var(--indigo)); color: #fff; font-size: 0.85rem; font-weight: 600; padding: 0.5rem 1rem; cursor: pointer; white-space: nowrap; }
+      .rot-add-row button:disabled { opacity: 0.6; cursor: default; }
+      .rot-students-close { width: 100%; padding: 0.55rem; border: 1px solid var(--gray-200); border-radius: 10px; background: #fff; font-size: 0.88rem; cursor: pointer; font-weight: 500; }
       /* Confirm modal */
       #confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.55); z-index: 300; align-items: center; justify-content: center; }
       #confirm-overlay.open { display: flex; }
@@ -311,6 +330,20 @@
       </div>
     </main>
 
+    <!-- Rotation students modal -->
+    <div id="rot-students-overlay">
+      <div class="rot-students-box">
+        <h3 id="rot-students-title">Alumnos de la rotación</h3>
+        <p class="rot-sub" id="rot-students-sub"></p>
+        <div class="rot-students-list" id="rot-students-list"><em style="color:#9ca3af;font-size:0.88rem">Cargando…</em></div>
+        <div class="rot-add-row">
+          <input type="email" id="rot-add-email" placeholder="alumno@uji.es" />
+          <button id="rot-add-btn">Añadir</button>
+        </div>
+        <button class="rot-students-close" id="rot-students-close">Cerrar</button>
+      </div>
+    </div>
+
     <!-- Confirm delete modal -->
     <div id="confirm-overlay">
       <div class="confirm-box">
@@ -451,7 +484,7 @@
             '<td style="color:var(--gray-600)">' + (r.start_date||"") + '</td>' +
             '<td style="color:var(--gray-600)">' + (r.end_date||"") + '</td>' +
             '<td><span class="status-badge ' + sc + '">' + r.status + '</span></td>' +
-            '<td><button class="btn-delete" data-id="' + esc(r.id) + '" data-name="' + esc(r.service) + '" data-type="rotation">Eliminar</button></td>' +
+            '<td style="display:flex;gap:0.4rem;align-items:center"><button class="btn-manage-students" data-id="' + esc(r.id) + '" data-service="' + esc(r.service) + '" data-hospital="' + esc(r.hospital) + '" style="border:none;border-radius:8px;background:#eff6ff;color:var(--blue);font-size:0.78rem;font-weight:600;padding:0.32rem 0.65rem;cursor:pointer">Alumnos</button><button class="btn-delete" data-id="' + esc(r.id) + '" data-name="' + esc(r.service) + '" data-type="rotation">Eliminar</button></td>' +
             '</tr>';
         }).join("");
       }
@@ -715,6 +748,86 @@
             loadStats();
           })
           .catch(function(){showToast("err","Error de conexión.");});
+      });
+
+      // ── Modal: gestionar alumnos de una rotación ─────────────────────────────
+      var rotStudentsOverlay = document.getElementById("rot-students-overlay");
+      var activeRotId = null;
+
+      function loadRotStudents() {
+        if (!activeRotId) return;
+        var el = document.getElementById("rot-students-list");
+        el.innerHTML = '<em style="color:#9ca3af;font-size:0.88rem">Cargando…</em>';
+        fetch(API_BASE + "/admin/rotations/" + activeRotId + "/students", { headers: authHdr() })
+          .then(function(r) { return r.json(); })
+          .then(function(students) {
+            if (!students.length) {
+              el.innerHTML = '<em style="color:#9ca3af;font-size:0.88rem">Sin alumnos asignados</em>';
+              return;
+            }
+            el.innerHTML = students.map(function(s) {
+              return '<div class="rot-student-row">' +
+                '<span><span class="s-name">' + esc(s.name) + '</span><span class="s-email">' + esc(s.email) + '</span></span>' +
+                '<button class="btn-rm" data-sid="' + esc(s.id) + '" data-sname="' + esc(s.name) + '">Quitar</button>' +
+                '</div>';
+            }).join("");
+            el.querySelectorAll(".btn-rm").forEach(function(btn) {
+              btn.addEventListener("click", function() {
+                var sId = btn.getAttribute("data-sid");
+                var sName = btn.getAttribute("data-sname");
+                if (!confirm("¿Quitar a " + sName + " de esta rotación?")) return;
+                btn.disabled = true;
+                fetch(API_BASE + "/admin/rotations/" + activeRotId + "/students/" + sId, {
+                  method: "DELETE", headers: authHdr()
+                })
+                  .then(function() { loadRotStudents(); })
+                  .catch(function() { showToast("err", "Error al quitar alumno."); btn.disabled = false; });
+              });
+            });
+          })
+          .catch(function() { el.innerHTML = '<em style="color:#dc2626">Error cargando alumnos</em>'; });
+      }
+
+      document.addEventListener("click", function(e) {
+        var btn = e.target.closest(".btn-manage-students");
+        if (!btn) return;
+        activeRotId = btn.getAttribute("data-id");
+        document.getElementById("rot-students-title").textContent = "Alumnos — " + btn.getAttribute("data-service");
+        document.getElementById("rot-students-sub").textContent = btn.getAttribute("data-hospital");
+        document.getElementById("rot-add-email").value = "";
+        loadRotStudents();
+        rotStudentsOverlay.classList.add("open");
+      });
+
+      document.getElementById("rot-students-close").addEventListener("click", function() {
+        rotStudentsOverlay.classList.remove("open");
+        activeRotId = null;
+      });
+      rotStudentsOverlay.addEventListener("click", function(e) {
+        if (e.target === rotStudentsOverlay) { rotStudentsOverlay.classList.remove("open"); activeRotId = null; }
+      });
+
+      document.getElementById("rot-add-btn").addEventListener("click", function() {
+        var email = document.getElementById("rot-add-email").value.trim();
+        if (!email || !activeRotId) return;
+        var btn = document.getElementById("rot-add-btn");
+        btn.disabled = true;
+        fetch(API_BASE + "/admin/rotations/" + activeRotId + "/students", {
+          method: "POST", headers: authHdr(),
+          body: JSON.stringify({ studentEmail: email })
+        })
+          .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+          .then(function(res) {
+            if (!res.ok) { showToast("err", res.data.message || "No se pudo añadir."); return; }
+            showToast("ok", res.data.student.name + " añadido.");
+            document.getElementById("rot-add-email").value = "";
+            loadRotStudents();
+          })
+          .catch(function() { showToast("err", "Error de conexión."); })
+          .finally(function() { btn.disabled = false; });
+      });
+      document.getElementById("rot-add-email").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") document.getElementById("rot-add-btn").click();
       });
 
       document.addEventListener("click", function(e){

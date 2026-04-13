@@ -645,6 +645,37 @@ router.delete("/admin/subjects/:id", requireAuth, requireAdmin, (req, res) => {
   return res.json({ ok: true });
 });
 
+// ── Admin: Alumnos de una rotación ───────────────────────────────────────────
+router.get("/admin/rotations/:id/students", requireAuth, requireAdmin, (req, res) => {
+  const rotation = db.prepare("SELECT id FROM rotations WHERE id = ?").get(req.params.id);
+  if (!rotation) return res.status(404).json({ message: "Rotación no encontrada" });
+  const students = db.prepare(`
+    SELECT u.id, u.name, u.email FROM users u
+    JOIN rotation_students rs ON rs.student_id = u.id
+    WHERE rs.rotation_id = ?
+    ORDER BY u.name ASC
+  `).all(req.params.id);
+  return res.json(students);
+});
+
+router.post("/admin/rotations/:id/students", requireAuth, requireAdmin, (req, res) => {
+  const { studentEmail } = req.body || {};
+  if (!studentEmail) return res.status(400).json({ message: "Falta el correo del alumno" });
+  const rotation = db.prepare("SELECT id FROM rotations WHERE id = ?").get(req.params.id);
+  if (!rotation) return res.status(404).json({ message: "Rotación no encontrada" });
+  const student = db.prepare("SELECT * FROM users WHERE email = ? AND role = 'student'").get(String(studentEmail).toLowerCase().trim());
+  if (!student) return res.status(404).json({ message: "Alumno no encontrado" });
+  const existing = db.prepare("SELECT 1 FROM rotation_students WHERE rotation_id = ? AND student_id = ?").get(req.params.id, student.id);
+  if (existing) return res.status(409).json({ message: "El alumno ya está en esta rotación" });
+  db.prepare("INSERT INTO rotation_students VALUES (?, ?)").run(req.params.id, student.id);
+  return res.status(201).json({ ok: true, student: { id: student.id, name: student.name, email: student.email } });
+});
+
+router.delete("/admin/rotations/:id/students/:studentId", requireAuth, requireAdmin, (req, res) => {
+  db.prepare("DELETE FROM rotation_students WHERE rotation_id = ? AND student_id = ?").run(req.params.id, req.params.studentId);
+  return res.json({ ok: true });
+});
+
 // ── Admin: Actividad en tiempo real ──────────────────────────────────────────
 router.get("/admin/activity", requireAuth, requireAdmin, (_req, res) => {
   const rows = db.prepare("SELECT * FROM activity_log ORDER BY created_at DESC LIMIT 60").all();

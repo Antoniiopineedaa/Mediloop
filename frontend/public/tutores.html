@@ -1576,7 +1576,24 @@
                     var el = document.getElementById("students-" + rot.id);
                     if (!el) return;
                     if (!students.length) { el.innerHTML = '<em style="color:#9ca3af">Sin alumnos aún</em>'; return; }
-                    el.innerHTML = students.map(function (s) { return '<span>' + s.name + '</span>'; }).join("");
+                    el.innerHTML = students.map(function (s) {
+                      return '<span style="display:inline-flex;align-items:center;gap:0.3rem">' + s.name +
+                        '<button type="button" class="remove-student-btn" data-rot-id="' + rot.id + '" data-student-id="' + s.id + '" data-student-name="' + s.name.replace(/"/g,'&quot;') + '" title="Quitar alumno" style="background:none;border:none;cursor:pointer;color:#6b7280;font-size:0.85rem;padding:0;line-height:1">×</button>' +
+                        '</span>';
+                    }).join("");
+                    el.querySelectorAll(".remove-student-btn").forEach(function(rbtn) {
+                      rbtn.addEventListener("click", function() {
+                        var rId = rbtn.getAttribute("data-rot-id");
+                        var sId = rbtn.getAttribute("data-student-id");
+                        var sName = rbtn.getAttribute("data-student-name");
+                        if (!confirm("¿Quitar a " + sName + " de esta rotación?")) return;
+                        fetch(API_BASE + "/rotations/" + rId + "/enroll/" + sId, {
+                          method: "DELETE", headers: headers()
+                        }).then(function(r) { return r.json(); })
+                          .then(function() { loadRotaciones(); })
+                          .catch(function() { showStatus("error", "Error al quitar alumno."); });
+                      });
+                    });
                   })
                   .catch(function () {});
               });
