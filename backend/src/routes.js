@@ -755,6 +755,106 @@ router.get("/admin/stats", requireAuth, requireAdmin, (_req, res) => {
   });
 });
 
+// ── Grupos de estudio ─────────────────────────────────────────────────────────
+router.get("/study-groups", requireAuth, (req, res) => {
+  const groups = db.prepare(`
+    SELECT sg.*, COUNT(sgm.student_id) as member_count
+    FROM study_groups sg
+    LEFT JOIN study_group_members sgm ON sgm.group_id = sg.id
+    GROUP BY sg.id ORDER BY sg.created_at DESC
+  `).all();
+  const myGroups = db.prepare("SELECT group_id FROM study_group_members WHERE student_id = ?").all(req.user.sub).map(r => r.group_id);
+  return res.json(groups.map(g => ({ ...g, isMember: myGroups.includes(g.id) })));
+});
+
+router.post("/study-groups", requireAuth, requireRole("student"), (req, res) => {
+  const { name, description } = req.body || {};
+  if (!name || !String(name).trim()) return res.status(400).json({ message: "El nombre es obligatorio" });
+  const id = newId("grp");
+  const now = new Date().toISOString();
+  db.prepare("INSERT INTO study_groups VALUES (?, ?, ?, ?, ?)").run(id, String(name).trim(), String(description || "").trim(), req.user.sub, now);
+  db.prepare("INSERT INTO study_group_members VALUES (?, ?)").run(id, req.user.sub);
+  return res.status(201).json({ ok: true, id });
+});
+
+router.post("/study-groups/:id/join", requireAuth, requireRole("student"), (req, res) => {
+  const group = db.prepare("SELECT id FROM study_groups WHERE id = ?").get(req.params.id);
+  if (!group) return res.status(404).json({ message: "Grupo no encontrado" });
+  const existing = db.prepare("SELECT 1 FROM study_group_members WHERE group_id = ? AND student_id = ?").get(req.params.id, req.user.sub);
+  if (existing) return res.status(409).json({ message: "Ya eres miembro de este grupo" });
+  db.prepare("INSERT INTO study_group_members VALUES (?, ?)").run(req.params.id, req.user.sub);
+  return res.json({ ok: true });
+});
+
+router.delete("/study-groups/:id/leave", requireAuth, requireRole("student"), (req, res) => {
+  db.prepare("DELETE FROM study_group_members WHERE group_id = ? AND student_id = ?").run(req.params.id, req.user.sub);
+  return res.json({ ok: true });
+});
+
+// ── Vídeos de tutores ─────────────────────────────────────────────────────────
+router.get("/community/tutor-videos", requireAuth, (_req, res) => {
+  const rows = db.prepare("SELECT * FROM tutor_videos ORDER BY created_at DESC LIMIT 20").all();
+  return res.json(rows.map(r => ({ id: r.id, tutorName: r.tutor_name, title: r.title, url: r.url, ago: timeAgo(r.created_at) })));
+});
+
+router.post("/community/tutor-videos", requireAuth, requireRole("tutor"), (req, res) => {
+  const { title, url } = req.body || {};
+  if (!title || !url) return res.status(400).json({ message: "Faltan título y URL" });
+  const urlStr = String(url).trim();
+  if (!urlStr.startsWith("http://") && !urlStr.startsWith("https://")) {
+    return res.status(400).json({ message: "La URL debe comenzar por http:// o https://" });
+  }
+  const tutor = db.prepare("SELECT name FROM users WHERE id = ?").get(req.user.sub);
+  const id = newId("vid");
+  db.prepare("INSERT INTO tutor_videos VALUES (?, ?, ?, ?, ?, ?)").run(
+    id, req.user.sub, tutor ? tutor.name : "Tutor", String(title).trim(), urlStr, new Date().toISOString()
+  );
+  return res.status(201).json({ ok: true, id });
+});
+
+// ── Racha del tutor ───────────────────────────────────────────────────────────
+router.get("/tutor/streak", requireAuth, requireRole("tutor"), (req, res) => {
+  // Días únicos con al menos una evaluación creada por este tutor
+  // Las evaluaciones no tienen tutor_id directo, usamos rotation_students
+  const evalDays = db.prepare(`
+    SELECT DISTINCT substr(e.created_at, 1, 10) as day
+    FROM evaluations e
+    JOIN rotation_students rs ON rs.student_id = e.student_id
+    JOIN rotations r ON r.id = rs.rotation_id
+    WHERE r.tutor_id = ?
+    ORDER BY day DESC
+  `).all(req.user.sub).map(r => r.day);
+
+  // También días con asistencias confirmadas del tutor
+  const attDays = db.prepare(`
+    SELECT DISTINCT substr(ac.time, 1, 10) as day
+    FROM attendance_confirmed ac
+    JOIN rotation_students rs ON rs.student_id = ac.student_id
+    JOIN rotations r ON r.id = rs.rotation_id
+    WHERE r.tutor_id = ?
+    ORDER BY day DESC
+  `).all(req.user.sub).map(r => r.day);
+
+  // Unir y ordenar días únicos
+  var allDays = [...new Set([...evalDays])].sort().reverse();
+
+  var streak = 0;
+  var today = new Date().toISOString().slice(0, 10);
+  var check = today;
+  for (var i = 0; i < allDays.length; i++) {
+    if (allDays[i] === check) {
+      streak++;
+      var d = new Date(check);
+      d.setDate(d.getDate() - 1);
+      check = d.toISOString().slice(0, 10);
+    } else if (allDays[i] < check) {
+      break;
+    }
+  }
+
+  return res.json({ streak, totalActiveDays: allDays.length, lastActivity: allDays[0] || null });
+});
+
 // ── Auth: Recuperación de contraseña ─────────────────────────────────────────
 router.post("/auth/forgot-password", (req, res) => {
   const { email } = req.body || {};
@@ -769,7 +869,31 @@ router.post("/auth/forgot-password", (req, res) => {
   const expiresAt = new Date(Date.now() + 3600000).toISOString(); // 1 hora
   db.prepare("INSERT INTO password_reset_tokens VALUES (?, ?, ?, ?, 0)").run(newId("rst"), user.id, token, expiresAt);
   logActivity(null, "Sistema", "Recuperación de contraseña solicitada", "Email: " + emailLower);
-  // En producción: enviar email con el token. En demo: devolver el link
+
+  // Intentar enviar email real si SMTP está configurado
+  const smtpHost = process.env.SMTP_HOST;
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+  if (smtpHost && smtpUser && smtpPass) {
+    try {
+      const nodemailer = require("nodemailer");
+      const transporter = nodemailer.createTransport({
+        host: smtpHost,
+        port: parseInt(process.env.SMTP_PORT || "587"),
+        secure: process.env.SMTP_SECURE === "true",
+        auth: { user: smtpUser, pass: smtpPass }
+      });
+      const resetUrl = (process.env.APP_URL || "https://mediloop.railway.app") + "/index.html?reset=" + token;
+      transporter.sendMail({
+        from: process.env.SMTP_FROM || smtpUser,
+        to: emailLower,
+        subject: "Mediloop — Recuperación de contraseña",
+        html: "<p>Hola " + user.name + ",</p><p>Haz clic en el siguiente enlace para restablecer tu contraseña (válido 1 hora):</p><p><a href=\"" + resetUrl + "\">" + resetUrl + "</a></p><p>Si no solicitaste esto, ignora este mensaje.</p>"
+      }).catch(() => {});
+      return res.json({ ok: true });
+    } catch (_) {}
+  }
+  // Demo: devolver el token en la respuesta
   return res.json({ ok: true, resetToken: token });
 });
 

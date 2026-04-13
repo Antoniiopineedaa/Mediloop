@@ -1072,28 +1072,26 @@
           <div id="student-posts-list"></div>
         </div>
         <div>
-          <h3 style="margin-bottom:1rem">Grupos de Estudio</h3>
-          <article class="grupo-card">
-            <div style="flex:1">
-              <h4>Anatomía Cardiovascular</h4>
-              <p>Grupo de estudio para el examen de anatomía del sistema cardiovascular.</p>
-              <div class="foot"><span class="miembros">15 miembros</span><button type="button" class="btn-join blue js-join-group">Unirse</button></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+            <h3 style="margin:0">Grupos de Estudio</h3>
+            <button type="button" id="btn-create-group" style="border:none;border-radius:8px;background:linear-gradient(90deg,#2563eb,#4f46e5);color:#fff;font-size:0.82rem;font-weight:600;padding:0.4rem 0.85rem;cursor:pointer">+ Crear grupo</button>
+          </div>
+          <div id="study-groups-list"><em style="color:#9ca3af;font-size:0.88rem">Cargando grupos...</em></div>
+
+          <!-- Modal crear grupo -->
+          <div id="create-group-overlay" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.55);z-index:300;align-items:center;justify-content:center">
+            <div style="background:#fff;border-radius:16px;padding:1.75rem;max-width:380px;width:92%;box-shadow:0 20px 60px rgba(15,23,42,0.3)">
+              <h3 style="margin:0 0 1rem;font-size:1rem">Crear grupo de estudio</h3>
+              <div style="display:flex;flex-direction:column;gap:0.6rem;margin-bottom:1rem">
+                <input id="group-name-input" type="text" placeholder="Nombre del grupo" style="padding:0.5rem 0.75rem;border:1px solid #e5e7eb;border-radius:10px;font-size:0.88rem;outline:none" />
+                <textarea id="group-desc-input" placeholder="Descripción (opcional)" rows="2" style="padding:0.5rem 0.75rem;border:1px solid #e5e7eb;border-radius:10px;font-size:0.88rem;resize:none;font-family:inherit;outline:none"></textarea>
+              </div>
+              <div style="display:flex;gap:0.65rem;justify-content:flex-end">
+                <button id="create-group-cancel" style="padding:0.5rem 1rem;border:1px solid #e5e7eb;border-radius:10px;background:#fff;font-size:0.88rem;cursor:pointer">Cancelar</button>
+                <button id="create-group-ok" style="padding:0.5rem 1.2rem;border:none;border-radius:10px;background:linear-gradient(90deg,#2563eb,#4f46e5);color:#fff;font-size:0.88rem;font-weight:600;cursor:pointer">Crear</button>
+              </div>
             </div>
-          </article>
-          <article class="grupo-card verde">
-            <div style="flex:1">
-              <h4>Farmacología Básica</h4>
-              <p>Repaso de conceptos fundamentales de farmacología.</p>
-              <div class="foot"><span class="miembros">23 miembros</span><button type="button" class="btn-join green js-join-group">Unirse</button></div>
-            </div>
-          </article>
-          <article class="grupo-card purple">
-            <div style="flex:1">
-              <h4>Casos Clínicos</h4>
-              <p>Análisis y discusión de casos clínicos complejos.</p>
-              <div class="foot"><span class="miembros">8 miembros</span><button type="button" class="btn-join purple js-join-group">Unirse</button></div>
-            </div>
-          </article>
+          </div>
         </div>
       </div>
     </section>
@@ -1510,12 +1508,82 @@
           });
         });
 
-        document.querySelectorAll(".js-join-group").forEach(function (btn) {
+        // ── Grupos de estudio dinámicos ──────────────────────────────────
+        var groupColors = ["", "verde", "purple"];
+        var joinColors  = ["blue", "green", "purple"];
+
+        function loadStudyGroups() {
+          var list = document.getElementById("study-groups-list");
+          if (!list) return;
+          fetch(API_BASE + "/study-groups", { headers: authHeaders() })
+            .then(function(r) { return r.json(); })
+            .then(function(groups) {
+              if (!groups.length) {
+                list.innerHTML = '<em style="color:#9ca3af;font-size:0.88rem">No hay grupos aún. ¡Crea el primero!</em>';
+                return;
+              }
+              list.innerHTML = groups.map(function(g, i) {
+                var colorClass = groupColors[i % groupColors.length];
+                var joinColor  = joinColors[i % joinColors.length];
+                var btnLabel   = g.isMember ? "Salir" : "Unirse";
+                var btnStyle   = g.isMember ? "background:#fee2e2;color:#dc2626;border:none;border-radius:8px;font-size:0.82rem;font-weight:600;padding:0.35rem 0.75rem;cursor:pointer" : "background:linear-gradient(90deg,#2563eb,#4f46e5);color:#fff;border:none;border-radius:8px;font-size:0.82rem;font-weight:600;padding:0.35rem 0.75rem;cursor:pointer";
+                return '<article class="grupo-card ' + colorClass + '" style="margin-bottom:0.75rem">' +
+                  '<div style="flex:1"><h4 style="margin:0 0 0.25rem">' + g.name.replace(/</g,"&lt;") + '</h4>' +
+                  (g.description ? '<p style="margin:0 0 0.5rem;font-size:0.85rem">' + g.description.replace(/</g,"&lt;") + '</p>' : '') +
+                  '<div class="foot"><span class="miembros">' + g.member_count + ' miembro' + (g.member_count !== 1 ? 's' : '') + '</span>' +
+                  '<button type="button" class="js-group-action" data-id="' + g.id + '" data-member="' + g.isMember + '" style="' + btnStyle + '">' + btnLabel + '</button>' +
+                  '</div></div></article>';
+              }).join("");
+
+              list.querySelectorAll(".js-group-action").forEach(function(btn) {
+                btn.addEventListener("click", function() {
+                  var gId = btn.getAttribute("data-id");
+                  var isMember = btn.getAttribute("data-member") === "true";
+                  btn.disabled = true;
+                  var url = API_BASE + "/study-groups/" + gId + (isMember ? "/leave" : "/join");
+                  var method = isMember ? "DELETE" : "POST";
+                  fetch(url, { method: method, headers: authHeaders() })
+                    .then(function() { loadStudyGroups(); })
+                    .catch(function() { showStatus("error", "Error al actualizar grupo."); btn.disabled = false; });
+                });
+              });
+            })
+            .catch(function() { document.getElementById("study-groups-list").innerHTML = '<em style="color:#9ca3af">Error al cargar grupos</em>'; });
+        }
+        loadStudyGroups();
+
+        // Modal crear grupo
+        var createGroupOverlay = document.getElementById("create-group-overlay");
+        document.getElementById("btn-create-group").addEventListener("click", function() {
+          document.getElementById("group-name-input").value = "";
+          document.getElementById("group-desc-input").value = "";
+          createGroupOverlay.style.display = "flex";
+        });
+        document.getElementById("create-group-cancel").addEventListener("click", function() {
+          createGroupOverlay.style.display = "none";
+        });
+        createGroupOverlay.addEventListener("click", function(e) {
+          if (e.target === createGroupOverlay) createGroupOverlay.style.display = "none";
+        });
+        document.getElementById("create-group-ok").addEventListener("click", function() {
+          var name = document.getElementById("group-name-input").value.trim();
+          var desc = document.getElementById("group-desc-input").value.trim();
+          if (!name) { showStatus("error", "El nombre del grupo es obligatorio."); return; }
+          var btn = document.getElementById("create-group-ok");
           btn.disabled = true;
-          btn.textContent = "Próximamente";
-          btn.style.opacity = "0.5";
-          btn.style.cursor = "not-allowed";
-          btn.title = "Los grupos de estudio se activarán próximamente";
+          fetch(API_BASE + "/study-groups", {
+            method: "POST", headers: authHeaders(),
+            body: JSON.stringify({ name: name, description: desc })
+          })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(res) {
+              if (!res.ok) { showStatus("error", res.data.message || "No se pudo crear."); return; }
+              showStatus("success", "Grupo creado correctamente.");
+              createGroupOverlay.style.display = "none";
+              loadStudyGroups();
+            })
+            .catch(function() { showStatus("error", "Error de conexión."); })
+            .finally(function() { btn.disabled = false; });
         });
         // Avatar dinámico
         var avatarEl = document.getElementById("btn-perfil-alumno");

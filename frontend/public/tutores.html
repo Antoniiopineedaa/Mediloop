@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <title>Mediloop · Área de tutores</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <style>
       :root {
         --blue: #2563eb;
@@ -932,7 +934,8 @@
           </div>
           <div class="rubrica-actions">
             <button class="save" type="button" id="save-eval">Guardar Evaluación</button>
-            <button class="rep" type="button" id="generate-report">Generar Reporte</button>
+            <button class="rep" type="button" id="generate-report">Exportar CSV</button>
+            <button class="rep" type="button" id="generate-pdf" style="background:linear-gradient(90deg,#dc2626,#b91c1c)">Exportar PDF</button>
           </div>
         </div>
       </div>
@@ -998,29 +1001,24 @@
       <div class="network-grid">
         <article class="card network-card">
           <h4>🎬 Vlog Educativo</h4>
-          <div class="v-item">
-            <div class="play b">▶</div>
-            <div>
-              <strong>Técnicas de Evaluación Efectiva</strong>
-              <div class="small">Dr. Carlos Mendoza · 12 min</div>
-            </div>
-          </div>
-          <div class="v-item">
-            <div class="play g">▶</div>
-            <div>
-              <strong>Feedback Constructivo en Medicina</strong>
-              <div class="small">Dra. Ana López · 8 min</div>
-            </div>
-          </div>
-          <div class="v-item">
-            <div class="play p">▶</div>
-            <div>
-              <strong>Innovaciones en Educación Médica</strong>
-              <div class="small">Dr. Roberto Silve · 15 min</div>
-            </div>
-          </div>
-          <button class="v-btn" type="button" id="upload-video">Subir Mi Video</button>
+          <div id="tutor-videos-list"><em style="color:#9ca3af;font-size:0.85rem">Cargando vídeos...</em></div>
+          <button class="v-btn" type="button" id="upload-video">+ Compartir vídeo</button>
         </article>
+
+        <!-- Modal compartir vídeo -->
+        <div id="video-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.55);z-index:300;align-items:center;justify-content:center">
+          <div style="background:#fff;border-radius:16px;padding:1.75rem;max-width:400px;width:92%;box-shadow:0 20px 60px rgba(15,23,42,0.3)">
+            <h3 style="margin:0 0 1rem;font-size:1rem">Compartir vídeo educativo</h3>
+            <div style="display:flex;flex-direction:column;gap:0.65rem;margin-bottom:1rem">
+              <input id="video-title-input" type="text" placeholder="Título del vídeo" style="padding:0.5rem 0.75rem;border:1px solid #e5e7eb;border-radius:10px;font-size:0.88rem;outline:none" />
+              <input id="video-url-input" type="url" placeholder="https://youtube.com/watch?v=..." style="padding:0.5rem 0.75rem;border:1px solid #e5e7eb;border-radius:10px;font-size:0.88rem;outline:none" />
+            </div>
+            <div style="display:flex;gap:0.65rem;justify-content:flex-end">
+              <button id="video-modal-cancel" style="padding:0.5rem 1rem;border:1px solid #e5e7eb;border-radius:10px;background:#fff;font-size:0.88rem;cursor:pointer">Cancelar</button>
+              <button id="video-modal-ok" style="padding:0.5rem 1.2rem;border:none;border-radius:10px;background:linear-gradient(90deg,#2563eb,#4f46e5);color:#fff;font-size:0.88rem;font-weight:600;cursor:pointer">Publicar</button>
+            </div>
+          </div>
+        </div>
 
         <article class="card network-card community-box">
           <h4>💬 Comunidad de Tutores</h4>
@@ -1508,13 +1506,103 @@
               });
           });
         }
+        // ── Vídeos dinámicos ────────────────────────────────────────────────
+        var vColors = ["b","g","p","r","y"];
+        function loadTutorVideos() {
+          var list = document.getElementById("tutor-videos-list");
+          if (!list) return;
+          fetch(API_BASE + "/community/tutor-videos", { headers: headers() })
+            .then(function(r) { return r.json(); })
+            .then(function(videos) {
+              if (!videos.length) {
+                list.innerHTML = '<em style="color:#9ca3af;font-size:0.85rem">Sé el primero en compartir un vídeo.</em>';
+                return;
+              }
+              list.innerHTML = videos.map(function(v, i) {
+                return '<div class="v-item"><div class="play ' + vColors[i % vColors.length] + '"><a href="' + v.url.replace(/"/g,"&quot;") + '" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">▶</a></div>' +
+                  '<div><strong><a href="' + v.url.replace(/"/g,"&quot;") + '" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">' + v.title.replace(/</g,"&lt;") + '</a></strong>' +
+                  '<div class="small">' + v.tutorName.replace(/</g,"&lt;") + ' · ' + v.ago + '</div></div></div>';
+              }).join("");
+            })
+            .catch(function() {});
+        }
+        loadTutorVideos();
+
+        var videoOverlay = document.getElementById("video-modal-overlay");
         var uploadVideoBtn = document.getElementById("upload-video");
         if (uploadVideoBtn) {
-          uploadVideoBtn.disabled = true;
-          uploadVideoBtn.title = "Próximamente";
-          uploadVideoBtn.style.opacity = "0.5";
-          uploadVideoBtn.style.cursor = "not-allowed";
-          uploadVideoBtn.textContent = "Subir video (próximamente)";
+          uploadVideoBtn.addEventListener("click", function() {
+            document.getElementById("video-title-input").value = "";
+            document.getElementById("video-url-input").value = "";
+            videoOverlay.style.display = "flex";
+          });
+        }
+        document.getElementById("video-modal-cancel").addEventListener("click", function() {
+          videoOverlay.style.display = "none";
+        });
+        videoOverlay.addEventListener("click", function(e) {
+          if (e.target === videoOverlay) videoOverlay.style.display = "none";
+        });
+        document.getElementById("video-modal-ok").addEventListener("click", function() {
+          var title = document.getElementById("video-title-input").value.trim();
+          var url = document.getElementById("video-url-input").value.trim();
+          if (!title || !url) { showStatus("error", "Completa el título y la URL."); return; }
+          var btn = document.getElementById("video-modal-ok");
+          btn.disabled = true;
+          fetch(API_BASE + "/community/tutor-videos", {
+            method: "POST", headers: headers(),
+            body: JSON.stringify({ title: title, url: url })
+          })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(res) {
+              if (!res.ok) { showStatus("error", res.data.message || "No se pudo publicar."); return; }
+              showStatus("success", "Vídeo compartido con la comunidad.");
+              videoOverlay.style.display = "none";
+              loadTutorVideos();
+            })
+            .catch(function() { showStatus("error", "Error de conexión."); })
+            .finally(function() { btn.disabled = false; });
+        });
+
+        // ── PDF export ──────────────────────────────────────────────────────
+        var pdfBtn = document.getElementById("generate-pdf");
+        if (pdfBtn) {
+          pdfBtn.addEventListener("click", function() {
+            fetch(API_BASE + "/evaluations", { headers: headers() })
+              .then(function(r) { return r.json(); })
+              .then(function(items) {
+                if (!items.length) { showStatus("error", "No hay evaluaciones para exportar."); return; }
+                var { jsPDF } = window.jspdf;
+                var doc = new jsPDF();
+                doc.setFontSize(18);
+                doc.text("Mediloop — Informe de Evaluaciones", 14, 20);
+                doc.setFontSize(10);
+                doc.setTextColor(100);
+                doc.text("Generado: " + new Date().toLocaleString("es-ES"), 14, 28);
+                doc.setTextColor(0);
+                var rows = items.map(function(e) {
+                  return [
+                    e.studentName,
+                    e.rotation,
+                    e.theory + "/5",
+                    e.practical + "/5",
+                    e.communication + "/5",
+                    e.total + "/5",
+                    e.createdAt ? e.createdAt.slice(0, 10) : ""
+                  ];
+                });
+                doc.autoTable({
+                  head: [["Alumno", "Rotación", "Teórico", "Práctico", "Comun.", "Media", "Fecha"]],
+                  body: rows,
+                  startY: 35,
+                  styles: { fontSize: 9 },
+                  headStyles: { fillColor: [37, 99, 235] }
+                });
+                doc.save("evaluaciones_" + new Date().toISOString().slice(0, 10) + ".pdf");
+                showStatus("success", "PDF exportado: " + items.length + " evaluaciones.");
+              })
+              .catch(function() { showStatus("error", "Error al generar PDF."); });
+          });
         }
 
         var goalStorageKey = "mediloop.tutor.goals";
@@ -1794,11 +1882,46 @@
               rankBadge.style.opacity = isTop ? "1" : "0.3";
               rankBadge.title = isTop ? "Desbloqueado: ranking #1" : "Requiere ser el tutor con mejor promedio";
             }
-            // Racha y próxima meta sin datos suficientes → desactivadas visualmente
-            var strakBadge = document.querySelector(".badge.r");
-            if (strakBadge) { strakBadge.style.opacity = "0.3"; strakBadge.title = "Próximamente"; }
-            var nextBadge = document.querySelector(".badge.n");
-            if (nextBadge) { nextBadge.innerHTML = "🥈<br>Próxima meta"; nextBadge.style.opacity = "0.3"; nextBadge.title = "Próximamente"; }
+            // Racha: calcular desde endpoint
+            fetch(API_BASE + "/tutor/streak", { headers: headers() })
+              .then(function(r) { return r.json(); })
+              .then(function(s) {
+                var strakBadge = document.querySelector(".badge.r");
+                if (strakBadge) {
+                  var earned = s.streak >= 7;
+                  strakBadge.innerHTML = "🔥<br>" + s.streak + " día" + (s.streak !== 1 ? "s" : "") + " racha";
+                  strakBadge.style.opacity = s.streak > 0 ? "1" : "0.3";
+                  strakBadge.title = earned ? "¡Racha de " + s.streak + " días consecutivos!" : "Racha actual: " + s.streak + " día(s). ¡Llega a 7 para desbloquear!";
+                }
+                // Próxima meta: mostrar la insignia más cercana a desbloquear
+                var nextBadge = document.querySelector(".badge.n");
+                if (nextBadge) {
+                  var nextText = "🥈<br>Próxima meta";
+                  var nextTitle = "";
+                  var evalCountN = evalCount || 0;
+                  var avgNum2 = kpis ? (kpis.avg || 0) : 0;
+                  if (evalCountN < 5) {
+                    nextText = "🥈<br>" + evalCountN + "/5 eval.";
+                    nextTitle = "Necesitas " + (5 - evalCountN) + " evaluaciones más para Mentor del Mes";
+                  } else if (avgNum2 < 4.5) {
+                    nextText = "🥈<br>Sube nota";
+                    nextTitle = "Promedio actual " + avgNum2 + "/5. Necesitas ≥4.5 para 5 Estrellas";
+                  } else if (s.streak < 7) {
+                    nextText = "🥈<br>" + s.streak + "/7 días";
+                    nextTitle = "Mantén la racha " + (7 - s.streak) + " día(s) más para desbloquear Racha 30 días";
+                  } else {
+                    nextText = "🥇<br>¡Todo logrado!";
+                    nextTitle = "Has desbloqueado todas las insignias";
+                  }
+                  nextBadge.innerHTML = nextText;
+                  nextBadge.style.opacity = "1";
+                  nextBadge.title = nextTitle;
+                }
+              })
+              .catch(function() {
+                var strakBadge = document.querySelector(".badge.r");
+                if (strakBadge) { strakBadge.style.opacity = "0.3"; strakBadge.title = "Sin datos"; }
+              });
           })
           .catch(function () {
             showStatus("error", "Error al cargar datos. Comprueba tu conexión.");

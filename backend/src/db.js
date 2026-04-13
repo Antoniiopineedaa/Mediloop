@@ -113,6 +113,29 @@ db.exec(`
     details TEXT,
     created_at TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS study_groups (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    creator_id TEXT NOT NULL,
+    created_at TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS study_group_members (
+    group_id TEXT NOT NULL,
+    student_id TEXT NOT NULL,
+    PRIMARY KEY (group_id, student_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS tutor_videos (
+    id TEXT PRIMARY KEY,
+    tutor_id TEXT NOT NULL,
+    tutor_name TEXT NOT NULL,
+    title TEXT NOT NULL,
+    url TEXT NOT NULL,
+    created_at TEXT NOT NULL
+  );
 `);
 
 // Migrations: add columns if not present (safe on existing DBs)
@@ -219,6 +242,31 @@ seedIfEmpty("subjects",
     ["subj-8", "Ginecología y Obstetricia", "course-5", now],
     ["subj-9", "Rotación Hospitalaria Avanzada", "course-6", now],
     ["subj-10", "Atención Primaria", "course-6", now]
+  ]
+);
+
+seedIfEmpty("study_groups",
+  "INSERT INTO study_groups VALUES (?, ?, ?, ?, ?)",
+  [
+    ["grp-1", "Anatomía Cardiovascular", "Grupo de estudio para el examen de anatomía del sistema cardiovascular.", "stu-1", now],
+    ["grp-2", "Farmacología Básica", "Repaso de conceptos fundamentales de farmacología.", "stu-2", now],
+    ["grp-3", "Casos Clínicos", "Análisis y discusión de casos clínicos complejos.", "stu-1", now]
+  ]
+);
+
+seedIfEmpty("study_group_members",
+  "INSERT INTO study_group_members VALUES (?, ?)",
+  [
+    ["grp-1", "stu-1"],
+    ["grp-2", "stu-2"]
+  ]
+);
+
+seedIfEmpty("tutor_videos",
+  "INSERT INTO tutor_videos VALUES (?, ?, ?, ?, ?, ?)",
+  [
+    ["vid-1", "tut-1", "Dra. María González", "Técnicas de Evaluación Efectiva", "https://www.youtube.com/watch?v=dQw4w9WgXcQ", new Date(Date.now() - 86400000).toISOString()],
+    ["vid-2", "tut-2", "Dr. Fernando Ruiz", "Feedback Constructivo en Medicina", "https://www.youtube.com/watch?v=dQw4w9WgXcQ", new Date(Date.now() - 172800000).toISOString()]
   ]
 );
 

@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(node -e \"require\\('./src/db.js'\\); require\\('./src/routes.js'\\); console.log\\('OK'\\)\")",
+      "Bash(timeout 5 node src/server.js)",
+      "Bash(curl:*)",
+      "Bash(netstat -ano)",
+      "Bash(findstr :4000)",
+      "Bash(taskkill:*)",
+      "Bash(node src/server.js)",
+      "Read(//tmp/**)",
+      "Bash(node:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(pkill -f \"node.*server.js\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d['token']\\)\")",
+      "Bash(pkill -f \"node.*server\")"
+    ]
+  }
+}
