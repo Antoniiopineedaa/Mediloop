@@ -1069,7 +1069,12 @@
       <h2>Mensajes</h2>
       <div style="display:grid;grid-template-columns:260px 1fr;gap:1rem;min-height:460px">
         <div style="background:#fff;border-radius:12px;border:1px solid var(--gray-200);overflow:hidden;display:flex;flex-direction:column">
-          <div style="padding:0.75rem 1rem;border-bottom:1px solid var(--gray-200);font-size:0.8rem;font-weight:600;color:var(--gray-600);text-transform:uppercase;letter-spacing:.05em">Alumnos</div>
+          <div style="padding:0.6rem 0.75rem;border-bottom:1px solid var(--gray-200)">
+            <input id="msg-search" type="text" placeholder="Buscar alumno por nombre o email..." autocomplete="off"
+              style="width:100%;padding:0.45rem 0.7rem;border:1px solid var(--gray-200);border-radius:8px;font-size:0.82rem;outline:none;box-sizing:border-box" />
+            <div id="msg-search-results" style="display:none;margin-top:0.4rem;background:#fff;border:1px solid var(--gray-200);border-radius:8px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08)"></div>
+          </div>
+          <div style="padding:0.5rem 1rem 0.3rem;font-size:0.75rem;font-weight:600;color:var(--gray-600);text-transform:uppercase;letter-spacing:.05em">Conversaciones</div>
           <div id="msg-contacts" style="flex:1;overflow-y:auto"></div>
         </div>
         <div style="background:#fff;border-radius:12px;border:1px solid var(--gray-200);display:flex;flex-direction:column">
@@ -2338,6 +2343,45 @@
           document.getElementById("mensajes").scrollIntoView({ behavior: "smooth" });
           openChat(userId, userName);
         };
+
+        // ── Buscador de alumnos ──────────────────────────────────
+        var searchTimer = null;
+        var searchEl = document.getElementById("msg-search");
+        var searchRes = document.getElementById("msg-search-results");
+
+        searchEl.addEventListener("input", function() {
+          clearTimeout(searchTimer);
+          var q = searchEl.value.trim();
+          if (q.length < 2) { searchRes.style.display = "none"; return; }
+          searchTimer = setTimeout(function() {
+            fetch(API_BASE + "/messages/search-users?q=" + encodeURIComponent(q), { headers: msgHdr() })
+              .then(function(r) { return r.json(); })
+              .then(function(users) {
+                if (!users.length) {
+                  searchRes.innerHTML = '<div style="padding:0.6rem 0.9rem;font-size:0.82rem;color:var(--gray-600)">Sin resultados</div>';
+                } else {
+                  searchRes.innerHTML = users.map(function(u) {
+                    return '<div class="msg-search-item" data-id="' + u.id + '" data-name="' + u.name.replace(/"/g,'&quot;') + '" style="padding:0.55rem 0.9rem;cursor:pointer;font-size:0.85rem;border-bottom:1px solid var(--gray-200)" onmouseover="this.style.background=\'var(--gray-100)\'" onmouseout="this.style.background=\'#fff\'">'
+                      + '<div style="font-weight:600">' + u.name.replace(/</g,'&lt;') + '</div>'
+                      + '<div style="font-size:0.75rem;color:var(--gray-600)">' + u.email + '</div>'
+                      + '</div>';
+                  }).join("");
+                }
+                searchRes.style.display = "block";
+                searchRes.querySelectorAll(".msg-search-item").forEach(function(item) {
+                  item.addEventListener("click", function() {
+                    openChat(item.dataset.id, item.dataset.name);
+                    searchEl.value = "";
+                    searchRes.style.display = "none";
+                  });
+                });
+              });
+          }, 250);
+        });
+
+        document.addEventListener("click", function(e) {
+          if (!searchEl.contains(e.target) && !searchRes.contains(e.target)) searchRes.style.display = "none";
+        });
 
         document.getElementById("msg-send-btn").addEventListener("click", sendMessage);
         document.getElementById("msg-input").addEventListener("keydown", function(e) { if (e.key === "Enter") sendMessage(); });

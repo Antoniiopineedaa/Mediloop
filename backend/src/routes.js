@@ -918,6 +918,18 @@ router.post("/messages/thread/:userId", requireAuth, (req, res) => {
   return res.json({ id, from_id: req.user.sub, from_name: me.name, content: content.trim(), created_at: now });
 });
 
+// Buscar usuarios para iniciar conversación (por nombre o email, rol opuesto)
+router.get("/messages/search-users", requireAuth, (req, res) => {
+  const q = (req.query.q || "").trim();
+  if (q.length < 2) return res.json([]);
+  const targetRole = req.user.role === "tutor" ? "student" : "tutor";
+  const like = "%" + q + "%";
+  const users = db.prepare(
+    "SELECT id, name, email, role FROM users WHERE role = ? AND (name LIKE ? OR email LIKE ?) ORDER BY name LIMIT 10"
+  ).all(targetRole, like, like);
+  return res.json(users);
+});
+
 // ── Auth: Recuperación de contraseña ─────────────────────────────────────────
 router.post("/auth/forgot-password", (req, res) => {
   const { email } = req.body || {};
