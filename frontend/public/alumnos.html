@@ -1383,12 +1383,16 @@
             } else {
               status = "Próxima"; borderClass = "borde-gray"; iconClass = "gray"; iconTxt = "★"; badgeClass = "proxima";
             }
+            var msgBtn = rot.tutor_id
+              ? '<button type="button" onclick="window.openMsgChat(\'' + rot.tutor_id + '\',\'' + (rot.tutor_name || 'Tutor').replace(/'/g,"\\'") + '\')" style="margin-top:0.6rem;border:none;border-radius:7px;background:#eff6ff;color:#2563eb;padding:0.35rem 0.75rem;font-size:0.8rem;cursor:pointer;font-weight:600;width:100%">💬 Mensaje al tutor</button>'
+              : '';
             return '<article class="card rotacion-card ' + borderClass + '">' +
               '<span class="badge ' + badgeClass + '">' + status + '</span>' +
               '<div class="icon-wrap ' + iconClass + '">' + iconTxt + '</div>' +
               '<h3>' + rot.service + '</h3>' +
               '<p class="sub">' + rot.hospital + '</p>' +
               '<p class="meta">' + rot.start_date + ' → ' + rot.end_date + '</p>' +
+              msgBtn +
               '</article>';
           }).join("");
         }
@@ -2140,6 +2144,12 @@
           fetch(API_BASE + "/messages/thread/" + activeContactId, { method: "POST", headers: msgHdr(), body: JSON.stringify({ content: text }) })
             .then(function() { loadThread(); loadContacts(); });
         }
+
+        // Exponer globalmente para botones externos
+        window.openMsgChat = function(userId, userName) {
+          document.getElementById("mensajes").scrollIntoView({ behavior: "smooth" });
+          openChat(userId, userName);
+        };
 
         document.getElementById("msg-send-btn").addEventListener("click", sendMessage);
         document.getElementById("msg-input").addEventListener("keydown", function(e) { if (e.key === "Enter") sendMessage(); });

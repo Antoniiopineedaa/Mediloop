@@ -1689,6 +1689,7 @@
                     if (!students.length) { el.innerHTML = '<em style="color:#9ca3af">Sin alumnos aún</em>'; return; }
                     el.innerHTML = students.map(function (s) {
                       return '<span style="display:inline-flex;align-items:center;gap:0.3rem">' + s.name +
+                        '<button type="button" onclick="window.openMsgChat(\'' + s.id + '\',\'' + s.name.replace(/'/g,"\\'") + '\')" title="Enviar mensaje" style="background:none;border:none;cursor:pointer;color:#2563eb;font-size:0.8rem;padding:0;line-height:1">💬</button>' +
                         '<button type="button" class="remove-student-btn" data-rot-id="' + rot.id + '" data-student-id="' + s.id + '" data-student-name="' + s.name.replace(/"/g,'&quot;') + '" title="Quitar alumno" style="background:none;border:none;cursor:pointer;color:#6b7280;font-size:0.85rem;padding:0;line-height:1">×</button>' +
                         '</span>';
                     }).join("");
@@ -2331,6 +2332,12 @@
           fetch(API_BASE + "/messages/thread/" + activeContactId, { method: "POST", headers: msgHdr(), body: JSON.stringify({ content: text }) })
             .then(function() { loadThread(); loadContacts(); });
         }
+
+        // Exponer globalmente para botones externos
+        window.openMsgChat = function(userId, userName) {
+          document.getElementById("mensajes").scrollIntoView({ behavior: "smooth" });
+          openChat(userId, userName);
+        };
 
         document.getElementById("msg-send-btn").addEventListener("click", sendMessage);
         document.getElementById("msg-input").addEventListener("keydown", function(e) { if (e.key === "Enter") sendMessage(); });
