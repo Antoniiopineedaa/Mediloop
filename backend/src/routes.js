@@ -856,6 +856,68 @@ router.get("/tutor/streak", requireAuth, requireRole("tutor"), (req, res) => {
   return res.json({ streak, totalActiveDays: allDays.length, lastActivity: allDays[0] || null });
 });
 
+// ── Mensajes privados ─────────────────────────────────────────────────────────
+router.get("/messages/unread-count", requireAuth, (req, res) => {
+  const row = db.prepare("SELECT COUNT(*) as n FROM messages WHERE to_id = ? AND read_at IS NULL").get(req.user.sub);
+  return res.json({ count: row.n });
+});
+
+router.get("/messages/contacts", requireAuth, (req, res) => {
+  let contacts;
+  if (req.user.role === "tutor") {
+    contacts = db.prepare(`
+      SELECT DISTINCT u.id, u.name, u.role
+      FROM users u
+      JOIN rotation_students rs ON rs.student_id = u.id
+      JOIN rotations r ON r.id = rs.rotation_id
+      WHERE r.tutor_id = ?
+      ORDER BY u.name
+    `).all(req.user.sub);
+  } else {
+    contacts = db.prepare(`
+      SELECT DISTINCT u.id, u.name, u.role
+      FROM users u
+      JOIN rotations r ON r.tutor_id = u.id
+      JOIN rotation_students rs ON rs.rotation_id = r.id
+      WHERE rs.student_id = ?
+      ORDER BY u.name
+    `).all(req.user.sub);
+  }
+  const result = contacts.map(c => {
+    const unread = db.prepare("SELECT COUNT(*) as n FROM messages WHERE from_id = ? AND to_id = ? AND read_at IS NULL").get(c.id, req.user.sub);
+    const last = db.prepare("SELECT content, created_at FROM messages WHERE (from_id = ? AND to_id = ?) OR (from_id = ? AND to_id = ?) ORDER BY created_at DESC LIMIT 1").get(c.id, req.user.sub, req.user.sub, c.id);
+    return { ...c, unread: unread.n, lastMessage: last ? last.content : null, lastAt: last ? last.created_at : null };
+  });
+  return res.json(result);
+});
+
+router.get("/messages/thread/:userId", requireAuth, (req, res) => {
+  const { userId } = req.params;
+  const msgs = db.prepare(`
+    SELECT id, from_id, from_name, content, created_at, read_at
+    FROM messages
+    WHERE (from_id = ? AND to_id = ?) OR (from_id = ? AND to_id = ?)
+    ORDER BY created_at ASC
+  `).all(req.user.sub, userId, userId, req.user.sub);
+  db.prepare("UPDATE messages SET read_at = ? WHERE to_id = ? AND from_id = ? AND read_at IS NULL")
+    .run(new Date().toISOString(), req.user.sub, userId);
+  return res.json(msgs);
+});
+
+router.post("/messages/thread/:userId", requireAuth, (req, res) => {
+  const { userId } = req.params;
+  const { content } = req.body || {};
+  if (!content || !content.trim()) return res.status(400).json({ message: "El mensaje no puede estar vacío" });
+  const target = db.prepare("SELECT id, name FROM users WHERE id = ?").get(userId);
+  if (!target) return res.status(404).json({ message: "Usuario no encontrado" });
+  const me = db.prepare("SELECT name FROM users WHERE id = ?").get(req.user.sub);
+  const id = newId("msg");
+  const now = new Date().toISOString();
+  db.prepare("INSERT INTO messages VALUES (?, ?, ?, ?, ?, ?, NULL)").run(id, req.user.sub, me.name, userId, content.trim(), now);
+  logActivity(req.user.sub, me.name, "Mensaje enviado", "Para: " + target.name);
+  return res.json({ id, from_id: req.user.sub, from_name: me.name, content: content.trim(), created_at: now });
+});
+
 // ── Auth: Recuperación de contraseña ─────────────────────────────────────────
 router.post("/auth/forgot-password", (req, res) => {
   const { email } = req.body || {};

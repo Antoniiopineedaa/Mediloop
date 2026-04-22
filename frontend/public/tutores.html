@@ -832,6 +832,7 @@
       <a href="#biblioteca" data-spy="biblioteca">Biblioteca</a>
       <a href="#networking" data-spy="networking">Networking</a>
       <a href="#dashboard" data-spy="dashboard">Dashboard</a>
+      <a href="#mensajes" data-spy="mensajes">Mensajes <span id="msg-badge-side" style="display:none;background:#ef4444;color:#fff;border-radius:9999px;font-size:0.65rem;padding:0 5px;vertical-align:middle;margin-left:2px"></span></a>
     </aside>
     <div class="pref-actions">
       <button type="button" id="go-back-btn" class="pref-btn" data-tip="Atrás" aria-label="Atrás">←</button>
@@ -854,6 +855,7 @@
         <a href="#biblioteca">Biblioteca</a>
         <a href="#networking">Networking</a>
         <a href="#dashboard">Dashboard</a>
+        <a href="#mensajes">Mensajes <span id="msg-badge-nav" style="display:none;background:#ef4444;color:#fff;border-radius:9999px;font-size:0.65rem;padding:0 5px;vertical-align:middle"></span></a>
       </nav>
       <button type="button" id="btn-perfil-tutor" style="background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:34px;height:34px;color:#fff;font-size:1rem;cursor:pointer;font-weight:700" title="Mi perfil">?</button>
       <a href="index.html" class="salir">Salir</a>
@@ -2215,6 +2217,148 @@
             })
             .catch(function() { showPerfilMsg("error", "Error de conexión."); });
         });
+      })();
+    </script>
+
+    <!-- ── MENSAJES PRIVADOS ─────────────────────────────────────── -->
+    <section class="section" id="mensajes" style="max-width:900px;margin:0 auto 2rem">
+      <h2 style="margin-bottom:1rem">Mensajes</h2>
+      <div style="display:grid;grid-template-columns:260px 1fr;gap:1rem;min-height:460px">
+        <!-- Lista de contactos -->
+        <div style="background:#fff;border-radius:12px;border:1px solid var(--gray-200);overflow:hidden;display:flex;flex-direction:column">
+          <div style="padding:0.75rem 1rem;border-bottom:1px solid var(--gray-200);font-size:0.8rem;font-weight:600;color:var(--gray-600);text-transform:uppercase;letter-spacing:.05em">Alumnos</div>
+          <div id="msg-contacts" style="flex:1;overflow-y:auto"></div>
+        </div>
+        <!-- Panel de chat -->
+        <div style="background:#fff;border-radius:12px;border:1px solid var(--gray-200);display:flex;flex-direction:column">
+          <div id="msg-chat-header" style="padding:0.85rem 1.25rem;border-bottom:1px solid var(--gray-200);font-weight:600;color:var(--gray-900)">Selecciona un alumno para chatear</div>
+          <div id="msg-chat-body" style="flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:0.5rem;min-height:340px"></div>
+          <div style="padding:0.75rem 1rem;border-top:1px solid var(--gray-200);display:flex;gap:0.5rem">
+            <input id="msg-input" type="text" placeholder="Escribe un mensaje..." style="flex:1;padding:0.55rem 0.9rem;border:1px solid var(--gray-200);border-radius:8px;font-size:0.9rem;outline:none" disabled />
+            <button id="msg-send-btn" type="button" style="background:var(--blue);color:#fff;border:none;border-radius:8px;padding:0.55rem 1.1rem;font-size:0.9rem;cursor:pointer;font-weight:600" disabled>Enviar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      (function() {
+        var API_BASE = window.location.hostname === "localhost" ? "http://localhost:4000/api" : "/api";
+        function getToken() { try { return JSON.parse(localStorage.getItem("mediloop.session") || "{}").token || ""; } catch(_) { return ""; } }
+        function msgHdr() { return { "Content-Type": "application/json", "Authorization": "Bearer " + getToken() }; }
+
+        var myId = null;
+        try { myId = JSON.parse(localStorage.getItem("mediloop.session") || "{}").user.id; } catch(_) {}
+
+        var activeContactId = null;
+        var pollTimer = null;
+
+        function fmtTime(iso) {
+          var d = new Date(iso);
+          var now = new Date();
+          var sameDay = d.toDateString() === now.toDateString();
+          if (sameDay) return d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+          return d.toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit" }) + " " + d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+        }
+
+        function renderContacts(contacts) {
+          var el = document.getElementById("msg-contacts");
+          if (!contacts.length) { el.innerHTML = '<p style="padding:1rem;font-size:0.85rem;color:var(--gray-600)">No tienes alumnos en tus rotaciones aún.</p>'; return; }
+          el.innerHTML = contacts.map(function(c) {
+            var badge = c.unread > 0 ? '<span style="background:#ef4444;color:#fff;border-radius:9999px;font-size:0.65rem;padding:0 6px;font-weight:700">' + c.unread + '</span>' : '';
+            var preview = c.lastMessage ? '<div style="font-size:0.75rem;color:var(--gray-600);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px">' + c.lastMessage.replace(/</g,"&lt;") + '</div>' : '<div style="font-size:0.75rem;color:var(--gray-600)">Sin mensajes aún</div>';
+            var active = c.id === activeContactId ? 'background:var(--gray-100);' : '';
+            return '<div class="msg-contact-item" data-id="' + c.id + '" data-name="' + c.name.replace(/"/g,"&quot;") + '" style="padding:0.75rem 1rem;cursor:pointer;border-bottom:1px solid var(--gray-200);' + active + '" onmouseover="this.style.background=\'var(--gray-100)\'" onmouseout="this.style.background=\'' + (c.id===activeContactId?'var(--gray-100)':'#fff') + '\'">'
+              + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">'
+              + '<span style="font-weight:600;font-size:0.9rem">' + c.name.replace(/</g,"&lt;") + '</span>' + badge + '</div>' + preview + '</div>';
+          }).join("");
+          el.querySelectorAll(".msg-contact-item").forEach(function(item) {
+            item.addEventListener("click", function() {
+              openChat(this.dataset.id, this.dataset.name);
+            });
+          });
+        }
+
+        function renderThread(msgs, myUserId) {
+          var el = document.getElementById("msg-chat-body");
+          if (!msgs.length) { el.innerHTML = '<p style="text-align:center;color:var(--gray-600);font-size:0.85rem;margin-top:2rem">No hay mensajes aún. ¡Escribe el primero!</p>'; return; }
+          el.innerHTML = msgs.map(function(m) {
+            var mine = m.from_id === myUserId;
+            return '<div style="display:flex;justify-content:' + (mine?"flex-end":"flex-start") + '">'
+              + '<div style="max-width:70%;background:' + (mine?"var(--blue)":"var(--gray-100)") + ';color:' + (mine?"#fff":"var(--gray-900)") + ';border-radius:' + (mine?"12px 12px 2px 12px":"12px 12px 12px 2px") + ';padding:0.5rem 0.85rem;font-size:0.88rem">'
+              + '<div>' + m.content.replace(/</g,"&lt;") + '</div>'
+              + '<div style="font-size:0.68rem;opacity:0.7;margin-top:2px;text-align:right">' + fmtTime(m.created_at) + '</div>'
+              + '</div></div>';
+          }).join("");
+          el.scrollTop = el.scrollHeight;
+        }
+
+        function openChat(userId, userName) {
+          activeContactId = userId;
+          document.getElementById("msg-chat-header").textContent = userName;
+          document.getElementById("msg-input").disabled = false;
+          document.getElementById("msg-send-btn").disabled = false;
+          document.getElementById("msg-input").focus();
+          loadThread();
+          loadContacts(); // refresca badges
+        }
+
+        function loadThread() {
+          if (!activeContactId) return;
+          fetch(API_BASE + "/messages/thread/" + activeContactId, { headers: msgHdr() })
+            .then(function(r) { return r.json(); })
+            .then(function(msgs) { renderThread(msgs, myId); });
+        }
+
+        function loadContacts() {
+          fetch(API_BASE + "/messages/contacts", { headers: msgHdr() })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+              renderContacts(data);
+              var total = data.reduce(function(s, c) { return s + c.unread; }, 0);
+              ["msg-badge-nav", "msg-badge-side"].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (!el) return;
+                if (total > 0) { el.textContent = total; el.style.display = "inline"; }
+                else { el.style.display = "none"; }
+              });
+            });
+        }
+
+        function sendMessage() {
+          var input = document.getElementById("msg-input");
+          var text = input.value.trim();
+          if (!text || !activeContactId) return;
+          input.value = "";
+          fetch(API_BASE + "/messages/thread/" + activeContactId, { method: "POST", headers: msgHdr(), body: JSON.stringify({ content: text }) })
+            .then(function() { loadThread(); loadContacts(); });
+        }
+
+        document.getElementById("msg-send-btn").addEventListener("click", sendMessage);
+        document.getElementById("msg-input").addEventListener("keydown", function(e) { if (e.key === "Enter") sendMessage(); });
+
+        // Cargar al iniciar y hacer polling
+        loadContacts();
+        setInterval(function() {
+          loadContacts();
+          if (activeContactId) loadThread();
+        }, 15000);
+
+        // Refrescar badge desde cualquier sección (polling global de no leídos)
+        function pollUnread() {
+          fetch(API_BASE + "/messages/unread-count", { headers: msgHdr() })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+              ["msg-badge-nav", "msg-badge-side"].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (!el) return;
+                if (d.count > 0) { el.textContent = d.count; el.style.display = "inline"; }
+                else { el.style.display = "none"; }
+              });
+            }).catch(function() {});
+        }
+        setInterval(pollUnread, 30000);
+        pollUnread();
       })();
     </script>
 

@@ -136,6 +136,16 @@ db.exec(`
     url TEXT NOT NULL,
     created_at TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS messages (
+    id TEXT PRIMARY KEY,
+    from_id TEXT NOT NULL,
+    from_name TEXT NOT NULL,
+    to_id TEXT NOT NULL,
+    content TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    read_at TEXT
+  );
 `);
 
 // Migrations: add columns if not present (safe on existing DBs)
